@@ -1,1 +1,2 @@
-export * from "./CreateCourseDialog";
+export * from "./CrearCursoModal.tsx";
+export * from "./CursoCard.tsx";

@@ -1,4 +1,4 @@
-import { post } from "@/api";
+import { get, post } from "@/api";
 import type {
   ApiResponse,
   CursoRequestDTO,
@@ -14,11 +14,11 @@ export const cursoService = {
   },
 
   /**
-   * Alias de crearCurso
+   * Envía la petición GET http://localhost:8080/cursos
    */
-  postTeam: (data: CursoRequestDTO): Promise<ApiResponse<CursoResponseDTO>> => {
-    return cursoService.crearCurso(data);
+  obtenerCursos: (): Promise<ApiResponse<CursoResponseDTO[]>> => {
+    return get<CursoResponseDTO[]>("/cursos");
   },
 };
 
-export const { crearCurso, postTeam } = cursoService;
+export const { crearCurso, obtenerCursos } = cursoService;

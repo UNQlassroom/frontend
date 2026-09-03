@@ -1,23 +1,23 @@
 import { useState } from "react";
 import { COMISIONES, SEMESTRES } from "@/lib";
-import type { CreateCourseFormData } from "@/types";
+import type { CrearCursoFormData } from "@/types";
 import * as React from "react";
 
-interface CreateCourseDialogProps {
+interface CrearCursoModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: CreateCourseFormData) => void;
+  onCreate: (data: CrearCursoFormData) => void;
   isLoading?: boolean;
   serverError?: string | null;
 }
 
-export function CreateCourseDialog({
+export function CrearCursoModal({
   open,
   onClose,
   onCreate,
   isLoading = false,
   serverError = null,
-}: CreateCourseDialogProps) {
+}: CrearCursoModalProps) {
   const [materia, setMateria] = useState("");
   const [comision, setComision] = useState(COMISIONES[0]!);
   const [semestre, setSemestre] = useState(SEMESTRES[0]!);

@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useCursos } from "@/hooks";
-import { CreateCourseDialog } from "@/components";
-import type { CreateCourseFormData } from "@/types";
+import { CrearCursoModal } from "@/components";
+import { CursoCard } from "@/components";
+import type { CrearCursoFormData } from "@/types";
 
 export const HomeProfesor = () => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const { isLoading, error, successCurso, crearNuevoCurso, limpiarEstado } = useCursos();
+  const { isLoading, error, crearNuevoCurso, limpiarEstado, cursos } = useCursos();
 
-  const handleCreate = async (formData: CreateCourseFormData) => {
+  const handleCreate = async (formData: CrearCursoFormData) => {
     const cursoCreado = await crearNuevoCurso(formData);
     if (cursoCreado) {
       setOpenDialog(false);
@@ -55,32 +56,23 @@ export const HomeProfesor = () => {
           </button>
         </section>
 
-        {successCurso && (
-          <div className="mt-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-left animate-rise">
-            <div className="flex items-center gap-2 text-emerald-700 font-semibold text-sm mb-2">
-              <span>✓</span>
-              <span>¡Curso creado exitosamente!</span>
-            </div>
-            <div className="font-mono text-xs text-foreground/80 space-y-1 bg-background/50 p-3 rounded-lg border border-line">
-              <p><strong>ID asignado:</strong> #{successCurso.id}</p>
-              <p><strong>Materia:</strong> {successCurso.materia}</p>
-              <p><strong>Comisión:</strong> {successCurso.comision} · <strong>Semestre:</strong> {successCurso.semestre}</p>
-              <p><strong>Descripción backend:</strong> {successCurso.descripcion}</p>
-              {successCurso.githubTeamSlug && (
-                <p><strong>GitHub Team:</strong> {successCurso.githubTeamSlug}</p>
-              )}
-            </div>
-          </div>
-        )}
+
 
         {/* Modal de creación */}
-        <CreateCourseDialog
+        <CrearCursoModal
           open={openDialog}
           onClose={() => setOpenDialog(false)}
           onCreate={handleCreate}
           isLoading={isLoading}
           serverError={error}
         />
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 m-4">
+          {cursos.map((c) => (
+              <CursoCard key={c.id} curso={c} />
+          ))}
+        </div>
+
       </main>
     </div>
   );
