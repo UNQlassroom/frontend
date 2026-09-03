@@ -1,19 +1,59 @@
-import { useState } from "react";
-import { crearCurso } from "@/services";
+import { useState, useEffect } from "react";
+import { crearCurso, obtenerCursos } from "@/services";
 import type {
   CursoResponseDTO,
-  CreateCourseFormData,
+  CrearCursoFormData,
 } from "@/types";
 
 export const useCursos = () => {
+  const [cursos, setCursos] = useState<CursoResponseDTO[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successCurso, setSuccessCurso] = useState<CursoResponseDTO | null>(null);
 
-  /**
-   * Parsea los datos del formulario y le pega a POST /cursos/crear
-   */
-  const crearNuevoCurso = async (formData: CreateCourseFormData): Promise<CursoResponseDTO | null> => {
+  const cargarCursos = () => {
+    setIsLoading(true);
+    setError(null);
+    obtenerCursos()
+      .then((response) => {
+        setCursos(response.data);
+      })
+      .catch((err: unknown) => {
+        console.error("Error al obtener cursos:", err);
+        setError("No se pudieron cargar los cursos del servidor.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    obtenerCursos()
+      .then((response) => {
+        if (isMounted) {
+          setCursos(response.data);
+        }
+      })
+      .catch((err: unknown) => {
+        if (isMounted) {
+          console.error("Error al obtener cursos:", err);
+          setError("No se pudieron cargar los cursos del servidor.");
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const crearNuevoCurso = async (formData: CrearCursoFormData): Promise<CursoResponseDTO | null> => {
     setIsLoading(true);
     setError(null);
     setSuccessCurso(null);
@@ -31,6 +71,8 @@ export const useCursos = () => {
       });
 
       const nuevoCurso = response.data;
+      
+      setCursos((prev) => [nuevoCurso, ...prev]);
       setSuccessCurso(nuevoCurso);
       return nuevoCurso;
     } catch (err: unknown) {
@@ -59,10 +101,12 @@ export const useCursos = () => {
   };
 
   return {
+    cursos,
     isLoading,
     error,
     successCurso,
     crearNuevoCurso,
+    cargarCursos,
     limpiarEstado,
   };
 };

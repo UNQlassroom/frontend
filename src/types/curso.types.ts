@@ -1,5 +1,5 @@
 /**
- * Datos que espera el backend en POST /cursos/crear
+ * Datos que espera el backend para un Curso
  */
 export interface CursoRequestDTO {
   materia: string;
@@ -9,7 +9,7 @@ export interface CursoRequestDTO {
 }
 
 /**
- * Respuesta que devuelve el backend en POST /cursos/crear
+ * Respuesta que devuelve el backend para un Curso
  */
 export interface CursoResponseDTO {
   id: number;
@@ -23,9 +23,9 @@ export interface CursoResponseDTO {
 }
 
 /**
- * Datos que vienen del formulario CreateCourseDialog
+ * Datos que vienen del formulario CrearCursoModal
  */
-export interface CreateCourseFormData {
+export interface CrearCursoFormData {
   materia: string;
   comision: string;
   semestre: string;
