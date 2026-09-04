@@ -48,3 +48,28 @@ export interface ObtenerAlumnosResponseDTO {
   teamSlug: string;
   alumnos: AlumnoTeamMemberDTO[];
 }
+
+/**
+ * Petición para agregar/invitar alumnos al equipo de GitHub de un curso
+ */
+export interface AgregarAlumnosRequestDTO {
+  usernames: string[];
+}
+
+/**
+ * Membresía de un alumno en el equipo de GitHub
+ */
+export interface AlumnoTeamMembershipDTO {
+  username: string;
+  role: string;
+  state: string;
+}
+
+/**
+ * Respuesta del backend al agregar alumnos
+ */
+export interface AgregarAlumnosResponseDTO {
+  cursoId: number;
+  teamSlug: string;
+  alumnos: AlumnoTeamMembershipDTO[];
+}
