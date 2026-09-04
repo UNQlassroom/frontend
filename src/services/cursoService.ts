@@ -3,6 +3,7 @@ import type {
   ApiResponse,
   CursoRequestDTO,
   CursoResponseDTO,
+  ObtenerAlumnosResponseDTO,
 } from "@/types";
 
 export const cursoService = {
@@ -19,6 +20,13 @@ export const cursoService = {
   obtenerCursos: (): Promise<ApiResponse<CursoResponseDTO[]>> => {
     return get<CursoResponseDTO[]>("/cursos");
   },
+
+  /**
+   * Envía la petición GET http://localhost:8080/cursos/{id}/alumnos
+   */
+  obtenerAlumnos: (id: number): Promise<ApiResponse<ObtenerAlumnosResponseDTO>> => {
+    return get<ObtenerAlumnosResponseDTO>(`/cursos/${id}/alumnos`);
+  },
 };
 
-export const { crearCurso, obtenerCursos } = cursoService;
+export const { crearCurso, obtenerCursos, obtenerAlumnos } = cursoService;

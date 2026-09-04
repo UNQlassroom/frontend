@@ -30,3 +30,21 @@ export interface CrearCursoFormData {
   comision: string;
   semestre: string;
 }
+
+/**
+ * Alumno miembro de un equipo en GitHub
+ */
+export interface AlumnoTeamMemberDTO {
+  username: string;
+  role: string;
+  state: string;
+}
+
+/**
+ * Respuesta que devuelve el backend con los alumnos de un curso
+ */
+export interface ObtenerAlumnosResponseDTO {
+  cursoId: number;
+  teamSlug: string;
+  alumnos: AlumnoTeamMemberDTO[];
+}
