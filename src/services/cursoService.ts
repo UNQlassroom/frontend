@@ -4,6 +4,8 @@ import type {
   CursoRequestDTO,
   CursoResponseDTO,
   ObtenerAlumnosResponseDTO,
+  AgregarAlumnosRequestDTO,
+  AgregarAlumnosResponseDTO,
 } from "@/types";
 
 export const cursoService = {
@@ -27,6 +29,19 @@ export const cursoService = {
   obtenerAlumnos: (id: number): Promise<ApiResponse<ObtenerAlumnosResponseDTO>> => {
     return get<ObtenerAlumnosResponseDTO>(`/cursos/${id}/alumnos`);
   },
+
+  /**
+   * Envía la petición POST http://localhost:8080/cursos/{id}/alumnos
+   */
+  agregarAlumnos: (
+    id: number,
+    data: AgregarAlumnosRequestDTO
+  ): Promise<ApiResponse<AgregarAlumnosResponseDTO>> => {
+    return post<AgregarAlumnosResponseDTO, AgregarAlumnosRequestDTO>(
+      `/cursos/${id}/alumnos`,
+      data
+    );
+  },
 };
 
-export const { crearCurso, obtenerCursos, obtenerAlumnos } = cursoService;
+export const { crearCurso, obtenerCursos, obtenerAlumnos, agregarAlumnos } = cursoService;
