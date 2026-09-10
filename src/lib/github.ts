@@ -6,5 +6,5 @@ export const getGitHubTeamUrl = (teamSlug: string): string => {
 };
 
 export const getGitHubRepoUrl = (teamSlug: string ): string => {
-    return `https://github.com/${GITHUB_ORGANIZATION}/${teamSlug + "_repoDePrueba"}`; // TODO parametrizar con nombre del alumno
+    return `https://github.com/${GITHUB_ORGANIZATION}/${teamSlug + "_thiagoDePrueba"}`; // TODO parametrizar con nombre del alumno
 };
