@@ -32,12 +32,24 @@ export interface CrearCursoFormData {
 }
 
 /**
+ * Datos del repositorio de GitHub asociado al alumno
+ */
+export interface RepositorioDTO {
+  nombre: string;
+  htmlUrl: string;
+  ultimoCommit?: string | null;
+  fechaUltimoCommit?: string | null;
+  estadoCI?: "sin_ci" | "success" | "failure" | "pending" | string | null;
+}
+
+/**
  * Alumno miembro de un equipo en GitHub
  */
 export interface AlumnoTeamMemberDTO {
   username: string;
   role: string;
   state: string;
+  repositorio?: RepositorioDTO | null;
 }
 
 /**
@@ -63,6 +75,7 @@ export interface AlumnoTeamMembershipDTO {
   username: string;
   role: string;
   state: string;
+  repositorio?: RepositorioDTO | null;
 }
 
 /**
