@@ -12,7 +12,7 @@ export const Navbar = () => {
           alt="UNQlassroom Logo"
           className="w-7 h-7 object-contain"
         />
-        <span className="font-display font-bold text-lg tracking-tight">
+        <span className="font-suez text-lg tracking-tight">
           UNQlassroom
         </span>
         <button
