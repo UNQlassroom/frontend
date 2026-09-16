@@ -1,13 +1,13 @@
 import { useState, useCallback } from "react";
 import { obtenerAlumnos } from "@/services";
-import type { ObtenerAlumnosResponseDTO } from "@/types";
+import type { AlumnosDeUnCursoResponseDTO } from "@/types";
 
 export const useAlumnos = () => {
-  const [alumnosData, setAlumnosData] = useState<ObtenerAlumnosResponseDTO | null>(null);
+  const [alumnosData, setAlumnosData] = useState<AlumnosDeUnCursoResponseDTO | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const cargarAlumnos = useCallback(async (cursoId: number): Promise<ObtenerAlumnosResponseDTO | null> => {
+  const cargarAlumnos = useCallback(async (cursoId: number): Promise<AlumnosDeUnCursoResponseDTO | null> => {
     setIsLoading(true);
     setError(null);
     try {

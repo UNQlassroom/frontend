@@ -1,37 +1,33 @@
 import type { CursoResponseDTO } from "@/types";
 import githubIcon from "@/assets/github_favicon.svg";
-import { getGitHubTeamUrl, getGitHubRepoUrl } from "@/lib";
+import { getGitHubRepoUrl } from "@/lib";
 
 interface Props {
   curso: CursoResponseDTO;
 }
 
 export function CursoCardAlumno({ curso }: Props) {
-  const githubTeamUrl = curso.githubTeamSlug
-    ? getGitHubTeamUrl(curso.githubTeamSlug)
-    : null;
-
-  const githubRepoUrl = curso.githubTeamSlug
-  ? getGitHubRepoUrl(curso.githubTeamSlug)
+  const githubRepoUrl = curso.githubRepoName
+  ? getGitHubRepoUrl(curso.githubRepoName)
   : null;
 
   return (
     <div className="rounded-2xl border border-line bg-panel p-6 shadow-sm flex flex-col justify-between animate-rise hover:border-foreground/20 transition-colors">
       <div>
         <div className="flex items-start justify-between gap-2">
-          {curso.githubTeamSlug ? (
+          {curso.githubRepoName ? (
             <a
-              href={githubTeamUrl ?? undefined}
+              href={githubRepoUrl ?? undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-              <span>{curso.githubTeamSlug}</span>
+              <span>{curso.githubRepoName}</span>
             </a>
           ) : (
             <span className="font-mono text-[10px] text-muted-foreground uppercase">
-              Sin equipo vinculado
+              Sin repositorio del curso
             </span>
           )}
         </div>

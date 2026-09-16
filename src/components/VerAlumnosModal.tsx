@@ -3,7 +3,7 @@ import { useAlumnos } from "@/hooks";
 import type { CursoResponseDTO } from "@/types";
 import githubIcon from "@/assets/github_favicon.svg";
 import {
-  getGitHubTeamUrl,
+  getGitHubRepoUrl,
   getEstadoCIInfo,
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
@@ -97,15 +97,15 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
             <p className="mt-0.5 font-mono text-xs text-muted-foreground">
               Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
             </p>
-            {curso.githubTeamSlug && (
+            {curso.githubRepoName && (
               <a
-                href={getGitHubTeamUrl(curso.githubTeamSlug)}
+                href={getGitHubRepoUrl(curso.githubRepoName)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-                <span>{curso.githubTeamSlug}</span>
+                <span>{curso.githubRepoName}</span>
               </a>
             )}
           </div>
