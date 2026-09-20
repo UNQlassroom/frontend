@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { CursoResponseDTO } from "@/types";
 import githubIcon from "@/assets/github_favicon.svg";
 import { getGitHubRepoUrl } from "@/lib";
@@ -32,15 +33,28 @@ export function CursoCardAlumno({ curso }: Props) {
           )}
         </div>
 
-        <h3 className="mt-4 font-display text-xl font-bold tracking-tight text-foreground">
-          {curso.materia}
-        </h3>
+        <Link
+          to={`/courses/${curso.id}`}
+          className="mt-4 block font-display text-xl font-bold tracking-tight text-foreground hover:underline group"
+        >
+          <span>{curso.materia}</span>
+          <span className="ml-1.5 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+            →
+          </span>
+        </Link>
         <p className="mt-1 font-mono text-xs text-muted-foreground">
           Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
         </p>
       </div>
 
       <div className="mt-6 pt-4 border-t border-line/60 flex items-center justify-between gap-2">
+        <Link
+          to={`/courses/${curso.id}`}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+        >
+          <span>Ver curso</span>
+        </Link>
+
         <a
           href={githubRepoUrl ?? undefined}
           target="_blank"
@@ -54,3 +68,4 @@ export function CursoCardAlumno({ curso }: Props) {
     </div>
   );
 }
+

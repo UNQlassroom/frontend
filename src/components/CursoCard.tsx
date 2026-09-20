@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+
 import type { CursoResponseDTO } from "@/types";
 import githubIcon from "@/assets/github_favicon.svg";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
@@ -35,22 +37,37 @@ export function CursoCard({ curso }: Props) {
             )}
           </div>
 
-          <h3 className="mt-4 font-display text-xl font-bold tracking-tight text-foreground">
-            {curso.materia}
-          </h3>
+          <Link
+            to={`/courses/${curso.id}`}
+            className="mt-4 block font-display text-xl font-bold tracking-tight text-foreground hover:underline group"
+          >
+            <span>{curso.materia}</span>
+            <span className="ml-1.5 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+              →
+            </span>
+          </Link>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
             Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
           </p>
         </div>
 
         <div className="mt-6 pt-4 border-t border-line/60 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => setOpenAlumnosModal(true)}
-            className="shrink-0 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
-          >
-            Ver alumnos
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to={`/courses/${curso.id}`}
+              className="shrink-0 rounded-lg bg-primary px-3 py-1.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+            >
+              Ver curso
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setOpenAlumnosModal(true)}
+              className="shrink-0 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+            >
+              Alumnos
+            </button>
+          </div>
 
           <button
             type="button"
@@ -62,6 +79,7 @@ export function CursoCard({ curso }: Props) {
             <span>Invitar</span>
           </button>
         </div>
+
       </div>
 
       <VerAlumnosModal
