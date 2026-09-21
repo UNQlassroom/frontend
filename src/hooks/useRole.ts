@@ -1,10 +1,13 @@
-import { useContext } from "react";
-import { RoleContext } from "@/context/role.context";
+import { useAuth } from "./useAuth";
 
 export const useRole = () => {
-  const context = useContext(RoleContext);
-  if (!context) {
-    throw new Error("useRole debe ser usado dentro de un RoleProvider");
-  }
-  return context;
+  const { isProfesor, isAlumno, user } = useAuth();
+  const role = isProfesor ? "profesor" : "alumno";
+
+  return {
+    role,
+    isProfesor,
+    isAlumno,
+    user,
+  };
 };
