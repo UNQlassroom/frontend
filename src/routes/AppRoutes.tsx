@@ -1,18 +1,32 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { HomeProfesor, HomeAlumno } from "@/pages";
-import { useRole } from "@/hooks";
+import { HomeProfesor, HomeAlumno, LoginPage, OAuthCallbackPage } from "@/pages";
+import { useAuth } from "@/hooks";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 export const AppRoutes = () => {
-  const { isProfesor } = useRole();
+  const { isProfesor, isAuthenticated } = useAuth();
 
   return (
     <Routes>
-      <Route
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+        <Route
         path="/home"
-        element={isProfesor ? <HomeProfesor /> : <HomeAlumno />}
+        element={
+          <ProtectedRoute>
+            {isProfesor ? <HomeProfesor /> : <HomeAlumno />}
+          </ProtectedRoute>
+        }
       />
-      <Route path="/" element={<Navigate to="/home" replace />} />
-      <Route path="*" element={<Navigate to="/home" replace />} />
+
+      <Route
+        path="/"
+        element={<Navigate to={isAuthenticated ? "/home" : "/login"} replace />}
+      />
+      <Route
+        path="*"
+        element={<Navigate to={isAuthenticated ? "/home" : "/login"} replace />}
+      />
     </Routes>
   );
 };
