@@ -1,26 +1,51 @@
-import { Routes, Route, Navigate, useParams } from "react-router-dom";
-import { HomeProfesor, HomeAlumno, CursoDetalle } from "@/pages";
-import { useRole } from "@/hooks";
-
-const RedirectCursosToCourses = () => {
-  const { id } = useParams<{ id: string }>();
-  return <Navigate to={`/courses/${id}`} replace />;
-};
+import { Routes, Route, Navigate } from "react-router-dom";
+import {
+  HomeDocente,
+  HomeAlumno,
+  CursoDetalleDocente,
+  CursoDetalleAlumno,
+  LoginPage,
+  OAuthCallbackPage,
+} from "@/pages";
+import { useAuth } from "@/hooks";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 export const AppRoutes = () => {
-  const { isProfesor } = useRole();
+  const { isDocente, isAuthenticated } = useAuth();
 
   return (
     <Routes>
+      {/* Rutas Públicas de Autenticación */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+
+      {/* Rutas Protegidas (requieren sesión activa) */}
       <Route
         path="/home"
-        element={isProfesor ? <HomeProfesor /> : <HomeAlumno />}
+        element={
+          <ProtectedRoute>
+            {isDocente ? <HomeDocente /> : <HomeAlumno />}
+          </ProtectedRoute>
+        }
       />
-      <Route path="/courses/:id" element={<CursoDetalle />} />
-      <Route path="/cursos/:id" element={<RedirectCursosToCourses />} />
-      <Route path="/" element={<Navigate to="/home" replace />} />
-      <Route path="*" element={<Navigate to="/home" replace />} />
+
+      <Route
+        path="/cursos/:id"
+        element={
+          <ProtectedRoute>
+            {isDocente ? <CursoDetalleDocente /> : <CursoDetalleAlumno />}
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/"
+        element={<Navigate to={isAuthenticated ? "/home" : "/login"} replace />}
+      />
+      <Route
+        path="*"
+        element={<Navigate to={isAuthenticated ? "/home" : "/login"} replace />}
+      />
     </Routes>
   );
 };
-

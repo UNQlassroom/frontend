@@ -1,8 +1,8 @@
-import { useRole } from "@/hooks";
+import { useAuth } from "@/hooks";
 import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
 
 export const Navbar = () => {
-  const { role, toggleRole } = useRole();
+  const { user, isAuthenticated, isDocente, logout } = useAuth();
 
   return (
     <header className="border-b border-line bg-panel px-6 py-3.5 flex items-center justify-between">
@@ -12,31 +12,35 @@ export const Navbar = () => {
           alt="UNQlassroom Logo"
           className="w-7 h-7 object-contain"
         />
-        <span className="font-suez text-lg tracking-tight">
-          UNQlassroom
-        </span>
-        <button
-          type="button"
-          onClick={toggleRole}
-          className="ml-2 inline-flex items-center gap-2 rounded-md border border-line bg-panel px-2.5 py-1 font-mono text-xs cursor-pointer hover:bg-line/40 transition-colors"
-          title="Click para cambiar de vista"
-        >
-          <span className="uppercase text-muted-foreground font-semibold text-[10px]">
-            {role}
-          </span>
+        <span className="font-suez text-lg tracking-tight">UNQlassroom</span>
+      </div>
+
+      {isAuthenticated && user && (
+        <div className="flex items-center gap-4">
           <span
-            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
-              role === "alumno" ? "bg-emerald-600" : "bg-neutral-700"
+            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide border ${
+              isDocente
+                ? "bg-neutral-800 text-neutral-200 border-neutral-700"
+                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
             }`}
           >
-            <span
-              className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${
-                role === "alumno" ? "translate-x-3.5" : "translate-x-0.5"
-              }`}
-            />
+            {isDocente ? "Docente" : "Alumno"}
           </span>
-        </button>
-      </div>
+
+          <span className="text-sm font-medium text-foreground hidden sm:inline">
+            @{user.username}
+          </span>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="text-xs font-medium text-muted-foreground hover:text-rose-500 border border-line hover:border-rose-500/30 rounded-md px-2.5 py-1 transition-colors cursor-pointer"
+            title="Cerrar sesión"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      )}
     </header>
   );
 };

@@ -1,5 +1,5 @@
 export * from "./CrearCursoModal.tsx";
-export * from "./CursoCard.tsx";
+export * from "./CursoCardDocente.tsx";
 export * from "./CursoCardAlumno.tsx";
 export * from "./VerAlumnosModal.tsx";
 export * from "./InvitarAlumnosModal.tsx";
@@ -10,5 +10,3 @@ export * from "./CrearAsignacionModal.tsx";
 export * from "./AsignacionesTab.tsx";
 export * from "./PanelMetricasRepositorios.tsx";
 export * from "./AsignacionesAlumnoList.tsx";
-export * from "./CursoDetalleAlumno.tsx";
-
