@@ -6,6 +6,7 @@ export const Navbar = () => {
 
   return (
     <header className="border-b border-line bg-panel px-6 py-3.5 flex items-center justify-between">
+      {/* Brand / Logo */}
       <div className="flex items-center gap-3">
         <img
           src={unqlassroomLogo}
@@ -15,8 +16,10 @@ export const Navbar = () => {
         <span className="font-suez text-lg tracking-tight">UNQlassroom</span>
       </div>
 
+      {/* Controles de Usuario Autenticado */}
       {isAuthenticated && user && (
         <div className="flex items-center gap-4">
+          {/* Badge del rol real */}
           <span
             className={`px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide border ${
               isDocente
@@ -27,10 +30,12 @@ export const Navbar = () => {
             {isDocente ? "Docente" : "Alumno"}
           </span>
 
+          {/* Información del usuario de GitHub */}
           <span className="text-sm font-medium text-foreground hidden sm:inline">
             @{user.username}
           </span>
 
+          {/* Botón para cerrar sesión */}
           <button
             type="button"
             onClick={logout}
