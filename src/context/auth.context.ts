@@ -6,7 +6,7 @@ export interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  isProfesor: boolean;
+  isDocente: boolean;
   isAlumno: boolean;
   login: (token: string, user: Usuario) => void;
   logout: () => void;

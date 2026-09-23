@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const isAuthenticated = Boolean(token && user);
-  const isProfesor = Boolean(user?.esDocente);
+  const isDocente = Boolean(user?.esDocente);
   const isAlumno = Boolean(user && !user.esDocente);
 
   return (
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         token,
         isAuthenticated,
         isLoading: false,
-        isProfesor,
+        isDocente,
         isAlumno,
         login,
         logout,

@@ -2,10 +2,11 @@ import { useAuth } from "@/hooks";
 import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
 
 export const Navbar = () => {
-  const { user, isAuthenticated, isProfesor, logout } = useAuth();
+  const { user, isAuthenticated, isDocente, logout } = useAuth();
 
   return (
     <header className="border-b border-line bg-panel px-6 py-3.5 flex items-center justify-between">
+      {/* Brand / Logo */}
       <div className="flex items-center gap-3">
         <img
           src={unqlassroomLogo}
@@ -21,12 +22,12 @@ export const Navbar = () => {
           {/* Badge del rol real */}
           <span
             className={`px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide border ${
-              isProfesor
+              isDocente
                 ? "bg-neutral-800 text-neutral-200 border-neutral-700"
                 : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
             }`}
           >
-            {isProfesor ? "Docente" : "Alumno"}
+            {isDocente ? "Docente" : "Alumno"}
           </span>
 
           {/* Información del usuario de GitHub */}

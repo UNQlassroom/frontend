@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useCursos } from "@/hooks";
-import { CrearCursoModal, CursoCard } from "@/components";
+import { CrearCursoModal, CursoCardDocente } from "@/components";
 import type { CrearCursoFormData } from "@/types";
 
-export const HomeProfesor = () => {
+export const HomeDocente = () => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const { isLoading, error, crearNuevoCurso, limpiarEstado, cursos } = useCursos();
 
@@ -54,7 +54,7 @@ export const HomeProfesor = () => {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-8">
         {cursos.map((c) => (
-          <CursoCard key={c.id} curso={c} />
+          <CursoCardDocente key={c.id} curso={c} />
         ))}
       </div>
     </main>
