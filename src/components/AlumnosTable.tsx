@@ -1,31 +1,29 @@
 import { useState, useMemo } from "react";
 import type { AlumnoMiembroDeUnCursoDTO, CursoResponseDTO } from "@/types";
-import { CIStatusBadge } from "./CIStatusBadge";
-import {
-  formatearFechaCommit,
-  obtenerPrimerLineaCommit,
-} from "@/lib";
-import githubIcon from "@/assets/github_favicon.svg";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 
 interface AlumnosTableProps {
   curso: CursoResponseDTO;
   alumnos: AlumnoMiembroDeUnCursoDTO[];
   isLoading: boolean;
+  isSyncing?: boolean;
   error: string | null;
   onRetry: () => void;
+  onSync?: () => void;
   onOpenInvitarModal: () => void;
 }
 
 export function AlumnosTable({
   alumnos,
   isLoading,
+  isSyncing = false,
   error,
   onRetry,
+  onSync,
   onOpenInvitarModal,
 }: AlumnosTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtroCI, setFiltroCI] = useState<string>("todos");
+  const [filtroEstado, setFiltroEstado] = useState<string>("todos");
 
   const alumnosFiltrados = useMemo(() => {
     return alumnos.filter((alumno) => {
@@ -35,12 +33,15 @@ export function AlumnosTable({
 
       if (!coincideBusqueda) return false;
 
-      if (filtroCI === "todos") return true;
-      if (filtroCI === "con_repo") return Boolean(alumno.repositorio);
-      if (filtroCI === "sin_repo") return !alumno.repositorio;
-      return alumno.repositorio?.estadoCI === filtroCI;
+      if (filtroEstado === "todos") return true;
+      return alumno.state === filtroEstado;
     });
-  }, [alumnos, searchTerm, filtroCI]);
+  }, [alumnos, searchTerm, filtroEstado]);
+
+  const pendientesCount = useMemo(
+    () => alumnos.filter((a) => a.state !== "active").length,
+    [alumnos]
+  );
 
   return (
     <div className="space-y-4 animate-rise">
@@ -71,33 +72,50 @@ export function AlumnosTable({
             />
           </div>
 
-          {/* Filtro por estado de CI */}
+          {/* Filtro por estado de inscripción */}
           <select
-            value={filtroCI}
-            onChange={(e) => setFiltroCI(e.target.value)}
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value)}
             className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
           >
-            <option value="todos">Todos los estados</option>
-            <option value="success">CI Passing</option>
-            <option value="failure">CI Failing</option>
-            <option value="pending">CI Pending</option>
-            <option value="sin_ci">Sin CI</option>
-            <option value="con_repo">Con repositorio</option>
-            <option value="sin_repo">Sin repositorio</option>
+            <option value="todos">Todos los estados ({alumnos.length})</option>
+            <option value="active">Activos ({alumnos.length - pendientesCount})</option>
+            <option value="pending">Invitación pendiente ({pendientesCount})</option>
           </select>
         </div>
 
-        {/* Botón de acceso al modal de invitar alumnos */}
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
-            {alumnos.length} {alumnos.length === 1 ? "alumno" : "alumnos"}
-          </span>
+        {/* Acciones principales: Sincronizar con GitHub e Invitar */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {onSync && (
+            <button
+              type="button"
+              onClick={onSync}
+              disabled={isSyncing || isLoading}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+              title="Consultar a GitHub si los alumnos ya aceptaron la invitación para actualizar su estado a activo"
+            >
+              <svg
+                className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin text-primary" : "text-muted-foreground"}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
+              <span>{isSyncing ? "Sincronizando..." : "Sincronizar con GitHub"}</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onOpenInvitarModal}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm shrink-0"
+            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-xs shrink-0"
+            title="Invitar alumnos"
           >
-            <img src={circleAddIcon} alt="Invitar" className="w-3.5 h-3.5 invert opacity-90" />
+            <img src={circleAddIcon} alt="Invitar" className="w-3.5 h-3.5 opacity-80" />
             <span>Invitar alumnos</span>
           </button>
         </div>
@@ -130,23 +148,21 @@ export function AlumnosTable({
       {/* Estado: Sin alumnos (Empty State) */}
       {!isLoading && !error && alumnos.length === 0 && (
         <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-6">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-xl mb-3 text-foreground">
-            👥
-          </div>
+
           <h3 className="font-display text-lg font-bold text-foreground">
-            No hay alumnos matriculados
+            No hay alumnos en este curso
           </h3>
           <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
-            Aún no se han añadido alumnos a este curso. Invitá a los estudiantes usando sus usuarios de GitHub para que puedan acceder a sus repositorios.
+            Aún no se han añadido alumnos a este curso. Invítalos usando sus usuarios de GitHub.
           </p>
           <div className="mt-5">
             <button
               type="button"
               onClick={onOpenInvitarModal}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-5 py-2.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-xs"
             >
-              <img src={circleAddIcon} alt="Invitar" className="w-3.5 h-3.5 invert opacity-90" />
-              <span>Invitar primer alumno</span>
+              <img src={circleAddIcon} alt="Invitar" className="w-3.5 h-3.5 opacity-80" />
+              <span>Invitar alumnos</span>
             </button>
           </div>
         </div>
@@ -164,7 +180,7 @@ export function AlumnosTable({
                 type="button"
                 onClick={() => {
                   setSearchTerm("");
-                  setFiltroCI("todos");
+                  setFiltroEstado("todos");
                 }}
                 className="mt-3 font-mono text-xs text-primary underline cursor-pointer"
               >
@@ -178,10 +194,8 @@ export function AlumnosTable({
                   <tr className="border-b border-line bg-panel2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                     <th className="py-3 px-4">Alumno</th>
                     <th className="py-3 px-4">Rol</th>
-                    <th className="py-3 px-4">Estado</th>
-                    <th className="py-3 px-4">Repositorio</th>
-                    <th className="py-3 px-4">Pipeline CI/CD</th>
-                    <th className="py-3 px-4">Último Commit</th>
+                    <th className="py-3 px-4">Estado en Curso</th>
+                    <th className="py-3 px-4">Información</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line/70 font-mono text-xs">
@@ -237,64 +251,22 @@ export function AlumnosTable({
                               alumno.state === "active" ? "bg-emerald-500" : "bg-amber-500"
                             }`}
                           />
-                          {alumno.state}
+                          {alumno.state === "active" ? "Activo" : "Invitación pendiente"}
                         </span>
                       </td>
 
-                      {/* Repositorio */}
+                      {/* Información adicional */}
                       <td className="py-3.5 px-4">
-                        {alumno.repositorio ? (
-                          <a
-                            href={alumno.repositorio.htmlUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-line/50 transition-colors shrink-0 max-w-[220px]"
-                            title={`Abrir repositorio: ${alumno.repositorio.htmlUrl}`}
-                          >
-                            <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80 shrink-0" />
-                            <span className="truncate">{alumno.repositorio.nombre}</span>
-                            <span className="text-[10px] text-muted-foreground shrink-0">↗</span>
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground/60 italic text-[11px]">
-                            Sin repositorio
+                        {alumno.state === "active" ? (
+                          <span className="text-muted-foreground text-[11px]">
+                            Miembro activo del equipo en GitHub
                           </span>
-                        )}
-                      </td>
-
-                      {/* Pipeline CI/CD */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        {alumno.repositorio ? (
-                          <CIStatusBadge estado={alumno.repositorio.estadoCI} />
                         ) : (
-                          <span className="text-muted-foreground/50 text-[11px]">—</span>
-                        )}
-                      </td>
-
-                      {/* Último commit */}
-                      <td className="py-3.5 px-4">
-                        {alumno.repositorio?.ultimoCommit ? (
-                          <div
-                            className="min-w-[180px] max-w-[280px]"
-                            title={`Commit: "${alumno.repositorio.ultimoCommit}"${
-                              alumno.repositorio.fechaUltimoCommit
-                                ? `\nFecha: ${new Date(alumno.repositorio.fechaUltimoCommit).toLocaleString("es-AR")}`
-                                : ""
-                            }`}
-                          >
-                            <p className="truncate text-foreground text-[11px] font-medium">
-                              {obtenerPrimerLineaCommit(alumno.repositorio.ultimoCommit)}
-                            </p>
-                            {alumno.repositorio.fechaUltimoCommit && (
-                              <p className="text-[10px] text-muted-foreground mt-0.5">
-                                {formatearFechaCommit(alumno.repositorio.fechaUltimoCommit)}
-                              </p>
-                            )}
+                          <div className="flex items-center gap-2">
+                            <span className="text-amber-600/90 text-[11px]">
+                              Pendiente de aceptar la invitación
+                            </span>
                           </div>
-                        ) : (
-                          <span className="text-muted-foreground/60 italic text-[11px]">
-                            {alumno.repositorio ? "Sin commits" : "—"}
-                          </span>
                         )}
                       </td>
                     </tr>

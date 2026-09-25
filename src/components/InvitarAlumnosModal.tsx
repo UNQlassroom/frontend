@@ -2,8 +2,6 @@ import { useState } from "react";
 import { agregarAlumnos } from "@/services";
 import type { CursoResponseDTO } from "@/types";
 import * as React from "react";
-import {getGitHubRepoUrl} from "@/lib";
-import githubIcon from "@/assets/github_favicon.svg";
 
 interface InvitarAlumnosModalProps {
   open: boolean;
@@ -92,20 +90,19 @@ export function InvitarAlumnosModal({
 
         if (status === 404 || serverMessage.includes("404")) {
           setError(
-              "Uno o más usuarios no fueron encontrados en GitHub. Verificá que estén bien escritos."
+            "Uno o más usuarios no fueron encontrados en GitHub. Verificá que estén bien escritos."
           );
         } else if (status === 422 || serverMessage.includes("422")) {
           setError(
-              "Uno o más usuarios están bloqueados o no pueden ser invitados. Verificá que estén bien escritos y que no tengan restricciones."
+            "Uno o más usuarios están bloqueados o no pueden ser invitados. Verificá que estén bien escritos y que no tengan restricciones."
           );
         } else {
           setError(
-              apiErr.message === "Network Error"
-                  ? "Error de conexión."
-                  : "Ocurrió un error inesperado."
+            apiErr.message === "Network Error"
+              ? "Error de conexión."
+              : "Ocurrió un error inesperado."
           );
         }
-
       } else {
         setError("Ocurrió un error inesperado al invitar a los alumnos.");
       }
@@ -123,17 +120,13 @@ export function InvitarAlumnosModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4"
-    >
-      <div
-        className="w-full max-w-lg rounded-2xl border border-line bg-panel2 p-6 shadow-xl flex flex-col animate-rise"
-      >
+    <div className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4">
+      <div className="w-full max-w-lg rounded-2xl border border-line bg-panel2 p-6 shadow-xl flex flex-col animate-rise">
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              Gestión de equipo
+              Gestión de alumnos
             </p>
             <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <span>Invitar alumnos</span>
@@ -141,17 +134,6 @@ export function InvitarAlumnosModal({
             <p className="mt-0.5 font-mono text-xs text-muted-foreground">
               Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
             </p>
-            {curso.githubRepoName && (
-                <a
-                    href={getGitHubRepoUrl(curso.githubRepoName)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                >
-                  <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-                  <span>{curso.githubRepoName}</span>
-                </a>
-            )}
           </div>
           <button
             type="button"
@@ -174,7 +156,7 @@ export function InvitarAlumnosModal({
                 ¡Invitaciones enviadas!
               </h3>
               <p className="mt-1 font-mono text-xs text-muted-foreground">
-                Se agregaron {usernames.length} alumno(s) al equipo de GitHub del curso.
+                Se agregaron {usernames.length} alumno(s) a la nómina del curso.
               </p>
             </div>
             <div className="pt-2">
@@ -231,7 +213,7 @@ export function InvitarAlumnosModal({
                       ? "Escribí un usuario y presioná Enter..."
                       : "Escribí otro y presioná Enter..."
                   }
-                  className="flex-1 min-w-[200px] bg-transparent outline-none py-1 px-1 font-mono text-xs  placeholder:text-muted-foreground/60"
+                  className="flex-1 min-w-[200px] bg-transparent outline-none py-1 px-1 font-mono text-xs placeholder:text-muted-foreground/60"
                 />
               </div>
 
@@ -276,4 +258,3 @@ export function InvitarAlumnosModal({
     </div>
   );
 }
-

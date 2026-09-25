@@ -1,64 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import type { AsignacionAlumnoDTO, EstadoEntrega } from "@/types";
-import { getGitHubRepoUrl, getGitHubIssuesUrl } from "@/lib";
-
-export const MOCK_ASIGNACIONES_ALUMNO: AsignacionAlumnoDTO[] = [
-  {
-    id: "1",
-    titulo: "TP1 - Modelado de Objetos y Clases",
-    descripcion:
-      "Implementar la jerarquía de clases y reglas de negocio del dominio asignado aplicando principios SOLID y buenas prácticas de POO.",
-    fechaEntrega: "2026-09-10",
-    fechaLimiteFormatted: "10 de Septiembre, 2026",
-    estadoEntrega: "corregido",
-    calificacion: 9,
-    notaMaxima: 10,
-    feedbackDocente:
-      "Excelente diseño del modelo de dominio y cobertura de pruebas unitarias. Buenas abstracciones y desacoplamiento. Consultá el issue para ver el feedback detallado.",
-    repoNombre: "unqlassroom-tp1-oop-alumno",
-    repoUrl: getGitHubRepoUrl("unqlassroom-tp1-oop-alumno"),
-    issuesUrl: getGitHubIssuesUrl("unqlassroom-tp1-oop-alumno"),
-    issueFeedbackUrl: getGitHubIssuesUrl("unqlassroom-tp1-oop-alumno", 1),
-    estadoCI: "success",
-    fechaUltimaEntrega: "2026-09-09T21:40:00Z",
-  },
-  {
-    id: "2",
-    titulo: "TP2 - Persistencia y Mapeo Objeto-Relacional",
-    descripcion:
-      "Mapear entidades relacionales y persistir el modelo en base de datos PostgreSQL utilizando JPA/Hibernate y repositorios Spring Data.",
-    fechaEntrega: "2026-10-15",
-    fechaLimiteFormatted: "15 de Octubre, 2026",
-    estadoEntrega: "entregado",
-    calificacion: null,
-    notaMaxima: 10,
-    feedbackDocente: null,
-    repoNombre: "unqlassroom-tp2-persistence-alumno",
-    repoUrl: getGitHubRepoUrl("unqlassroom-tp2-persistence-alumno"),
-    issuesUrl: getGitHubIssuesUrl("unqlassroom-tp2-persistence-alumno"),
-    issueFeedbackUrl: getGitHubIssuesUrl("unqlassroom-tp2-persistence-alumno", 1),
-    estadoCI: "success",
-    fechaUltimaEntrega: "2026-10-13T19:25:00Z",
-  },
-  {
-    id: "3",
-    titulo: "TP3 - Arquitectura Web y Servicios RESTful",
-    descripcion:
-      "Construir API REST con controladores, endpoints documentados en Swagger/OpenAPI, manejo de errores y validaciones.",
-    fechaEntrega: "2026-11-20",
-    fechaLimiteFormatted: "20 de Noviembre, 2026",
-    estadoEntrega: "pendiente",
-    calificacion: null,
-    notaMaxima: 10,
-    feedbackDocente: null,
-    repoNombre: "unqlassroom-tp3-rest-alumno",
-    repoUrl: getGitHubRepoUrl("unqlassroom-tp3-rest-alumno"),
-    issuesUrl: getGitHubIssuesUrl("unqlassroom-tp3-rest-alumno"),
-    issueFeedbackUrl: null,
-    estadoCI: "sin_ci",
-    fechaUltimaEntrega: null,
-  },
-];
+import type { AsignacionAlumnoDTO, AsignacionResponseDTO, EstadoEntrega } from "@/types";
+import { obtenerAsignaciones } from "@/services";
 
 export interface EstadisticasProgresoAlumno {
   totalAsignaciones: number;
@@ -69,36 +11,87 @@ export interface EstadisticasProgresoAlumno {
   porcentajeCompletado: number;
 }
 
+function mapAsignacionesDTO(asignaciones: AsignacionResponseDTO[]): AsignacionAlumnoDTO[] {
+  return asignaciones.map((asig) => {
+    const miGrupo = asig.grupos?.[0];
+    const repo = miGrupo?.repositorio;
+
+    let estadoEntrega: EstadoEntrega = "pendiente";
+    if (repo?.ultimoCommit) {
+      estadoEntrega = "entregado";
+    }
+
+    return {
+      id: asig.id,
+      titulo: asig.titulo,
+      descripcion: asig.descripcion,
+      tipo: asig.tipo,
+      templateRepoName: asig.templateRepoName,
+      fechaLimite: asig.fechaLimite,
+      fechaLimiteFormatted: asig.fechaLimite
+        ? new Date(asig.fechaLimite).toLocaleDateString("es-AR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        : undefined,
+      estadoEntrega,
+      calificacion: null,
+      grupoNombre: miGrupo?.nombre,
+      integrantes: miGrupo?.integrantes,
+      repoNombre: repo?.nombre,
+      repoUrl: repo?.htmlUrl,
+      estadoCI: repo?.estadoCI ?? "sin_ci",
+      ultimoCommit: repo?.ultimoCommit,
+      fechaUltimoCommit: repo?.fechaUltimoCommit,
+    };
+  });
+}
+
 export function useAsignacionesAlumno(cursoId?: number) {
-  const [asignaciones, setAsignaciones] = useState<AsignacionAlumnoDTO[]>(MOCK_ASIGNACIONES_ALUMNO);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [asignaciones, setAsignaciones] = useState<AsignacionAlumnoDTO[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(cursoId));
   const [error, setError] = useState<string | null>(null);
 
   const cargarAsignaciones = useCallback(async () => {
+    if (!cursoId) return;
     setIsLoading(true);
     setError(null);
     try {
-      // Simulación de latencia a la espera del endpoint real
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setAsignaciones(MOCK_ASIGNACIONES_ALUMNO);
-    } catch {
-      setError("No se pudieron cargar las asignaciones del alumno.");
+      const response = await obtenerAsignaciones(cursoId);
+      setAsignaciones(mapAsignacionesDTO(response.data));
+    } catch (err: unknown) {
+      console.error("Error al cargar asignaciones del alumno:", err);
+      setError("No se pudieron cargar las asignaciones del curso.");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [cursoId]);
 
   useEffect(() => {
-    let isMounted = true;
-    const timer = setTimeout(() => {
-      if (isMounted && cursoId) {
-        setAsignaciones(MOCK_ASIGNACIONES_ALUMNO);
-      }
-    }, 50);
+    if (!cursoId) return;
+    let ignore = false;
+
+    obtenerAsignaciones(cursoId)
+      .then((response) => {
+        if (!ignore) {
+          setAsignaciones(mapAsignacionesDTO(response.data));
+        }
+      })
+      .catch((err: unknown) => {
+        if (!ignore) {
+          console.error("Error al cargar asignaciones del alumno:", err);
+          setError("No se pudieron cargar las asignaciones del curso.");
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      });
 
     return () => {
-      isMounted = false;
-      clearTimeout(timer);
+      ignore = true;
     };
   }, [cursoId]);
 
@@ -106,7 +99,7 @@ export function useAsignacionesAlumno(cursoId?: number) {
     if (asignaciones.length > 0) {
       setAsignaciones([]);
     } else {
-      setAsignaciones(MOCK_ASIGNACIONES_ALUMNO);
+      cargarAsignaciones();
     }
   };
 
