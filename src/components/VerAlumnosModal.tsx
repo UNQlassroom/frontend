@@ -1,13 +1,6 @@
 import { useEffect } from "react";
 import { useAlumnos } from "@/hooks";
 import type { CursoResponseDTO } from "@/types";
-import githubIcon from "@/assets/github_favicon.svg";
-import {
-  getGitHubRepoUrl,
-  getEstadoCIInfo,
-  formatearFechaCommit,
-  obtenerPrimerLineaCommit,
-} from "@/lib";
 
 interface VerAlumnosModalProps {
   open: boolean;
@@ -15,59 +8,16 @@ interface VerAlumnosModalProps {
   curso: CursoResponseDTO;
 }
 
-function CIStatusBadge({ estado }: { estado?: string | null }) {
-  const info = getEstadoCIInfo(estado);
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[11px] font-medium shrink-0 ${info.badgeClass}`}
-      title={`Estado de CI: ${info.label}`}
-    >
-      {info.type === "success" && (
-        <svg className="w-3 h-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-          <path
-            fillRule="evenodd"
-            d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z"
-            clipRule="evenodd"
-          />
-        </svg>
-      )}
-      {info.type === "failure" && (
-        <svg className="w-3 h-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-          <path
-            fillRule="evenodd"
-            d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"
-            clipRule="evenodd"
-          />
-        </svg>
-      )}
-      {info.type === "pending" && (
-        <svg
-          className="w-3 h-3 shrink-0 animate-spin"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-        >
-          <circle
-            cx="8"
-            cy="8"
-            r="6"
-            strokeWidth="2"
-            strokeDasharray="14"
-            strokeLinecap="round"
-          />
-        </svg>
-      )}
-      {info.type === "sin_ci" && (
-        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 shrink-0" />
-      )}
-      <span>{info.label}</span>
-    </span>
-  );
-}
-
 export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) {
-  const { alumnosData, isLoading, error, cargarAlumnos, limpiar } = useAlumnos();
+  const {
+    alumnosData,
+    isLoading,
+    isSyncing,
+    error,
+    cargarAlumnos,
+    sincronizarAlumnos,
+    limpiar,
+  } = useAlumnos();
 
   useEffect(() => {
     if (open) {
@@ -80,12 +30,8 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
   if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4"
-    >
-      <div
-        className="w-full max-w-2xl rounded-2xl border border-line bg-panel2 p-6 shadow-xl flex flex-col max-h-[85vh] animate-rise"
-      >
+    <div className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4">
+      <div className="w-full max-w-2xl rounded-2xl border border-line bg-panel2 p-6 shadow-xl flex flex-col max-h-[85vh] animate-rise">
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
@@ -97,18 +43,15 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
             <p className="mt-0.5 font-mono text-xs text-muted-foreground">
               Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
             </p>
-            {curso.githubRepoName && (
-              <a
-                href={getGitHubRepoUrl(curso.githubRepoName)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              >
-                <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-                <span>{curso.githubRepoName}</span>
-              </a>
-            )}
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+            aria-label="Cerrar modal"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Lista de Alumnos */}
@@ -139,8 +82,32 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
             <div>
               <div className="flex items-center justify-between mb-3 px-1">
                 <span className="font-mono text-xs text-muted-foreground">
-                  Total: {alumnosData.alumnos.length} {alumnosData.alumnos.length === 1 ? "alumno" : "alumnos"}
+                  Total: {alumnosData.alumnos.length}{" "}
+                  {alumnosData.alumnos.length === 1 ? "alumno" : "alumnos"}
                 </span>
+
+                <button
+                  type="button"
+                  onClick={() => sincronizarAlumnos(curso.id)}
+                  disabled={isSyncing || isLoading}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+                  title="Consultar a GitHub si los alumnos ya aceptaron la invitación para actualizar su estado a activo"
+                >
+                  <svg
+                    className={`w-3.5 h-3.5 ${
+                      isSyncing ? "animate-spin text-primary" : "text-muted-foreground"
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  </svg>
+                  <span>{isSyncing ? "Sincronizando..." : "Sincronizar con GitHub"}</span>
+                </button>
               </div>
 
               {alumnosData.alumnos.length === 0 ? (
@@ -154,113 +121,48 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                   {alumnosData.alumnos.map((alumno) => (
                     <div
                       key={alumno.username}
-                      className="flex flex-col gap-2.5 rounded-xl border border-line bg-panel p-3.5 hover:border-foreground/20 transition-colors"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-line bg-panel p-3.5 hover:border-foreground/20 transition-colors"
                     >
-                      {/* Fila superior: Usuario, rol y estado */}
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <img
-                            src={`https://github.com/${alumno.username}.png?size=64`}
-                            alt={alumno.username}
-                            className="w-7 h-7 rounded-full border border-line bg-line/20 object-cover shrink-0"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
-                          />
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <img
+                          src={`https://github.com/${alumno.username}.png?size=64`}
+                          alt={alumno.username}
+                          className="w-8 h-8 rounded-full border border-line bg-line/20 object-cover shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                        <div>
                           <a
                             href={`https://github.com/${alumno.username}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-mono text-sm font-semibold text-foreground hover:underline truncate"
+                            className="font-mono text-sm font-semibold text-foreground hover:underline truncate block"
                             title={`Ver perfil de @${alumno.username}`}
                           >
                             @{alumno.username}
                           </a>
                         </div>
-
-                        <div className="flex items-center gap-2 font-mono text-[11px] shrink-0">
-                          <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-muted-foreground">
-                            {alumno.role}
-                          </span>
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-medium ${
-                              alumno.state === "active"
-                                ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                                : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-                            }`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                alumno.state === "active" ? "bg-emerald-500" : "bg-amber-500"
-                              }`}
-                            />
-                            {alumno.state}
-                          </span>
-                        </div>
                       </div>
 
-                      {/* Fila inferior: Repositorio, Estado CI y Último commit */}
-                      <div className="pt-2 border-t border-line/60">
-                        {alumno.repositorio ? (
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div className="flex flex-wrap items-center gap-2 min-w-0">
-                              <a
-                                href={alumno.repositorio.htmlUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-1 font-mono text-xs font-medium text-foreground hover:bg-line/40 transition-colors shrink-0"
-                                title={`Abrir repositorio: ${alumno.repositorio.htmlUrl}`}
-                              >
-                                <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-                                <span className="font-semibold truncate max-w-[180px] sm:max-w-[240px]">
-                                  {alumno.repositorio.nombre}
-                                </span>
-                                <span className="text-[10px] text-muted-foreground">↗</span>
-                              </a>
-
-                              <CIStatusBadge estado={alumno.repositorio.estadoCI} />
-                            </div>
-
-                            {alumno.repositorio.ultimoCommit ? (
-                              <div
-                                className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground min-w-0"
-                                title={`Último commit: "${alumno.repositorio.ultimoCommit}"${
-                                  alumno.repositorio.fechaUltimoCommit
-                                    ? `\nFecha: ${new Date(alumno.repositorio.fechaUltimoCommit).toLocaleString("es-AR")}`
-                                    : ""
-                                }`}
-                              >
-                                <svg
-                                  className="w-3.5 h-3.5 shrink-0 opacity-70"
-                                  viewBox="0 0 16 16"
-                                  fill="currentColor"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm1.47 1a4.002 4.002 0 0 0-7.94 0H1.75a.75.75 0 0 0 0 1.5h2.28a4.002 4.002 0 0 0 7.94 0h2.28a.75.75 0 0 0 0-1.5h-2.28Z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                                <span className="truncate max-w-[160px] sm:max-w-[220px]">
-                                  {obtenerPrimerLineaCommit(alumno.repositorio.ultimoCommit)}
-                                </span>
-                                {alumno.repositorio.fechaUltimoCommit && (
-                                  <span className="shrink-0 text-[10px] text-muted-foreground/80">
-                                    · {formatearFechaCommit(alumno.repositorio.fechaUltimoCommit)}
-                                  </span>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="font-mono text-[11px] text-muted-foreground/60 italic">
-                                Sin commits aún
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="font-mono text-[11px] text-muted-foreground/60">
-                            Sin repositorio asignado
-                          </div>
-                        )}
+                      <div className="flex items-center gap-2 font-mono text-[11px] shrink-0">
+                        <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-muted-foreground uppercase">
+                          {alumno.role}
+                        </span>
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-medium ${
+                            alumno.state === "active"
+                              ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                              : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              alumno.state === "active" ? "bg-emerald-500" : "bg-amber-500"
+                            }`}
+                          />
+                          {alumno.state === "active" ? "Activo" : "Invitación pendiente"}
+                        </span>
                       </div>
                     </div>
                   ))}
