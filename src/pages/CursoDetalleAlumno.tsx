@@ -1,8 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useCursoDetalle, useAsignacionesAlumno } from "@/hooks";
 import { AsignacionesAlumnoList } from "@/components";
-import { getGitHubRepoUrl } from "@/lib";
-import githubIcon from "@/assets/github_favicon.svg";
 
 export const CursoDetalleAlumno = () => {
   const { id } = useParams<{ id: string }>();
@@ -67,10 +65,6 @@ export const CursoDetalleAlumno = () => {
     );
   }
 
-  const cursoRepoUrl = curso.githubRepoName
-    ? getGitHubRepoUrl(curso.githubRepoName)
-    : null;
-
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 flex-1 w-full space-y-8 animate-rise">
       {/* Navegación de retorno (Breadcrumbs) */}
@@ -120,27 +114,6 @@ export const CursoDetalleAlumno = () => {
                 </p>
               )}
             </div>
-          </div>
-
-          {/* Enlace al Repositorio de la Cátedra / Curso */}
-          <div className="flex flex-col sm:flex-row md:flex-col items-start md:items-end gap-3 shrink-0">
-            {curso.githubRepoName ? (
-              <a
-                href={cursoRepoUrl ?? undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors shadow-xs"
-                title={`Ver repositorio oficial: ${curso.githubRepoName}`}
-              >
-                <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80" />
-                <span className="max-w-[200px] truncate">{curso.githubRepoName}</span>
-                <span className="text-muted-foreground text-[10px]">↗</span>
-              </a>
-            ) : (
-              <span className="rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs text-muted-foreground">
-                Sin repositorio oficial disponible
-              </span>
-            )}
           </div>
         </div>
       </section>
@@ -192,7 +165,7 @@ export const CursoDetalleAlumno = () => {
               Trabajos Prácticos y Asignaciones
             </h2>
             <p className="font-mono text-xs text-muted-foreground">
-              Consultá el estado de entrega, correcciones y notas de tus TPs.
+              Consultá el estado de tu repositorio asignado, commits y CI/CD.
             </p>
           </div>
 
@@ -202,7 +175,7 @@ export const CursoDetalleAlumno = () => {
             className="text-[11px] font-mono text-muted-foreground hover:text-foreground underline underline-offset-4 cursor-pointer self-start sm:self-auto"
             title="Herramienta de desarrollo para probar vista sin asignaciones"
           >
-            {asignaciones.length === 0 ? "↻ Cargar mocks" : "Probar estado vacío"}
+            {asignaciones.length === 0 ? "↺ Cargar mocks" : "Probar estado vacío"}
           </button>
         </div>
 

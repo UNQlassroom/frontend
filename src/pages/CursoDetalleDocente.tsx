@@ -7,8 +7,6 @@ import {
   PanelMetricasRepositorios,
   InvitarAlumnosModal,
 } from "@/components";
-import { getGitHubRepoUrl } from "@/lib";
-import githubIcon from "@/assets/github_favicon.svg";
 
 type TabType = "alumnos" | "asignaciones" | "metricas";
 
@@ -37,8 +35,10 @@ export const CursoDetalleDocente = () => {
   const {
     alumnosData,
     isLoading: isLoadingAlumnos,
+    isSyncing: isSyncingAlumnos,
     error: errorAlumnos,
     cargarAlumnos,
+    sincronizarAlumnos,
   } = useAlumnos();
 
   useEffect(() => {
@@ -122,16 +122,6 @@ export const CursoDetalleDocente = () => {
       <section className="bg-panel rounded-2xl border border-line p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                Detalle del Curso (Docente)
-              </span>
-              <span className="text-muted-foreground/40">•</span>
-              <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 font-mono text-[11px] font-medium text-foreground">
-                Año {curso.anio}
-              </span>
-            </div>
-
             <h1 className="font-suez text-3xl sm:text-4xl tracking-tight text-foreground">
               {curso.materia}
             </h1>
@@ -154,27 +144,6 @@ export const CursoDetalleDocente = () => {
                 </p>
               )}
             </div>
-          </div>
-
-          {/* Enlace y Acciones del Curso en GitHub */}
-          <div className="flex flex-col sm:flex-row md:flex-col items-start md:items-end gap-3 shrink-0">
-            {curso.githubRepoName ? (
-              <a
-                href={getGitHubRepoUrl(curso.githubRepoName)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors shadow-xs"
-                title={`Ver repositorio oficial: ${curso.githubRepoName}`}
-              >
-                <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80" />
-                <span className="max-w-[200px] truncate">{curso.githubRepoName}</span>
-                <span className="text-muted-foreground text-[10px]">↗</span>
-              </a>
-            ) : (
-              <span className="rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs text-muted-foreground">
-                Sin repo de GitHub configurado
-              </span>
-            )}
           </div>
         </div>
       </section>
@@ -216,9 +185,6 @@ export const CursoDetalleDocente = () => {
               }`}
             >
               <span>Asignaciones</span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-normal">
-                (TPs)
-              </span>
             </button>
 
             {/* Pestaña Métricas de Repositorios */}
@@ -232,7 +198,6 @@ export const CursoDetalleDocente = () => {
               }`}
             >
               <span>Métricas de Repositorios</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </button>
           </nav>
         </div>
@@ -244,13 +209,17 @@ export const CursoDetalleDocente = () => {
               curso={curso}
               alumnos={alumnos}
               isLoading={isLoadingAlumnos}
+              isSyncing={isSyncingAlumnos}
               error={errorAlumnos}
               onRetry={() => cursoId && cargarAlumnos(cursoId)}
+              onSync={() => cursoId && sincronizarAlumnos(cursoId)}
               onOpenInvitarModal={() => setOpenInvitarModal(true)}
             />
           )}
 
-          {activeTab === "asignaciones" && <AsignacionesTab curso={curso} />}
+          {activeTab === "asignaciones" && (
+            <AsignacionesTab curso={curso} alumnos={alumnos} />
+          )}
 
           {activeTab === "metricas" && (
             <PanelMetricasRepositorios curso={curso} alumnos={alumnos} />
