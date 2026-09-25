@@ -1,19 +1,76 @@
-export interface AsignacionDTO {
-  id: string | number;
-  titulo: string;
-  descripcion: string;
-  fechaEntrega?: string;
-  repoPlantilla?: string;
-  estado?: "activa" | "borrador" | "cerrada";
-  entregasCount?: number;
-  totalAlumnos?: number;
+import type { RepositorioDTO } from "./curso.types";
+
+export type TipoAsignacion = "INDIVIDUAL" | "GRUPAL";
+
+export interface CrearGrupoRequestDTO {
+  nombre: string;
+  integrantesUsernames: string[];
 }
 
-export interface CrearAsignacionFormData {
+export interface CrearAsignacionRequestDTO {
   titulo: string;
-  descripcion: string;
-  fechaEntrega: string;
-  repoPlantilla: string;
+  descripcion?: string | null;
+  tipo: TipoAsignacion;
+  templateRepoName: string;
+  fechaLimite?: string | null;
+  grupos?: CrearGrupoRequestDTO[] | null;
+}
+
+export interface GrupoAsignacionResponseDTO {
+  id: number;
+  nombre: string | null;
+  integrantes: string[];
+  repositorio?: RepositorioDTO | null;
+}
+
+export interface AsignacionResponseDTO {
+  id: number;
+  cursoId: number;
+  titulo: string;
+  descripcion: string | null;
+  tipo: TipoAsignacion;
+  templateRepoName: string;
+  fechaLimite: string | null;
+  grupos: GrupoAsignacionResponseDTO[];
+}
+
+export interface TemplateRepoResponseDTO {
+  name: string;
+  fullName: string;
+  htmlUrl: string;
+  description: string | null;
+}
+
+export interface CrearTemplateRepoRequestDTO {
+  name: string;
+  description?: string;
+}
+
+// Interfaz para la vista de Alumno
+export type EstadoEntrega = "pendiente" | "entregado" | "corregido";
+
+export interface AsignacionAlumnoDTO {
+  id: string | number;
+  titulo: string;
+  descripcion: string | null;
+  tipo: TipoAsignacion;
+  templateRepoName?: string;
+  fechaLimite?: string | null;
+  fechaLimiteFormatted?: string;
+  estadoEntrega: EstadoEntrega;
+  calificacion?: number | null;
+  notaMaxima?: number;
+  feedbackDocente?: string | null;
+  grupoNombre?: string | null;
+  integrantes?: string[];
+  repoNombre?: string | null;
+  repoUrl?: string | null;
+  issuesUrl?: string | null;
+  issueFeedbackUrl?: string | null;
+  estadoCI?: "success" | "failure" | "pending" | "sin_ci" | string | null;
+  ultimoCommit?: string | null;
+  fechaUltimoCommit?: string | null;
+  fechaUltimaEntrega?: string | null;
 }
 
 export interface MetricaRepoItem {
@@ -35,24 +92,4 @@ export interface MetricasResumen {
   pending: number;
   sinCi: number;
   porcentajePassing: number;
-}
-
-export type EstadoEntrega = "pendiente" | "entregado" | "corregido";
-
-export interface AsignacionAlumnoDTO {
-  id: string | number;
-  titulo: string;
-  descripcion: string;
-  fechaEntrega?: string;
-  fechaLimiteFormatted?: string;
-  estadoEntrega: EstadoEntrega;
-  calificacion?: number | null;
-  notaMaxima?: number;
-  feedbackDocente?: string | null;
-  repoNombre?: string | null;
-  repoUrl?: string | null;
-  issuesUrl?: string | null;
-  issueFeedbackUrl?: string | null;
-  estadoCI?: "success" | "failure" | "pending" | "sin_ci";
-  fechaUltimaEntrega?: string | null;
 }

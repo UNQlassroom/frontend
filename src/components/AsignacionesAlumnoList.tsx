@@ -160,9 +160,9 @@ export function AsignacionesAlumnoList({
             type="button"
             onClick={onToggleDemoEmptyState}
             className="rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
-            title="Alternar entre listado con datos simulados y estado vacío"
+            title="Alternar entre listado con datos y estado vacío"
           >
-            {asignaciones.length > 0 ? "Probar estado vacío" : "Restablecer datos demo"}
+            {asignaciones.length > 0 ? "Probar estado vacío" : "Recargar asignaciones"}
           </button>
         )}
       </div>
@@ -179,17 +179,6 @@ export function AsignacionesAlumnoList({
           <p className="mt-2 font-mono text-xs text-muted-foreground leading-relaxed">
             Aún no se han publicado trabajos prácticos en este curso. Los nuevos TPs aparecerán aquí junto con sus fechas de entrega y repositorio asignado.
           </p>
-          {onToggleDemoEmptyState && (
-            <div className="mt-6 flex justify-center">
-              <button
-                type="button"
-                onClick={onToggleDemoEmptyState}
-                className="rounded-lg bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-              >
-                Cargar asignaciones de prueba
-              </button>
-            </div>
-          )}
         </div>
       ) : asignacionesFiltradas.length === 0 ? (
         /* Estado vacío del filtro seleccionado */
@@ -210,10 +199,22 @@ export function AsignacionesAlumnoList({
                 key={asig.id}
                 className="rounded-2xl border border-line bg-panel p-6 shadow-xs flex flex-col justify-between hover:border-foreground/20 transition-colors animate-rise space-y-5"
               >
-                {/* Cabecera de la tarjeta: Título, Estado de entrega, Calificación y CI */}
+                {/* Cabecera de la tarjeta: Título, Tipo, Estado de entrega y CI */}
                 <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                  <div className="space-y-1.5 flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <div className="space-y-2 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Badge de Tipo: Individual o Grupal */}
+                      <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] font-medium text-foreground">
+                        {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
+                      </span>
+
+                      {/* Badge de Grupo (si es grupal) */}
+                      {asig.tipo === "GRUPAL" && asig.grupoNombre && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-foreground">
+                          {asig.grupoNombre}
+                        </span>
+                      )}
+
                       {/* Badge de Estado de Entrega */}
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-mono text-[11px] font-medium ${badge.classes}`}
@@ -230,7 +231,7 @@ export function AsignacionesAlumnoList({
                       {/* Indicador de Fecha Límite */}
                       {asig.fechaLimiteFormatted && (
                         <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] text-muted-foreground">
-                          <span>⏰ Vence:</span>
+                          <span>Fecha de entrega:</span>
                           <span className="font-semibold text-foreground">
                             {asig.fechaLimiteFormatted}
                           </span>
@@ -241,9 +242,29 @@ export function AsignacionesAlumnoList({
                     <h3 className="font-display text-xl font-bold text-foreground">
                       {asig.titulo}
                     </h3>
-                    <p className="font-mono text-xs text-muted-foreground leading-relaxed">
-                      {asig.descripcion}
-                    </p>
+                    {asig.descripcion && (
+                      <p className="font-mono text-xs text-muted-foreground leading-relaxed">
+                        {asig.descripcion}
+                      </p>
+                    )}
+
+                    {/* Compañeros de grupo si es grupal */}
+                    {asig.tipo === "GRUPAL" && asig.integrantes && asig.integrantes.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1 font-mono text-[11px] text-muted-foreground">
+                        <span>Integrantes:</span>
+                        {asig.integrantes.map((username) => (
+                          <a
+                            key={username}
+                            href={`https://github.com/${username}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2 py-0.5 text-foreground hover:underline"
+                          >
+                            <span>@{username}</span>
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Panel de Calificación Obtenida */}
@@ -283,87 +304,35 @@ export function AsignacionesAlumnoList({
                       </span>
                     )}
 
-                    {asig.fechaUltimaEntrega && (
+                    {asig.fechaUltimoCommit && (
                       <span className="mt-1 font-mono text-[10px] text-muted-foreground">
-                        Última entrega: {formatFechaLegible(asig.fechaUltimaEntrega)}
+                        Último commit: {formatFechaLegible(asig.fechaUltimoCommit)}
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Sección de Feedback docente / Comentarios de corrección */}
-                {asig.feedbackDocente && (
-                  <div className="rounded-xl border border-line bg-panel2/60 p-4 space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-[11px] font-semibold text-foreground inline-flex items-center gap-1.5">
-                        <span>💬</span>
-                        <span>Devolución docente</span>
-                      </span>
-                      {asig.issueFeedbackUrl && (
-                        <a
-                          href={asig.issueFeedbackUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-mono text-[11px] text-primary underline hover:opacity-80 inline-flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>Ver en GitHub Issue</span>
-                          <span>↗</span>
-                        </a>
-                      )}
-                    </div>
-                    <p className="font-mono text-xs text-muted-foreground leading-relaxed italic">
-                      "{asig.feedbackDocente}"
-                    </p>
-                  </div>
-                )}
-
                 {/* Acciones y Enlaces de GitHub: Repositorio e Issues */}
                 <div className="pt-3 border-t border-line/60 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    {/* Botón de acceso directo al Repositorio del Alumno */}
+                    {/* Botón de acceso directo al Repositorio del Alumno / Grupo */}
                     {asig.repoUrl ? (
                       <a
                         href={asig.repoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-2xs"
-                        title="Ir al repositorio de tu entrega en GitHub"
+                        title="Ir al repositorio asignado en GitHub"
                       >
                         <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-                        <span>Mi repositorio</span>
+                        <span>Repositorio asignado</span>
                         <span className="text-muted-foreground text-[10px]">↗</span>
                       </a>
                     ) : (
                       <span className="rounded-lg border border-line bg-panel2 px-3 py-1 font-mono text-[11px] text-muted-foreground">
-                        Sin repositorio asignado
+                        Repositorio en proceso de creación...
                       </span>
                     )}
-
-                    {/* Botón de acceso directo a la sección de Issues */}
-                    {asig.issuesUrl ? (
-                      <a
-                        href={asig.issueFeedbackUrl || asig.issuesUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-2xs"
-                        title="Ir a los Issues y Feedback de GitHub"
-                      >
-                        <svg
-                          className="w-3.5 h-3.5 opacity-80 shrink-0"
-                          viewBox="0 0 16 16"
-                          fill="currentColor"
-                        >
-                          <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
-                          <path
-                            fillRule="evenodd"
-                            d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span>Issues & Feedback</span>
-                        <span className="text-muted-foreground text-[10px]">↗</span>
-                      </a>
-                    ) : null}
                   </div>
 
                   {/* Estado / Acción de entrega */}
@@ -371,12 +340,12 @@ export function AsignacionesAlumnoList({
                     {asig.estadoEntrega === "pendiente" ? (
                       <span className="inline-flex items-center gap-1.5 text-amber-600 font-semibold text-[11px]">
                         <span>⚠️</span>
-                        <span>Recordá realizar push a tu rama principal antes de la fecha límite</span>
+                        <span>Hacé git push a la rama principal de tu repositorio</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-muted-foreground text-[11px]">
+                      <span className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold text-[11px]">
                         <span>✓</span>
-                        <span>Entrega registrada</span>
+                        <span>Actividad registrada</span>
                       </span>
                     )}
                   </div>

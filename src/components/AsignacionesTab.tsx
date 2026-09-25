@@ -1,56 +1,81 @@
-import { useState } from "react";
-import type { AsignacionDTO, CursoResponseDTO } from "@/types";
+import { useState, useEffect, useCallback } from "react";
+import type {
+  AlumnoMiembroDeUnCursoDTO,
+  AsignacionResponseDTO,
+  CursoResponseDTO,
+  TemplateRepoResponseDTO,
+} from "@/types";
+import { obtenerAsignaciones, listarTemplates } from "@/services";
 import { CrearAsignacionModal } from "./CrearAsignacionModal";
+import { CIStatusBadge } from "./CIStatusBadge";
+import {
+  formatearFechaCommit,
+  obtenerPrimerLineaCommit,
+} from "@/lib";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import githubIcon from "@/assets/github_favicon.svg";
 
 interface AsignacionesTabProps {
   curso: CursoResponseDTO;
+  alumnos: AlumnoMiembroDeUnCursoDTO[];
 }
 
-const EJEMPLOS_ASIGNACIONES: AsignacionDTO[] = [
-  {
-    id: "1",
-    titulo: "TP1 - Modelado de Objetos y Clases",
-    descripcion:
-      "Implementar la jerarquía de clases y reglas de negocio del dominio asignado aplicando principios SOLID.",
-    fechaEntrega: "2026-10-15",
-    repoPlantilla: "unqlassroom-templates/tp1-oop-base",
-    estado: "activa",
-    entregasCount: 14,
-    totalAlumnos: 20,
-  },
-  {
-    id: "2",
-    titulo: "TP2 - Persistencia y Base de Datos",
-    descripcion:
-      "Mapear entidades relacionales y persistir el modelo en PostgreSQL usando Hibernate/JPA.",
-    fechaEntrega: "2026-11-20",
-    repoPlantilla: "unqlassroom-templates/tp2-persistence-base",
-    estado: "borrador",
-    entregasCount: 0,
-    totalAlumnos: 20,
-  },
-];
-
-export function AsignacionesTab({ curso }: AsignacionesTabProps) {
-  const [asignaciones, setAsignaciones] = useState<AsignacionDTO[]>([]);
+export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
+  const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
+  const [templates, setTemplates] = useState<TemplateRepoResponseDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expandedAsigId, setExpandedAsigId] = useState<number | null>(null);
 
-  const handleCreate = (nueva: AsignacionDTO) => {
-    setAsignaciones((prev) => [nueva, ...prev]);
+  const cargarAsignaciones = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await obtenerAsignaciones(curso.id);
+      setAsignaciones(response.data);
+      if (response.data.length > 0 && expandedAsigId === null) {
+        setExpandedAsigId(response.data[0].id);
+      }
+    } catch (err: unknown) {
+      console.error("Error al cargar asignaciones:", err);
+      setError("No se pudieron cargar las asignaciones del curso.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [curso.id, expandedAsigId]);
+
+  useEffect(() => {
+    cargarAsignaciones();
+  }, [curso.id]);
+
+  useEffect(() => {
+    listarTemplates()
+      .then((res) => setTemplates(res.data))
+      .catch((err) => console.error("Error al cargar templates:", err));
+  }, []);
+
+  const getTemplateUrl = (templateName: string): string => {
+    if (!templateName) return "https://github.com";
+    if (templateName.startsWith("http://") || templateName.startsWith("https://")) {
+      return templateName;
+    }
+    const match = templates.find(
+      (t) =>
+        t.name.toLowerCase() === templateName.toLowerCase() ||
+        t.fullName.toLowerCase() === templateName.toLowerCase()
+    );
+    if (match?.htmlUrl) {
+      return match.htmlUrl;
+    }
+    if (templateName.includes("/")) {
+      return `https://github.com/${templateName}`;
+    }
+    return `https://github.com/${templateName}`;
   };
 
-  const handleDelete = (id: string | number) => {
-    setAsignaciones((prev) => prev.filter((a) => a.id !== id));
-  };
-
-  const handleCargarEjemplos = () => {
-    setAsignaciones(EJEMPLOS_ASIGNACIONES);
-  };
-
-  const handleLimpiar = () => {
-    setAsignaciones([]);
+  const toggleExpand = (id: number) => {
+    setExpandedAsigId((prev) => (prev === id ? null : id));
   };
 
   return (
@@ -59,149 +84,260 @@ export function AsignacionesTab({ curso }: AsignacionesTabProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-panel p-4 rounded-xl border border-line">
         <div>
           <h3 className="font-display text-base font-bold text-foreground">
-            Trabajos Prácticos y Asignaciones
+            Asignaciones
           </h3>
           <p className="font-mono text-xs text-muted-foreground mt-0.5">
-            Materia: {curso.materia} · Comisión {curso.comision}
+            Creá asignaciones para tu materia {curso.materia}.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {asignaciones.length > 0 ? (
-            <button
-              type="button"
-              onClick={handleLimpiar}
-              className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              title="Restablecer para ver el empty state"
-            >
-              Ver estado vacío
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleCargarEjemplos}
-              className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              title="Cargar ejemplos para visualizar listado"
-            >
-              Cargar ejemplos
-            </button>
-          )}
-
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm shrink-0"
+            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-xs shrink-0"
+            title="Crear asignación"
           >
-            <img src={circleAddIcon} alt="Crear" className="w-3.5 h-3.5 invert opacity-90" />
-            <span>Crear Asignación</span>
+            <img src={circleAddIcon} alt="Crear" className="w-3.5 h-3.5 opacity-80" />
+            <span>Crear asignación</span>
           </button>
         </div>
       </div>
 
-      {/* Empty state solicitado en el requerimiento */}
-      {asignaciones.length === 0 ? (
+      {/* Estado: Cargando */}
+      {isLoading && asignaciones.length === 0 && (
+        <div className="rounded-xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
+          <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="font-mono text-xs text-muted-foreground">
+            Cargando asignaciones del curso...
+          </p>
+        </div>
+      )}
+
+      {/* Estado: Error */}
+      {!isLoading && error && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-center">
+          <p className="font-mono text-xs text-destructive mb-3">{error}</p>
+          <button
+            type="button"
+            onClick={cargarAsignaciones}
+            className="rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {/* Empty state si no hay asignaciones */}
+      {!isLoading && !error && asignaciones.length === 0 && (
         <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-xl mx-auto my-8 animate-rise">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-line/40 border border-line flex items-center justify-center text-2xl mb-4 text-foreground shadow-xs">
-            📋
-          </div>
           <h3 className="font-display text-xl font-bold text-foreground tracking-tight">
             No hay asignaciones creadas
           </h3>
           <p className="mt-2 font-mono text-xs text-muted-foreground leading-relaxed max-w-md mx-auto">
-            Aún no se han configurado trabajos prácticos en este curso. Creá una asignación para asociar un repositorio plantilla y que los estudiantes comiencen sus entregas.
+            Aún no se han creado asignaciones para este curso. Puedes crear la primera asignación haciendo clic en el botón a continuación.
           </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-6 flex justify-center">
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-5 py-2.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-xs"
             >
-              <img src={circleAddIcon} alt="Crear" className="w-3.5 h-3.5 invert opacity-90" />
-              <span>Crear Asignación</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleCargarEjemplos}
-              className="rounded-lg border border-line bg-panel2 px-4 py-2.5 font-mono text-xs text-foreground hover:bg-line/40 transition-colors cursor-pointer"
-            >
-              Cargar datos demo
+              <img src={circleAddIcon} alt="Crear" className="w-3.5 h-3.5 opacity-80" />
+              <span>Crear primera asignación</span>
             </button>
           </div>
         </div>
-      ) : (
-        /* Listado de asignaciones maquetado */
-        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-          {asignaciones.map((asig) => (
-            <div
-              key={asig.id}
-              className="rounded-2xl border border-line bg-panel p-5 shadow-xs flex flex-col justify-between hover:border-foreground/20 transition-colors"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[11px] font-medium ${
-                      asig.estado === "activa"
-                        ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                        : "bg-line/60 text-muted-foreground border border-line"
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        asig.estado === "activa" ? "bg-emerald-500" : "bg-muted-foreground"
-                      }`}
-                    />
-                    {asig.estado === "activa" ? "En curso" : "Borrador"}
-                  </span>
+      )}
 
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(asig.id)}
-                    className="text-muted-foreground hover:text-destructive font-mono text-xs p-1 cursor-pointer"
-                    title="Eliminar asignación"
-                  >
-                    ✕
-                  </button>
+      {/* Listado de Asignaciones */}
+      {!isLoading && asignaciones.length > 0 && (
+        <div className="space-y-4">
+          {asignaciones.map((asig) => {
+            const isExpanded = expandedAsigId === asig.id;
+            const totalGrupos = asig.grupos?.length || 0;
+            const templateUrl = getTemplateUrl(asig.templateRepoName);
+
+            return (
+              <div
+                key={asig.id}
+                className="rounded-2xl border border-line bg-panel p-5 shadow-xs transition-colors space-y-4"
+              >
+                {/* Header de la Asignación */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] font-medium text-foreground">
+                        {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
+                      </span>
+
+                      {/* Enlace al repositorio plantilla */}
+                      <a
+                        href={templateUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors group cursor-pointer"
+                        title={`Ver repositorio plantilla ${asig.templateRepoName} en GitHub`}
+                      >
+                        <img src={githubIcon} alt="Repo" className="w-3.5 h-3.5 opacity-80" />
+                        <span>Plantilla:</span>
+                        <span className="font-semibold text-foreground underline decoration-muted-foreground/40 group-hover:decoration-foreground">
+                          {asig.templateRepoName}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground group-hover:text-foreground">↗</span>
+                      </a>
+
+                      {asig.fechaLimite && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] text-muted-foreground">
+                          <span>Fecha de entrega:</span>
+                          <span className="font-semibold text-foreground">
+                            {new Date(asig.fechaLimite).toLocaleDateString("es-AR", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </span>
+                      )}
+                    </div>
+
+                    <h4 className="font-display text-xl font-bold text-foreground">
+                      {asig.titulo}
+                    </h4>
+                    {asig.descripcion && (
+                      <p className="font-mono text-xs text-muted-foreground leading-relaxed">
+                        {asig.descripcion}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {totalGrupos} {asig.tipo === "GRUPAL" ? "grupo(s)" : "repositorio(s)"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(asig.id)}
+                      className="rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                    >
+                      {isExpanded ? "Ocultar repositorios ▲" : "Ver repositorios ▼"}
+                    </button>
+                  </div>
                 </div>
 
-                <h4 className="font-display text-lg font-bold text-foreground">
-                  {asig.titulo}
-                </h4>
-                <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                  {asig.descripcion}
-                </p>
+                {/* Detalle desplegable de los repositorios y grupos */}
+                {isExpanded && (
+                  <div className="pt-4 border-t border-line space-y-3">
+                    <h5 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                      Repositorios generados ({totalGrupos})
+                    </h5>
 
-                {asig.repoPlantilla && (
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-1 font-mono text-[11px] text-foreground">
-                    <img src={githubIcon} alt="Repo" className="w-3.5 h-3.5 opacity-80" />
-                    <span className="text-muted-foreground">Plantilla:</span>
-                    <span className="font-semibold">{asig.repoPlantilla}</span>
+                    {totalGrupos === 0 ? (
+                      <p className="font-mono text-xs text-muted-foreground italic">
+                        No hay repositorios asociados a esta asignación todavía.
+                      </p>
+                    ) : (
+                      <div className="overflow-x-auto rounded-xl border border-line bg-panel2/60">
+                        <table className="w-full text-left border-collapse font-mono text-xs">
+                          <thead>
+                            <tr className="border-b border-line bg-panel2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                              <th className="py-2.5 px-3">
+                                {asig.tipo === "GRUPAL" ? "Grupo / Integrantes" : "Alumno"}
+                              </th>
+                              <th className="py-2.5 px-3">Repositorio GitHub</th>
+                              <th className="py-2.5 px-3">Pipeline CI/CD</th>
+                              <th className="py-2.5 px-3">Último Commit</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-line/60">
+                            {asig.grupos.map((grupo) => (
+                              <tr key={grupo.id} className="hover:bg-line/20 transition-colors">
+                                {/* Nombre o Integrantes */}
+                                <td className="py-3 px-3">
+                                  <div className="space-y-1">
+                                    {grupo.nombre && (
+                                      <p className="font-semibold text-foreground">
+                                        {grupo.nombre}
+                                      </p>
+                                    )}
+                                    <div className="flex flex-wrap gap-1">
+                                      {grupo.integrantes.map((u) => (
+                                        <a
+                                          key={u}
+                                          href={`https://github.com/${u}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+                                        >
+                                          @{u}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* Repositorio */}
+                                <td className="py-3 px-3">
+                                  {grupo.repositorio ? (
+                                    <a
+                                      href={grupo.repositorio.htmlUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+                                      title={grupo.repositorio.htmlUrl}
+                                    >
+                                      <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
+                                      <span className="truncate max-w-[200px]">
+                                        {grupo.repositorio.nombre}
+                                      </span>
+                                      <span className="text-[10px] text-muted-foreground">↗</span>
+                                    </a>
+                                  ) : (
+                                    <span className="text-muted-foreground/60 italic text-[11px]">
+                                      En proceso...
+                                    </span>
+                                  )}
+                                </td>
+
+                                {/* CI/CD */}
+                                <td className="py-3 px-3">
+                                  {grupo.repositorio ? (
+                                    <CIStatusBadge estado={grupo.repositorio.estadoCI} />
+                                  ) : (
+                                    <span className="text-muted-foreground/50 text-[11px]">—</span>
+                                  )}
+                                </td>
+
+                                {/* Último commit */}
+                                <td className="py-3 px-3">
+                                  {grupo.repositorio?.ultimoCommit ? (
+                                    <div className="min-w-[180px] max-w-[260px]">
+                                      <p className="truncate text-foreground text-[11px] font-medium">
+                                        {obtenerPrimerLineaCommit(grupo.repositorio.ultimoCommit)}
+                                      </p>
+                                      {grupo.repositorio.fechaUltimoCommit && (
+                                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                                          {formatearFechaCommit(grupo.repositorio.fechaUltimoCommit)}
+                                        </p>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground/60 italic text-[11px]">
+                                      {grupo.repositorio ? "Sin commits" : "—"}
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-
-              <div className="mt-5 pt-3 border-t border-line/70 flex items-center justify-between font-mono text-xs">
-                <div className="text-muted-foreground text-[11px]">
-                  {asig.fechaEntrega ? (
-                    <span>
-                      Fecha límite:{" "}
-                      <strong className="text-foreground">{asig.fechaEntrega}</strong>
-                    </span>
-                  ) : (
-                    <span>Sin fecha límite definida</span>
-                  )}
-                </div>
-
-                {asig.totalAlumnos !== undefined && asig.totalAlumnos > 0 ? (
-                  <span className="text-[11px] text-muted-foreground">
-                    Entregas:{" "}
-                    <strong className="text-foreground">
-                      {asig.entregasCount ?? 0}/{asig.totalAlumnos}
-                    </strong>
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -209,7 +345,9 @@ export function AsignacionesTab({ curso }: AsignacionesTabProps) {
       <CrearAsignacionModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onCreate={handleCreate}
+        cursoId={curso.id}
+        alumnos={alumnos}
+        onSuccess={cargarAsignaciones}
       />
     </div>
   );
