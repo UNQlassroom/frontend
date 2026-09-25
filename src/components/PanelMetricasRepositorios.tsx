@@ -1,5 +1,9 @@
 import { useState, useMemo } from "react";
-import type { AlumnoMiembroDeUnCursoDTO, CursoResponseDTO } from "@/types";
+import type {
+  AlumnoMiembroDeUnCursoDTO,
+  AsignacionResponseDTO,
+  CursoResponseDTO,
+} from "@/types";
 import { CIStatusBadge } from "./CIStatusBadge";
 import {
   formatearFechaCommit,
@@ -10,6 +14,7 @@ import githubIcon from "@/assets/github_favicon.svg";
 interface PanelMetricasRepositoriosProps {
   curso: CursoResponseDTO;
   alumnos?: AlumnoMiembroDeUnCursoDTO[];
+  asignaciones?: AsignacionResponseDTO[];
 }
 
 interface ItemMetrica {
@@ -34,7 +39,7 @@ const MOCK_REPOSITORIOS: ItemMetrica[] = [
     estadoCI: "success",
     ultimoCommit: "feat: implementacion completa de tests unitarios de persistencia",
     commitHash: "7b1a92e",
-    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 25).toISOString(), // hace 25 min
+    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
     branch: "main",
   },
   {
@@ -45,7 +50,7 @@ const MOCK_REPOSITORIOS: ItemMetrica[] = [
     estadoCI: "failure",
     ultimoCommit: "fix: corregir asercion en test de integracion que arrojaba NullPointer",
     commitHash: "9f42c18",
-    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // hace 2 horas
+    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
     branch: "feature/auth",
   },
   {
@@ -56,7 +61,7 @@ const MOCK_REPOSITORIOS: ItemMetrica[] = [
     estadoCI: "pending",
     ultimoCommit: "ci: configuracion de GitHub Actions con Gradle build and test",
     commitHash: "3a88d01",
-    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // hace 10 min
+    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
     branch: "main",
   },
   {
@@ -67,7 +72,7 @@ const MOCK_REPOSITORIOS: ItemMetrica[] = [
     estadoCI: "success",
     ultimoCommit: "refactor: aplicar patron Strategy para calculo de descuentos",
     commitHash: "5c12b74",
-    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // hace 5 horas
+    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
     branch: "main",
   },
   {
@@ -78,7 +83,7 @@ const MOCK_REPOSITORIOS: ItemMetrica[] = [
     estadoCI: "sin_ci",
     ultimoCommit: "docs: agregar diagrama de clases en formato mermaid al README",
     commitHash: "d194c5e",
-    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // ayer
+    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
     branch: "develop",
   },
   {
@@ -89,20 +94,55 @@ const MOCK_REPOSITORIOS: ItemMetrica[] = [
     estadoCI: "success",
     ultimoCommit: "test: cobertura 95% alcanzada en servicios principales",
     commitHash: "1e2f89b",
-    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(), // hace 1 día
+    fechaUltimoCommit: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
     branch: "main",
   },
 ];
 
 export function PanelMetricasRepositorios({
   curso,
-  alumnos = [],
+  asignaciones = [],
 }: PanelMetricasRepositoriosProps) {
-  // Si los alumnos tienen repositorios con datos, los transformamos; si no, o a pedido, usamos mock
-  const tieneDatosReales = useMemo(() => {
-    return alumnos.some((a) => a.repositorio !== null && a.repositorio !== undefined);
-  }, [alumnos]);
+  // Extraer repositorios reales de las asignaciones del curso
+  const reposReales: ItemMetrica[] = useMemo(() => {
+    if (!asignaciones || asignaciones.length === 0) return [];
+    const items: ItemMetrica[] = [];
 
+    asignaciones.forEach((asig) => {
+      asig.grupos.forEach((grupo, idx) => {
+        if (grupo.repositorio) {
+          const repo = grupo.repositorio;
+          const estadoValido = (repo.estadoCI ?? "sin_ci") as
+            | "success"
+            | "failure"
+            | "pending"
+            | "sin_ci";
+
+          items.push({
+            id: `${asig.id}-${grupo.id}-${idx}`,
+            repoNombre: repo.nombre,
+            repoUrl: repo.htmlUrl,
+            alumnoUsername:
+              grupo.nombre ||
+              (grupo.integrantes.length > 0
+                ? grupo.integrantes.join(", ")
+                : "Sin asignar"),
+            estadoCI: ["success", "failure", "pending", "sin_ci"].includes(estadoValido)
+              ? estadoValido
+              : "sin_ci",
+            ultimoCommit: repo.ultimoCommit || "Sin mensaje de commit",
+            commitHash: `c${(idx + 10) * 31}`,
+            fechaUltimoCommit: repo.fechaUltimoCommit || new Date().toISOString(),
+            branch: "main",
+          });
+        }
+      });
+    });
+
+    return items;
+  }, [asignaciones]);
+
+  const tieneDatosReales = reposReales.length > 0;
   const [forzarMock, setForzarMock] = useState<boolean>(!tieneDatosReales);
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");
@@ -111,32 +151,8 @@ export function PanelMetricasRepositorios({
     if (forzarMock || !tieneDatosReales) {
       return MOCK_REPOSITORIOS;
     }
-
-    return alumnos
-      .filter((a) => Boolean(a.repositorio))
-      .map((a, idx) => {
-        const repo = a.repositorio!;
-        const estadoValido = (repo.estadoCI ?? "sin_ci") as
-          | "success"
-          | "failure"
-          | "pending"
-          | "sin_ci";
-
-        return {
-          id: `${a.username}-${idx}`,
-          repoNombre: repo.nombre,
-          repoUrl: repo.htmlUrl,
-          alumnoUsername: a.username,
-          estadoCI: ["success", "failure", "pending", "sin_ci"].includes(estadoValido)
-            ? estadoValido
-            : "sin_ci",
-          ultimoCommit: repo.ultimoCommit || "Sin mensaje de commit",
-          commitHash: `c${(idx + 10) * 31}`,
-          fechaUltimoCommit: repo.fechaUltimoCommit || new Date().toISOString(),
-          branch: "main",
-        };
-      });
-  }, [forzarMock, tieneDatosReales, alumnos]);
+    return reposReales;
+  }, [forzarMock, tieneDatosReales, reposReales]);
 
   // Cálculo de estadísticas consolidadas
   const total = datosItems.length;
@@ -180,7 +196,7 @@ export function PanelMetricasRepositorios({
             )}
           </div>
           <p className="font-mono text-xs text-muted-foreground mt-0.5">
-            Monitoreo en tiempo real de los pipelines de GitHub Actions, fechas y actividad de commits.
+            Monitoreo en tiempo real de los pipelines de GitHub Actions, fechas y actividad de commits de las asignaciones.
           </p>
         </div>
 
@@ -393,7 +409,7 @@ export function PanelMetricasRepositorios({
             type="text"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="Buscar por repositorio, alumno o mensaje de commit..."
+            placeholder="Buscar por repositorio, alumno/grupo o commit..."
             className="w-full rounded-lg border border-line bg-background pl-9 pr-3 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
@@ -422,7 +438,7 @@ export function PanelMetricasRepositorios({
           <thead>
             <tr className="border-b border-line bg-panel2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
               <th className="py-3 px-4">Repositorio</th>
-              <th className="py-3 px-4">Alumno</th>
+              <th className="py-3 px-4">Alumno / Grupo</th>
               <th className="py-3 px-4">Pipeline CI/CD</th>
               <th className="py-3 px-4">Último Commit</th>
               <th className="py-3 px-4">Rama</th>
@@ -450,26 +466,11 @@ export function PanelMetricasRepositorios({
                   </a>
                 </td>
 
-                {/* Alumno */}
+                {/* Alumno o Grupo */}
                 <td className="py-3.5 px-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={`https://github.com/${item.alumnoUsername}.png?size=64`}
-                      alt={item.alumnoUsername}
-                      className="w-6 h-6 rounded-full border border-line bg-line/30 object-cover shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                    <a
-                      href={`https://github.com/${item.alumnoUsername}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-foreground hover:underline"
-                    >
-                      @{item.alumnoUsername}
-                    </a>
-                  </div>
+                  <span className="font-medium text-foreground">
+                    {item.alumnoUsername}
+                  </span>
                 </td>
 
                 {/* Pipeline CI/CD */}
