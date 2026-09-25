@@ -45,28 +45,38 @@ export function CrearAsignacionModal({
 
   // Lista de repositorios templates
   const [templates, setTemplates] = useState<TemplateRepoResponseDTO[]>([]);
-  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open) {
-      setIsLoadingTemplates(true);
-      listarTemplates()
-        .then((res) => {
+    if (!open) return;
+
+    let ignore = false;
+    listarTemplates()
+      .then((res) => {
+        if (!ignore) {
           setTemplates(res.data);
           if (res.data.length > 0) {
             setTemplateRepoName(res.data[0].name);
           }
-        })
-        .catch((err) => {
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
           console.warn("No se pudieron cargar templates automáticos:", err);
-        })
-        .finally(() => {
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
           setIsLoadingTemplates(false);
-        });
-    }
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [open]);
 
   const handleClose = () => {
@@ -78,6 +88,7 @@ export function CrearAsignacionModal({
     setFechaLimite("");
     setGrupos([{ nombre: "Grupo 1", integrantesUsernames: [] }]);
     setError(null);
+    setIsLoadingTemplates(true);
     onClose();
   };
 

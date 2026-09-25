@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import type { AsignacionAlumnoDTO, EstadoEntrega } from "@/types";
+import type { AsignacionAlumnoDTO, AsignacionResponseDTO, EstadoEntrega } from "@/types";
 import { obtenerAsignaciones } from "@/services";
 
 export interface EstadisticasProgresoAlumno {
@@ -11,9 +11,46 @@ export interface EstadisticasProgresoAlumno {
   porcentajeCompletado: number;
 }
 
+function mapAsignacionesDTO(asignaciones: AsignacionResponseDTO[]): AsignacionAlumnoDTO[] {
+  return asignaciones.map((asig) => {
+    const miGrupo = asig.grupos?.[0];
+    const repo = miGrupo?.repositorio;
+
+    let estadoEntrega: EstadoEntrega = "pendiente";
+    if (repo?.ultimoCommit) {
+      estadoEntrega = "entregado";
+    }
+
+    return {
+      id: asig.id,
+      titulo: asig.titulo,
+      descripcion: asig.descripcion,
+      tipo: asig.tipo,
+      templateRepoName: asig.templateRepoName,
+      fechaLimite: asig.fechaLimite,
+      fechaLimiteFormatted: asig.fechaLimite
+        ? new Date(asig.fechaLimite).toLocaleDateString("es-AR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        : undefined,
+      estadoEntrega,
+      calificacion: null,
+      grupoNombre: miGrupo?.nombre,
+      integrantes: miGrupo?.integrantes,
+      repoNombre: repo?.nombre,
+      repoUrl: repo?.htmlUrl,
+      estadoCI: repo?.estadoCI ?? "sin_ci",
+      ultimoCommit: repo?.ultimoCommit,
+      fechaUltimoCommit: repo?.fechaUltimoCommit,
+    };
+  });
+}
+
 export function useAsignacionesAlumno(cursoId?: number) {
   const [asignaciones, setAsignaciones] = useState<AsignacionAlumnoDTO[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(cursoId));
   const [error, setError] = useState<string | null>(null);
 
   const cargarAsignaciones = useCallback(async () => {
@@ -22,41 +59,7 @@ export function useAsignacionesAlumno(cursoId?: number) {
     setError(null);
     try {
       const response = await obtenerAsignaciones(cursoId);
-      const items: AsignacionAlumnoDTO[] = response.data.map((asig) => {
-        const miGrupo = asig.grupos?.[0];
-        const repo = miGrupo?.repositorio;
-
-        let estadoEntrega: EstadoEntrega = "pendiente";
-        if (repo?.ultimoCommit) {
-          estadoEntrega = "entregado";
-        }
-
-        return {
-          id: asig.id,
-          titulo: asig.titulo,
-          descripcion: asig.descripcion,
-          tipo: asig.tipo,
-          templateRepoName: asig.templateRepoName,
-          fechaLimite: asig.fechaLimite,
-          fechaLimiteFormatted: asig.fechaLimite
-            ? new Date(asig.fechaLimite).toLocaleDateString("es-AR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })
-            : undefined,
-          estadoEntrega,
-          calificacion: null,
-          grupoNombre: miGrupo?.nombre,
-          integrantes: miGrupo?.integrantes,
-          repoNombre: repo?.nombre,
-          repoUrl: repo?.htmlUrl,
-          estadoCI: repo?.estadoCI ?? "sin_ci",
-          ultimoCommit: repo?.ultimoCommit,
-          fechaUltimoCommit: repo?.fechaUltimoCommit,
-        };
-      });
-      setAsignaciones(items);
+      setAsignaciones(mapAsignacionesDTO(response.data));
     } catch (err: unknown) {
       console.error("Error al cargar asignaciones del alumno:", err);
       setError("No se pudieron cargar las asignaciones del curso.");
@@ -66,10 +69,31 @@ export function useAsignacionesAlumno(cursoId?: number) {
   }, [cursoId]);
 
   useEffect(() => {
-    if (cursoId) {
-      cargarAsignaciones();
-    }
-  }, [cursoId, cargarAsignaciones]);
+    if (!cursoId) return;
+    let ignore = false;
+
+    obtenerAsignaciones(cursoId)
+      .then((response) => {
+        if (!ignore) {
+          setAsignaciones(mapAsignacionesDTO(response.data));
+        }
+      })
+      .catch((err: unknown) => {
+        if (!ignore) {
+          console.error("Error al cargar asignaciones del alumno:", err);
+          setError("No se pudieron cargar las asignaciones del curso.");
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [cursoId]);
 
   const handleToggleEstadoVacio = () => {
     if (asignaciones.length > 0) {

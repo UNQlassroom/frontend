@@ -23,7 +23,7 @@ interface AsignacionesTabProps {
 export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
   const [templates, setTemplates] = useState<TemplateRepoResponseDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedAsigId, setExpandedAsigId] = useState<number | null>(null);
@@ -34,8 +34,8 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
     try {
       const response = await obtenerAsignaciones(curso.id);
       setAsignaciones(response.data);
-      if (response.data.length > 0 && expandedAsigId === null) {
-        setExpandedAsigId(response.data[0].id);
+      if (response.data.length > 0) {
+        setExpandedAsigId((prev) => (prev === null ? response.data[0].id : prev));
       }
     } catch (err: unknown) {
       console.error("Error al cargar asignaciones:", err);
@@ -43,10 +43,34 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [curso.id, expandedAsigId]);
+  }, [curso.id]);
 
   useEffect(() => {
-    cargarAsignaciones();
+    let ignore = false;
+    obtenerAsignaciones(curso.id)
+      .then((response) => {
+        if (!ignore) {
+          setAsignaciones(response.data);
+          if (response.data.length > 0) {
+            setExpandedAsigId((prev) => (prev === null ? response.data[0].id : prev));
+          }
+        }
+      })
+      .catch((err: unknown) => {
+        if (!ignore) {
+          console.error("Error al cargar asignaciones:", err);
+          setError("No se pudieron cargar las asignaciones del curso.");
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [curso.id]);
 
   useEffect(() => {
