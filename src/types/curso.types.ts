@@ -17,9 +17,8 @@ export interface CursoResponseDTO {
   anio: number;
   semestre: number;
   comision: number;
-  descripcion: string;
-  githubRepoId?: number | null;
-  githubRepoName?: string | null;
+  descripcion?: string | null;
+  ownerUsername?: string | null;
 }
 
 /**
@@ -32,15 +31,17 @@ export interface CrearCursoFormData {
 }
 
 /**
- * Datos del repositorio de GitHub asociado al alumno
+ * Datos del repositorio de GitHub asociado a una asignación o grupo
  */
 export interface RepositorioDTO {
+  id?: number | null;
   nombre: string;
   htmlUrl: string;
   ultimoCommit?: string | null;
   fechaUltimoCommit?: string | null;
   estadoCI?: "sin_ci" | "success" | "failure" | "pending" | string | null;
 }
+
 /**
  * Petición para agregar/invitar alumnos al equipo de GitHub de un curso
  */
@@ -49,20 +50,18 @@ export interface AgregarAlumnosRequestDTO {
 }
 
 /**
- * Alumno perteneciente al repo princilap de GitHub de un curso
+ * Alumno perteneciente al curso (sin repositorio directo)
  */
 export interface AlumnoMiembroDeUnCursoDTO {
   username: string;
   role: string;
-  state: string;
-  repositorio?: RepositorioDTO | null;
+  state: "active" | "pending" | string;
 }
 
 /**
- * Respuesta del backend al agregar alumnos
+ * Respuesta del backend al consultar/sincronizar alumnos
  */
 export interface AlumnosDeUnCursoResponseDTO {
   cursoId: number;
-  repoName: string;
   alumnos: AlumnoMiembroDeUnCursoDTO[];
 }
