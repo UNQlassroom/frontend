@@ -7,8 +7,10 @@ export interface Usuario {
 }
 
 export interface AuthResponseDTO {
-  token: string;
-  user: Usuario;
+  token?: string | null;
+  user?: Usuario | null;
+  requiereUnirseAOrg?: boolean;
+  redirectUrl?: string | null;
 }
 
 export interface GitHubLoginRequestDTO {
