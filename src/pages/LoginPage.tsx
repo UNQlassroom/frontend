@@ -7,12 +7,15 @@ export const LoginPage = () => {
   const { isAuthenticated } = useAuth();
   const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
 
+  const pendienteOrg = sessionStorage.getItem("oauth_pendiente_org") === "true";
+
   if (isAuthenticated) {
     return <Navigate to="/home" replace />;
   }
 
   const iniciarLoginGitHub = (esDocente: boolean) => {
     sessionStorage.setItem("oauth_es_docente", JSON.stringify(esDocente));
+    sessionStorage.removeItem("oauth_pendiente_org");
 
     const redirectUri = `${window.location.origin}/oauth/callback`;
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
@@ -38,6 +41,17 @@ export const LoginPage = () => {
         <p className="text-sm text-muted-foreground mb-8">
           Inicia sesión o regístrate utilizando tu cuenta de GitHub seleccionando tu rol.
         </p>
+
+        {pendienteOrg && (
+          <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-left">
+            <h3 className="text-sm font-semibold text-amber-500 mb-1">
+              Invitación a la organización enviada
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Una vez que hayas aceptado la invitación en GitHub, vuelve a presionar el botón correspondiente a tu rol para finalizar tu inicio de sesión.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-col gap-3">
           <button
