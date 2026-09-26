@@ -19,7 +19,8 @@ export const CursoDetalleAlumno = () => {
     error: errorAsignaciones,
     estadisticas,
     cargarAsignaciones,
-    handleToggleEstadoVacio,
+    entregar,
+    entregandoId,
   } = useAsignacionesAlumno(cursoId);
 
   if (isLoadingCurso) {
@@ -159,7 +160,7 @@ export const CursoDetalleAlumno = () => {
 
       {/* Lista Principal de Asignaciones y Trabajos Prácticos */}
       <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3">
           <div>
             <h2 className="font-display text-lg font-bold tracking-tight text-foreground">
               Trabajos Prácticos y Asignaciones
@@ -171,11 +172,23 @@ export const CursoDetalleAlumno = () => {
 
           <button
             type="button"
-            onClick={handleToggleEstadoVacio}
-            className="text-[11px] font-mono text-muted-foreground hover:text-foreground underline underline-offset-4 cursor-pointer self-start sm:self-auto"
-            title="Herramienta de desarrollo para probar vista sin asignaciones"
+            onClick={cargarAsignaciones}
+            disabled={isLoadingAsignaciones}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
+            title="Recargar asignaciones y verificar estado actualizado"
           >
-            {asignaciones.length === 0 ? "↺ Cargar mocks" : "Probar estado vacío"}
+            <svg
+              className={`w-3.5 h-3.5 ${isLoadingAsignaciones ? "animate-spin text-primary" : "text-muted-foreground"}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+            <span>{isLoadingAsignaciones ? "Actualizando..." : "Actualizar"}</span>
           </button>
         </div>
 
@@ -184,6 +197,8 @@ export const CursoDetalleAlumno = () => {
           isLoading={isLoadingAsignaciones}
           error={errorAsignaciones}
           onRetry={cargarAsignaciones}
+          onEntregar={entregar}
+          entregandoId={entregandoId}
         />
       </section>
     </main>

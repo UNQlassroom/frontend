@@ -21,6 +21,8 @@ export interface GrupoAsignacionResponseDTO {
   nombre: string | null;
   integrantes: string[];
   repositorio?: RepositorioDTO | null;
+  entregada?: boolean;
+  fechaEntrega?: string | null;
 }
 
 export interface AsignacionResponseDTO {
@@ -32,6 +34,8 @@ export interface AsignacionResponseDTO {
   templateRepoName: string;
   fechaLimite: string | null;
   grupos: GrupoAsignacionResponseDTO[];
+  entregada?: boolean;
+  fechaEntrega?: string | null;
 }
 
 export interface TemplateRepoResponseDTO {
@@ -61,6 +65,7 @@ export interface AsignacionAlumnoDTO {
   calificacion?: number | null;
   notaMaxima?: number;
   feedbackDocente?: string | null;
+  grupoId?: number;
   grupoNombre?: string | null;
   integrantes?: string[];
   repoNombre?: string | null;
@@ -71,6 +76,9 @@ export interface AsignacionAlumnoDTO {
   ultimoCommit?: string | null;
   fechaUltimoCommit?: string | null;
   fechaUltimaEntrega?: string | null;
+  entregada?: boolean;
+  fechaEntrega?: string | null;
+  fechaEntregaFormatted?: string;
 }
 
 export interface MetricaRepoItem {

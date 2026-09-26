@@ -47,6 +47,21 @@ export const asignacionService = {
   },
 
   /**
+   * Envía la petición POST /cursos/{cursoId}/asignaciones/{asignacionId}/entregar
+   * Marca la asignación como entregada por el alumno o docente
+   */
+  entregarAsignacion: (
+    cursoId: number,
+    asignacionId: number,
+    grupoId?: number
+  ): Promise<ApiResponse<AsignacionResponseDTO>> => {
+    return post<AsignacionResponseDTO, { grupoId?: number } | undefined>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/entregar`,
+      grupoId ? { grupoId } : undefined
+    );
+  },
+
+  /**
    * Envía la petición GET /templates
    * Lista los repositorios plantillas disponibles en la organización
    */
@@ -72,6 +87,7 @@ export const {
   crearAsignacion,
   obtenerAsignaciones,
   obtenerAsignacionPorId,
+  entregarAsignacion,
   listarTemplates,
   crearTemplate,
 } = asignacionService;
