@@ -148,7 +148,9 @@ export function AlumnosTable({
       {/* Estado: Sin alumnos (Empty State) */}
       {!isLoading && !error && alumnos.length === 0 && (
         <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-6">
-
+          <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
+          👤
+          </div>
           <h3 className="font-display text-lg font-bold text-foreground">
             No hay alumnos en este curso
           </h3>
@@ -193,7 +195,6 @@ export function AlumnosTable({
                 <thead>
                   <tr className="border-b border-line bg-panel2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                     <th className="py-3 px-4">Alumno</th>
-                    <th className="py-3 px-4">Rol</th>
                     <th className="py-3 px-4">Estado en Curso</th>
                     <th className="py-3 px-4">Información</th>
                   </tr>
@@ -230,13 +231,6 @@ export function AlumnosTable({
                         </div>
                       </td>
 
-                      {/* Rol */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-[11px] text-muted-foreground uppercase">
-                          {alumno.role}
-                        </span>
-                      </td>
-
                       {/* Estado */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
@@ -264,7 +258,7 @@ export function AlumnosTable({
                         ) : (
                           <div className="flex items-center gap-2">
                             <span className="text-amber-600/90 text-[11px]">
-                              Pendiente de aceptar la invitación
+                              Pendiente de aceptar la invitación a la organización
                             </span>
                           </div>
                         )}

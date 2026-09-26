@@ -43,6 +43,20 @@ export const HomeDocente = () => {
         </button>
       </section>
 
+      {!isLoading && !error && cursos.length === 0 && (
+          <div className="mt-12 rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto">
+            <div className="mx-auto w-12 h-12 rounded-full bg-line/40 flex items-center justify-center text-xl mb-4">
+              📚
+            </div>
+            <h3 className="font-display text-lg font-bold text-foreground">
+              No gestionás ningún curso
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Crealo desde el botón "Crear curso" para empezar a organizar tus clases.
+            </p>
+          </div>
+      )}
+
       {/* Modal de creación */}
       <CrearCursoModal
         open={openDialog}

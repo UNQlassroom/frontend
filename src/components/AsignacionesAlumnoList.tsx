@@ -434,7 +434,7 @@ export function AsignacionesAlumnoList({
                                   d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                                 />
                               </svg>
-                              <span>Copiar git clone</span>
+                              <span>Copiar HTTPS</span>
                             </>
                           )}
                         </button>
@@ -464,7 +464,7 @@ export function AsignacionesAlumnoList({
                               <li>
                                 <span className="text-foreground font-semibold">Copiá el comando</span> haciendo clic en{" "}
                                 <span className="text-foreground bg-panel2 px-1 py-0.5 rounded border border-line font-medium">
-                                  Copiar git clone
+                                  Copiar HTTPS
                                 </span>.
                               </li>
                               <li>
@@ -507,8 +507,7 @@ export function AsignacionesAlumnoList({
                             type="button"
                             onClick={() => handleEntregar(Number(asig.id))}
                             disabled={entregandoId === asig.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-1.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 shadow-xs"
-                            title="Marcar esta asignación como entregada"
+                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50"                            title="Marcar esta asignación como entregada"
                           >
                             {entregandoId === asig.id ? (
                               <>
@@ -517,8 +516,7 @@ export function AsignacionesAlumnoList({
                               </>
                             ) : (
                               <>
-                                <span>Marcar como entregado</span>
-                                <span>✓</span>
+                                <span >Entregar</span>
                               </>
                             )}
                           </button>
@@ -527,7 +525,6 @@ export function AsignacionesAlumnoList({
                     ) : (
                       <div className="flex items-center gap-2 font-mono text-xs">
                         <span className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold text-xs">
-                          <span>✓</span>
                           <span>
                             {asig.estadoEntrega === "corregido"
                               ? "Corregido"

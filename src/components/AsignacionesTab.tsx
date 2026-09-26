@@ -155,6 +155,9 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
       {/* Empty state si no hay asignaciones */}
       {!isLoading && !error && asignaciones.length === 0 && (
         <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-xl mx-auto my-8 animate-rise">
+          <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
+            📚
+          </div>
           <h3 className="font-display text-xl font-bold text-foreground tracking-tight">
             No hay asignaciones creadas
           </h3>
