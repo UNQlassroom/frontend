@@ -156,7 +156,7 @@ export function InvitarAlumnosModal({
                 ¡Invitaciones enviadas!
               </h3>
               <p className="mt-1 font-mono text-xs text-muted-foreground">
-                Se agregaron {usernames.length} alumno(s) a la nómina del curso.
+                Se agregaron {usernames.length} alumno(s) al curso.
               </p>
             </div>
             <div className="pt-2">

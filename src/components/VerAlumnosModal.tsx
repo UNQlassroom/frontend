@@ -146,9 +146,6 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                       </div>
 
                       <div className="flex items-center gap-2 font-mono text-[11px] shrink-0">
-                        <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-muted-foreground uppercase">
-                          {alumno.role}
-                        </span>
                         <span
                           className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-medium ${
                             alumno.state === "active"
@@ -161,7 +158,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                               alumno.state === "active" ? "bg-emerald-500" : "bg-amber-500"
                             }`}
                           />
-                          {alumno.state === "active" ? "Activo" : "Invitación pendiente"}
+                          {alumno.state === "active" ? "Activo" : "Invitación pendiente en GitHub"}
                         </span>
                       </div>
                     </div>
