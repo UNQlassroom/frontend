@@ -20,7 +20,6 @@ export const OAuthCallbackPage = () => {
     : null;
 
   const [errorMsg, setErrorMsg] = useState<string | null>(errorInicial);
-  const [redirigiendoAOrg, setRedirigiendoAOrg] = useState(false);
   const procesadoRef = useRef(false);
 
   useEffect(() => {
@@ -38,9 +37,9 @@ export const OAuthCallbackPage = () => {
       .loginConGitHub({ code, esDocente })
       .then((response) => {
         if (response.data.requiereUnirseAOrg && response.data.redirectUrl) {
-          setRedirigiendoAOrg(true);
           sessionStorage.setItem("oauth_pendiente_org", "true");
-          window.location.replace(response.data.redirectUrl);
+          sessionStorage.setItem("oauth_invitacion_url", response.data.redirectUrl);
+          navigate("/login", { replace: true });
           return;
         }
 
@@ -49,6 +48,7 @@ export const OAuthCallbackPage = () => {
           login(token, user);
           sessionStorage.removeItem("oauth_es_docente");
           sessionStorage.removeItem("oauth_pendiente_org");
+          sessionStorage.removeItem("oauth_invitacion_url");
           navigate("/home", { replace: true });
         }
       })
@@ -65,17 +65,7 @@ export const OAuthCallbackPage = () => {
   return (
     <div className="min-h-[calc(100vh-65px)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-xl border border-line bg-panel p-8 shadow-xl text-center">
-        {redirigiendoAOrg ? (
-          <div className="space-y-4">
-            <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <h2 className="font-semibold text-lg text-foreground">
-              Redirigiendo a GitHub...
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Debes unirte a la organización para ingresar a UNQlassroom. Redirigiendo a la invitación...
-            </p>
-          </div>
-        ) : errorMsg ? (
+        {errorMsg ? (
           <div className="space-y-4">
             <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto text-xl font-bold">
               ✕

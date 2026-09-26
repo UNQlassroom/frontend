@@ -8,6 +8,7 @@ export const LoginPage = () => {
   const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
 
   const pendienteOrg = sessionStorage.getItem("oauth_pendiente_org") === "true";
+  const invitacionUrl = sessionStorage.getItem("oauth_invitacion_url");
 
   if (isAuthenticated) {
     return <Navigate to="/home" replace />;
@@ -16,6 +17,7 @@ export const LoginPage = () => {
   const iniciarLoginGitHub = (esDocente: boolean) => {
     sessionStorage.setItem("oauth_es_docente", JSON.stringify(esDocente));
     sessionStorage.removeItem("oauth_pendiente_org");
+    sessionStorage.removeItem("oauth_invitacion_url");
 
     const redirectUri = `${window.location.origin}/oauth/callback`;
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
@@ -43,13 +45,26 @@ export const LoginPage = () => {
         </p>
 
         {pendienteOrg && (
-          <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-left">
-            <h3 className="text-sm font-semibold text-amber-500 mb-1">
-              Invitación a la organización enviada
+          <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-left space-y-2">
+            <h3 className="text-sm font-semibold text-amber-500">
+              Invitación a la organización pendiente
             </h3>
             <p className="text-xs text-muted-foreground">
-              Una vez que hayas aceptado la invitación en GitHub, vuelve a presionar el botón correspondiente a tu rol para finalizar tu inicio de sesión.
+              Debes unirte a la organización para ingresar. Acepta la invitación en GitHub y luego pulsa el botón correspondiente a tu rol para finalizar tu ingreso.
             </p>
+            {invitacionUrl && (
+              <div className="pt-1">
+                <a
+                  href={invitacionUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-600 dark:text-amber-400 font-medium text-xs transition-colors"
+                >
+                  <span>Abrir invitación en GitHub</span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+            )}
           </div>
         )}
 
