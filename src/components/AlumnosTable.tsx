@@ -259,7 +259,7 @@ export function AlumnosTable({
                       <td className="py-3.5 px-4">
                         {alumno.state === "active" ? (
                           <span className="text-muted-foreground text-[11px]">
-                            Miembro activo del equipo en GitHub
+                            Miembro activo de UNQlassroom en GitHub
                           </span>
                         ) : (
                           <div className="flex items-center gap-2">
