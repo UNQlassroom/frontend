@@ -65,9 +65,8 @@ function mapAsignacionesDTO(
       ultimoCommit: repo?.ultimoCommit,
       fechaUltimoCommit: repo?.fechaUltimoCommit,
       entregada: estaEntregada,
-      fechaEntregada,
-      fechaEntrega: fechaEntregada,
-      fechaEntregaFormatted: fechaEntregada
+      fechaEntregada: fechaEntregada,
+      fechaEntregadaFormatted: fechaEntregada
         ? new Date(fechaEntregada).toLocaleDateString("es-AR", {
             day: "2-digit",
             month: "2-digit",
