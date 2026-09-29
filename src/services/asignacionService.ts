@@ -3,6 +3,7 @@ import type {
   ApiResponse,
   AsignacionResponseDTO,
   CrearAsignacionRequestDTO,
+  CalificarAsignacionRequestDTO,
   TemplateRepoResponseDTO,
   CrearTemplateRepoRequestDTO,
 } from "@/types";
@@ -62,6 +63,21 @@ export const asignacionService = {
   },
 
   /**
+   * Envía la petición POST /cursos/{cursoId}/asignaciones/{asignacionId}/grupos/calificar
+   * Docente: Califica la asignación de un grupo o alumno con nota y observaciones
+   */
+  calificarAsignacion: (
+    cursoId: number,
+    asignacionId: number,
+    data: CalificarAsignacionRequestDTO
+  ): Promise<ApiResponse<AsignacionResponseDTO>> => {
+    return post<AsignacionResponseDTO, CalificarAsignacionRequestDTO>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/grupos/calificar`,
+      data
+    );
+  },
+
+  /**
    * Envía la petición GET /templates
    * Lista los repositorios plantillas disponibles en la organización
    */
@@ -88,6 +104,7 @@ export const {
   obtenerAsignaciones,
   obtenerAsignacionPorId,
   entregarAsignacion,
+  calificarAsignacion,
   listarTemplates,
   crearTemplate,
 } = asignacionService;
