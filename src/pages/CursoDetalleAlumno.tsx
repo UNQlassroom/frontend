@@ -123,7 +123,7 @@ export const CursoDetalleAlumno = () => {
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="rounded-xl border border-line bg-panel p-4 text-center">
           <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            Total TPs
+            Total de Asignaciones
           </p>
           <p className="mt-1 font-display text-2xl font-bold text-foreground">
             {estadisticas.totalAsignaciones}
@@ -132,7 +132,7 @@ export const CursoDetalleAlumno = () => {
 
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center">
           <p className="font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-semibold">
-            Corregidos
+            Corregidas
           </p>
           <p className="mt-1 font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             {estadisticas.corregidas}
@@ -141,7 +141,7 @@ export const CursoDetalleAlumno = () => {
 
         <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 text-center">
           <p className="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-semibold">
-            Entregados
+            Entregadas
           </p>
           <p className="mt-1 font-display text-2xl font-bold text-blue-600 dark:text-blue-400">
             {estadisticas.entregadas}
@@ -163,10 +163,10 @@ export const CursoDetalleAlumno = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3">
           <div>
             <h2 className="font-display text-lg font-bold tracking-tight text-foreground">
-              Trabajos Prácticos y Asignaciones
+              Asignaciones
             </h2>
             <p className="font-mono text-xs text-muted-foreground">
-              Consultá el estado de tu repositorio asignado, commits y CI/CD.
+              Aquí podrás ver tus asignaciones, su fecha de entrega, calificación, issues y feedback docente.
             </p>
           </div>
 

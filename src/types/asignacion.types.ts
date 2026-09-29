@@ -9,11 +9,11 @@ export interface CrearGrupoRequestDTO {
 
 export interface CrearAsignacionRequestDTO {
   titulo: string;
-  descripcion?: string | null;
+  descripcion?: string;
   tipo: TipoAsignacion;
   templateRepoName: string;
+  grupos?: CrearGrupoRequestDTO[];
   fechaLimite?: string | null;
-  grupos?: CrearGrupoRequestDTO[] | null;
 }
 
 export interface GrupoAsignacionResponseDTO {
@@ -21,8 +21,12 @@ export interface GrupoAsignacionResponseDTO {
   nombre: string | null;
   integrantes: string[];
   repositorio?: RepositorioDTO | null;
-  entregada?: boolean;
-  fechaEntrega?: string | null;
+  entregada: boolean;
+  fechaEntregada?: string | null;
+  releaseUrl?: string | null;
+  calificacion?: number | null;
+  observaciones?: string | null;
+  fechaCalificacion?: string | null;
 }
 
 export interface AsignacionResponseDTO {
@@ -34,8 +38,13 @@ export interface AsignacionResponseDTO {
   templateRepoName: string;
   fechaLimite: string | null;
   grupos: GrupoAsignacionResponseDTO[];
-  entregada?: boolean;
-  fechaEntrega?: string | null;
+}
+
+export interface CalificarAsignacionRequestDTO {
+  grupoId?: number;
+  alumnoUsername?: string;
+  calificacion: number;
+  observaciones?: string | null;
 }
 
 export interface TemplateRepoResponseDTO {
@@ -64,21 +73,22 @@ export interface AsignacionAlumnoDTO {
   estadoEntrega: EstadoEntrega;
   calificacion?: number | null;
   notaMaxima?: number;
-  feedbackDocente?: string | null;
+  observaciones?: string | null;
+  fechaCalificacion?: string | null;
   grupoId?: number;
   grupoNombre?: string | null;
   integrantes?: string[];
   repoNombre?: string | null;
   repoUrl?: string | null;
-  issuesUrl?: string | null;
+  releaseUrl?: string | null;
   issueFeedbackUrl?: string | null;
   estadoCI?: "success" | "failure" | "pending" | "sin_ci" | string | null;
   ultimoCommit?: string | null;
   fechaUltimoCommit?: string | null;
   fechaUltimaEntrega?: string | null;
   entregada?: boolean;
-  fechaEntrega?: string | null;
-  fechaEntregaFormatted?: string;
+  fechaEntregada?: string | null;
+  fechaEntregadaFormatted?: string;
 }
 
 export interface MetricaRepoItem {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { AsignacionAlumnoDTO, EstadoEntrega } from "@/types";
 import { useAuth } from "@/hooks";
 import { CIStatusBadge } from "./CIStatusBadge";
+import { ConfirmarReentregaModal } from "./ConfirmarReentregaModal";
 import githubIcon from "@/assets/github_favicon.svg";
 
 interface AsignacionesAlumnoListProps {
@@ -25,6 +26,7 @@ export function AsignacionesAlumnoList({
   const [filtro, setFiltro] = useState<EstadoEntrega | "todas">("todas");
   const [copiedId, setCopiedId] = useState<string | number | null>(null);
   const [entregaError, setEntregaError] = useState<{ id: string | number; message: string } | null>(null);
+  const [asignacionParaReentregar, setAsignacionParaReentregar] = useState<AsignacionAlumnoDTO | null>(null);
 
   const asignacionesFiltradas =
     filtro === "todas"
@@ -59,6 +61,7 @@ export function AsignacionesAlumnoList({
           ? String(err.message)
           : "Error al registrar la entrega. Intentalo nuevamente.";
       setEntregaError({ id: asigId, message: msg });
+      throw err;
     }
   };
 
@@ -196,7 +199,7 @@ export function AsignacionesAlumnoList({
             No tenés asignaciones asignadas
           </h3>
           <p className="mt-2 font-mono text-xs text-muted-foreground leading-relaxed">
-            Aún no se han publicado trabajos prácticos en este curso. Los nuevos TPs aparecerán aquí junto con sus fechas de entrega y repositorio asignado.
+            Aún no se han publicado asignaciones en este curso. Las nuevas asignaciones aparecerán aquí junto con sus fechas de entrega y repositorio asignado.
           </p>
         </div>
       ) : asignacionesFiltradas.length === 0 ? (
@@ -211,7 +214,6 @@ export function AsignacionesAlumnoList({
             const badge = getBadgeEstado(asig.estadoEntrega);
             const notaMaxima = asig.notaMaxima ?? 10;
             const tieneNota = typeof asig.calificacion === "number";
-            const esAprobado = tieneNota && asig.calificacion! >= 4;
             const isVencida = asig.fechaLimite ? new Date() > new Date(asig.fechaLimite) : false;
 
             return (
@@ -342,35 +344,35 @@ export function AsignacionesAlumnoList({
                       Calificación
                     </span>
                     {asig.estadoEntrega === "corregido" && tieneNota ? (
-                      <div className="flex items-baseline gap-1 mt-0.5">
-                        <span
-                          className={`font-suez text-2xl font-bold ${
-                            esAprobado ? "text-emerald-600" : "text-destructive"
-                          }`}
-                        >
-                          {asig.calificacion}
-                        </span>
-                        <span className="font-mono text-xs text-muted-foreground">
-                          /{notaMaxima}
-                        </span>
-                        <span
-                          className={`ml-1.5 rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase ${
-                            esAprobado
-                              ? "bg-emerald-500/10 text-emerald-600"
-                              : "bg-destructive/10 text-destructive"
-                          }`}
-                        >
-                          {esAprobado ? "Aprobado" : "Desaprobado"}
-                        </span>
-                      </div>
+                      <>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <span
+                            className={`font-suez text-2xl font-bold text-black`}
+                          >
+                            {asig.calificacion}
+                          </span>
+                          <span className="font-mono text-xs text-muted-foreground">
+                            /{notaMaxima}
+                          </span>
+                        </div>
+                        {asig.observaciones ? (
+                          <span className="mt-1 font-mono text-[10px] text-primary font-medium inline-flex items-center gap-1">
+                            <span>💬 Con devolución</span>
+                          </span>
+                        ) : (
+                          <span className="mt-1 font-mono text-[10px] text-muted-foreground">
+                            Sin observaciones
+                          </span>
+                        )}
+                      </>
                     ) : asig.estadoEntrega === "entregado" ? (
                       <div className="flex flex-col items-start lg:items-end mt-1">
                         <span className="font-mono text-xs font-semibold text-sky-600 inline-flex items-center gap-1">
-                          <span>⏳ En corrección</span>
+                          <span>En corrección</span>
                         </span>
-                        {asig.fechaEntregaFormatted && (
+                        {asig.fechaEntregadaFormatted && (
                           <span className="mt-1 font-mono text-[10px] text-muted-foreground">
-                            Entregado: {asig.fechaEntregaFormatted}
+                            Entregado: {asig.fechaEntregadaFormatted}
                           </span>
                         )}
                       </div>
@@ -387,6 +389,25 @@ export function AsignacionesAlumnoList({
                     )}
                   </div>
                 </div>
+
+                {/* Sección de Observaciones y Devolución del Docente */}
+                {asig.observaciones && (
+                  <div className="p-4 rounded-xl border border-primary/25 bg-primary/5 space-y-2 animate-rise">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary">
+                        <span>Devolución y observaciones del docente</span>
+                      </div>
+                      {asig.fechaCalificacion && (
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          Calificado el: {formatFechaLegible(asig.fechaCalificacion)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-3 rounded-lg border border-primary/10 bg-panel font-mono text-xs text-foreground whitespace-pre-wrap leading-relaxed shadow-2xs">
+                      {asig.observaciones}
+                    </div>
+                  </div>
+                )}
 
                 {/* Acciones y Enlaces de GitHub: Repositorio, Clonar y Entrega */}
                 <div className="pt-3 border-t border-line/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -434,7 +455,7 @@ export function AsignacionesAlumnoList({
                                   d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                                 />
                               </svg>
-                              <span>Copiar HTTPS</span>
+                              <span>git clone</span>
                             </>
                           )}
                         </button>
@@ -464,7 +485,7 @@ export function AsignacionesAlumnoList({
                               <li>
                                 <span className="text-foreground font-semibold">Copiá el comando</span> haciendo clic en{" "}
                                 <span className="text-foreground bg-panel2 px-1 py-0.5 rounded border border-line font-medium">
-                                  Copiar HTTPS
+                                  git clone
                                 </span>.
                               </li>
                               <li>
@@ -493,13 +514,12 @@ export function AsignacionesAlumnoList({
                     )}
                   </div>
 
-                  {/* Acción de Entrega / Estado */}
+                  {/* Acción de Entrega / Reentrega / Estado */}
                   <div className="flex flex-col sm:items-end gap-1">
                     {asig.estadoEntrega === "pendiente" ? (
                       <div className="flex items-center gap-2">
                         {isVencida ? (
                           <span className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-1.5 font-mono text-xs font-semibold text-destructive">
-                            <span>⚠️</span>
                             <span>Plazo vencido</span>
                           </span>
                         ) : (
@@ -507,7 +527,8 @@ export function AsignacionesAlumnoList({
                             type="button"
                             onClick={() => handleEntregar(Number(asig.id))}
                             disabled={entregandoId === asig.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50"                            title="Marcar esta asignación como entregada"
+                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                            title="Marcar esta asignación como entregada"
                           >
                             {entregandoId === asig.id ? (
                               <>
@@ -516,24 +537,69 @@ export function AsignacionesAlumnoList({
                               </>
                             ) : (
                               <>
-                                <span >Entregar</span>
+                                <span>Entregar</span>
                               </>
                             )}
                           </button>
                         )}
                       </div>
+                    ) : asig.estadoEntrega === "entregado" ? (
+                      <div className="flex flex-wrap items-center sm:justify-end gap-2 font-mono text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1.5 text-sky-600 dark:text-sky-400 font-semibold text-xs">
+                            <span>Entregado</span>
+                          </span>
+                          {asig.fechaEntregadaFormatted && (
+                            <span className="text-[11px] text-muted-foreground">
+                              ({asig.fechaEntregadaFormatted})
+                            </span>
+                          )}
+                        </div>
+
+                        {!isVencida ? (
+                          <button
+                            type="button"
+                            onClick={() => setAsignacionParaReentregar(asig)}
+                            disabled={entregandoId === asig.id}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 px-3 py-1 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                            title="Volver a entregar con el último commit del repositorio"
+                          >
+                            {entregandoId === asig.id ? (
+                              <>
+                                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                <span>Reentregando...</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg
+                                  className="w-3 h-3"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                                </svg>
+                                <span>Reentregar</span>
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground bg-panel2 px-2 py-0.5 rounded border border-line">
+                            Plazo cerrado
+                          </span>
+                        )}
+                      </div>
                     ) : (
                       <div className="flex items-center gap-2 font-mono text-xs">
                         <span className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold text-xs">
-                          <span>
-                            {asig.estadoEntrega === "corregido"
-                              ? "Corregido"
-                              : "Entregado"}
-                          </span>
+                          <span>Corregido</span>
                         </span>
-                        {asig.fechaEntregaFormatted && (
+                        {asig.fechaEntregadaFormatted && (
                           <span className="text-[11px] text-muted-foreground">
-                            ({asig.fechaEntregaFormatted})
+                            ({asig.fechaEntregadaFormatted})
                           </span>
                         )}
                       </div>
@@ -551,6 +617,27 @@ export function AsignacionesAlumnoList({
           })}
         </div>
       )}
+
+      {/* Modal de confirmación para reentrega */}
+      <ConfirmarReentregaModal
+        open={Boolean(asignacionParaReentregar)}
+        onClose={() => setAsignacionParaReentregar(null)}
+        asignacionTitulo={asignacionParaReentregar?.titulo || ""}
+        repoNombre={asignacionParaReentregar?.repoNombre}
+        fechaEntregadaPrevia={asignacionParaReentregar?.fechaEntregadaFormatted}
+        fechaLimite={asignacionParaReentregar?.fechaLimiteFormatted}
+        isLoading={entregandoId === asignacionParaReentregar?.id}
+        onConfirm={async () => {
+          if (!asignacionParaReentregar) return;
+          const asigId = Number(asignacionParaReentregar.id);
+          try {
+            await handleEntregar(asigId);
+            setAsignacionParaReentregar(null);
+          } catch {
+            // El error se muestra a través de entregaError
+          }
+        }}
+      />
     </div>
   );
 }

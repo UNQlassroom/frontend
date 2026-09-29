@@ -24,13 +24,16 @@ function mapAsignacionesDTO(
       ) ?? asig.grupos?.[0];
     const repo = miGrupo?.repositorio;
 
-    const estaEntregada = Boolean(
-      miGrupo?.entregada ?? asig.entregada ?? (repo?.ultimoCommit ? true : false)
-    );
-    const fechaEntrega = miGrupo?.fechaEntrega ?? asig.fechaEntrega ?? null;
+    // Directo desde el grupo: se considera entregada si el booleano entregada es true o si tiene fechaEntregada
+    const estaEntregada = Boolean(miGrupo?.entregada || miGrupo?.fechaEntregada);
+    const fechaEntregada = miGrupo?.fechaEntregada ?? null;
+    const calificacion = miGrupo?.calificacion ?? null;
+    const tieneCalificacion = typeof calificacion === "number";
 
     let estadoEntrega: EstadoEntrega = "pendiente";
-    if (estaEntregada) {
+    if (tieneCalificacion) {
+      estadoEntrega = "corregido";
+    } else if (estaEntregada) {
       estadoEntrega = "entregado";
     }
 
@@ -49,19 +52,22 @@ function mapAsignacionesDTO(
           })
         : undefined,
       estadoEntrega,
-      calificacion: null,
+      calificacion,
+      observaciones: miGrupo?.observaciones ?? null,
+      fechaCalificacion: miGrupo?.fechaCalificacion ?? null,
       grupoId: miGrupo?.id,
       grupoNombre: miGrupo?.nombre,
       integrantes: miGrupo?.integrantes,
       repoNombre: repo?.nombre,
       repoUrl: repo?.htmlUrl,
+      releaseUrl: miGrupo?.releaseUrl ?? null,
       estadoCI: repo?.estadoCI ?? "sin_ci",
       ultimoCommit: repo?.ultimoCommit,
       fechaUltimoCommit: repo?.fechaUltimoCommit,
       entregada: estaEntregada,
-      fechaEntrega,
-      fechaEntregaFormatted: fechaEntrega
-        ? new Date(fechaEntrega).toLocaleDateString("es-AR", {
+      fechaEntregada: fechaEntregada,
+      fechaEntregadaFormatted: fechaEntregada
+        ? new Date(fechaEntregada).toLocaleDateString("es-AR", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
@@ -128,7 +134,9 @@ export function useAsignacionesAlumno(cursoId?: number) {
       if (!cursoId) return false;
       setEntregandoId(asignacionId);
       try {
-        const response = await entregarAsignacion(cursoId, asignacionId);
+        const asigActual = asignaciones.find((a) => a.id === asignacionId);
+        const grupoId = asigActual?.grupoId;
+        const response = await entregarAsignacion(cursoId, asignacionId, grupoId);
         const asignacionActualizada = response.data;
         setAsignaciones((prev) => {
           const mapeadas = mapAsignacionesDTO([asignacionActualizada], username);
@@ -144,7 +152,7 @@ export function useAsignacionesAlumno(cursoId?: number) {
         setEntregandoId(null);
       }
     },
-    [cursoId, username]
+    [cursoId, username, asignaciones]
   );
 
   const estadisticas = useMemo<EstadisticasProgresoAlumno>(() => {
@@ -200,10 +208,10 @@ export function useAsignacionesAlumno(cursoId?: number) {
     isLoading,
     error,
     estadisticas,
-    cargarAsignaciones,
-    filtrarPorEstado,
-    setAsignaciones,
-    entregar,
     entregandoId,
+    entregar,
+    filtrarPorEstado,
+    cargarAsignaciones,
+    refetch: cargarAsignaciones,
   };
 }
