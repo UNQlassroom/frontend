@@ -1,5 +1,5 @@
 export const GITHUB_ORGANIZATION: string =
-  import.meta.env.VITE_GITHUB_ORGANIZATION || "unqlassroom";
+  import.meta.env.VITE_GITHUB_ORGANIZATION || "UNQlassroom-cursos";
 
 export const getGitHubRepoUrl = (repoName: string): string => {
     return `https://github.com/${GITHUB_ORGANIZATION}/${repoName}`;
