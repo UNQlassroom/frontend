@@ -7,6 +7,7 @@ export * from "./Navbar.tsx";
 export * from "./CIStatusBadge.tsx";
 export * from "./AlumnosTable.tsx";
 export * from "./CrearAsignacionModal.tsx";
+export * from "./CalificarAsignacionModal.tsx";
 export * from "./AsignacionesTab.tsx";
 export * from "./PanelMetricasRepositorios.tsx";
 export * from "./AsignacionesAlumnoList.tsx";

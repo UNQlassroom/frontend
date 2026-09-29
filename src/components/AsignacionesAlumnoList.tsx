@@ -196,7 +196,7 @@ export function AsignacionesAlumnoList({
             No tenés asignaciones asignadas
           </h3>
           <p className="mt-2 font-mono text-xs text-muted-foreground leading-relaxed">
-            Aún no se han publicado trabajos prácticos en este curso. Los nuevos TPs aparecerán aquí junto con sus fechas de entrega y repositorio asignado.
+            Aún no se han publicado asignaciones en este curso. Las nuevas asignaciones aparecerán aquí junto con sus fechas de entrega y repositorio asignado.
           </p>
         </div>
       ) : asignacionesFiltradas.length === 0 ? (
@@ -353,24 +353,15 @@ export function AsignacionesAlumnoList({
                         <span className="font-mono text-xs text-muted-foreground">
                           /{notaMaxima}
                         </span>
-                        <span
-                          className={`ml-1.5 rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase ${
-                            esAprobado
-                              ? "bg-emerald-500/10 text-emerald-600"
-                              : "bg-destructive/10 text-destructive"
-                          }`}
-                        >
-                          {esAprobado ? "Aprobado" : "Desaprobado"}
-                        </span>
                       </div>
                     ) : asig.estadoEntrega === "entregado" ? (
                       <div className="flex flex-col items-start lg:items-end mt-1">
                         <span className="font-mono text-xs font-semibold text-sky-600 inline-flex items-center gap-1">
-                          <span>⏳ En corrección</span>
+                          <span>En corrección</span>
                         </span>
-                        {asig.fechaEntregaFormatted && (
+                        {asig.fechaEntregadaFormatted && (
                           <span className="mt-1 font-mono text-[10px] text-muted-foreground">
-                            Entregado: {asig.fechaEntregaFormatted}
+                            Entregado: {asig.fechaEntregadaFormatted}
                           </span>
                         )}
                       </div>
@@ -434,7 +425,7 @@ export function AsignacionesAlumnoList({
                                   d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                                 />
                               </svg>
-                              <span>Copiar HTTPS</span>
+                              <span>git clone</span>
                             </>
                           )}
                         </button>
@@ -464,7 +455,7 @@ export function AsignacionesAlumnoList({
                               <li>
                                 <span className="text-foreground font-semibold">Copiá el comando</span> haciendo clic en{" "}
                                 <span className="text-foreground bg-panel2 px-1 py-0.5 rounded border border-line font-medium">
-                                  Copiar HTTPS
+                                  git clone
                                 </span>.
                               </li>
                               <li>
@@ -531,9 +522,9 @@ export function AsignacionesAlumnoList({
                               : "Entregado"}
                           </span>
                         </span>
-                        {asig.fechaEntregaFormatted && (
+                        {asig.fechaEntregadaFormatted && (
                           <span className="text-[11px] text-muted-foreground">
-                            ({asig.fechaEntregaFormatted})
+                            ({asig.fechaEntregadaFormatted})
                           </span>
                         )}
                       </div>
