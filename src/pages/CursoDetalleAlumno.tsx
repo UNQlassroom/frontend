@@ -163,10 +163,10 @@ export const CursoDetalleAlumno = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3">
           <div>
             <h2 className="font-display text-lg font-bold tracking-tight text-foreground">
-              Trabajos Prácticos y Asignaciones
+              Asignaciones
             </h2>
             <p className="font-mono text-xs text-muted-foreground">
-              Consultá el estado de tu repositorio asignado, commits y CI/CD.
+              Aquí podrás ver tus asignaciones, su fecha de entrega, calificación, issues y feedback docente.
             </p>
           </div>
 
