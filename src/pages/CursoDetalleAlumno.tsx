@@ -126,7 +126,7 @@ export const CursoDetalleAlumno = () => {
               Asignaciones
             </h2>
             <p className="font-mono text-xs text-muted-foreground">
-              Aquí podrás ver tus asignaciones, su fecha de entrega, calificación, issues y feedback docente.
+              Aquí podrás ver tus asignaciones, su fecha de entrega, calificación, correcciones y feedback docente.
             </p>
           </div>
 
@@ -154,6 +154,7 @@ export const CursoDetalleAlumno = () => {
 
         <AsignacionesAlumnoList
           asignaciones={asignaciones}
+          cursoId={curso.id}
           isLoading={isLoadingAsignaciones}
           error={errorAsignaciones}
           onRetry={cargarAsignaciones}
