@@ -254,9 +254,6 @@ export function PanelMetricasRepositorios({
                 <span className="font-suez text-3xl font-bold text-foreground">
                   {sinCiCount}
                 </span>
-              <span className="font-mono text-xs text-muted-foreground">
-                  ({sinCiCount} sin CI)
-                </span>
             </div>
             <p className="mt-1 font-mono text-[11px] text-muted-foreground">
               {sinCiPct}% del total
@@ -264,19 +261,16 @@ export function PanelMetricasRepositorios({
           </div>
 
             {/* Pending */}
-            <div className="rounded-xl border border-line bg-panel p-4 shadow-xs">
+            <div className="rounded-xl border border-line bg-amber-100 p-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  En Ejecución
+                  CI En Ejecución
                 </span>
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
               </div>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="font-suez text-3xl font-bold text-foreground">
                   {pendingCount}
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  ({pendingCount} pendientes)
                 </span>
               </div>
               <p className="mt-1 font-mono text-[11px] text-muted-foreground">
@@ -288,7 +282,7 @@ export function PanelMetricasRepositorios({
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-emerald-700">
-                  Exitosos
+                  CI Exitosos
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
               </div>
@@ -296,12 +290,9 @@ export function PanelMetricasRepositorios({
                 <span className="font-suez text-3xl font-bold text-emerald-600">
                   {passingCount}
                 </span>
-                <span className="font-mono text-xs text-emerald-700 font-semibold">
-                  {passingPct}%
-                </span>
               </div>
               <p className="mt-1 font-mono text-[11px] text-emerald-700/80">
-                Builds y pruebas exitosas
+                {passingPct}% del total
               </p>
             </div>
 
@@ -309,7 +300,7 @@ export function PanelMetricasRepositorios({
             <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-rose-700">
-                  Fallidos
+                  CI Fallidos
                 </span>
                 <span className="w-2 h-2 rounded-full bg-rose-500" />
               </div>
@@ -317,137 +308,39 @@ export function PanelMetricasRepositorios({
                 <span className="font-suez text-3xl font-bold text-rose-600">
                   {failingCount}
                 </span>
-                <span className="font-mono text-xs text-rose-700 font-semibold">
-                  {failingPct}%
-                </span>
               </div>
               <p className="mt-1 font-mono text-[11px] text-rose-700/80">
-                Requieren atención del alumno
+                {failingPct}% del total
               </p>
             </div>
         </div>
 
-          {/* Barra visual de distribución de Pipelines (Health Bar) */}
-          <div className="rounded-2xl border border-line bg-panel p-5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between font-mono text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground">Distribución de Pipelines CI/CD</span>
-              <span>{passingPct}% tasa de aprobación</span>
-            </div>
-
-            {/* Barra segmentada */}
-            <div className="h-3.5 w-full rounded-full bg-line/60 overflow-hidden flex">
-              {sinCiPct > 0 && (
-                <div
-                  style={{ width: `${sinCiPct}%` }}
-                  className="bg-neutral-400 transition-all duration-500"
-                  title={`Sin CI: ${sinCiCount} (${sinCiPct}%)`}
-                />
-              )}
-              {pendingPct > 0 && (
-                  <div
-                      style={{ width: `${pendingPct}%` }}
-                      className="bg-amber-500 transition-all duration-500"
-                      title={`Pendientes: ${pendingCount} (${pendingPct}%)`}
-                  />
-              )}
-              {passingPct > 0 && (
-                  <div
-                      style={{ width: `${passingPct}%` }}
-                      className="bg-emerald-500 transition-all duration-500"
-                      title={`Exitosos: ${passingCount} (${passingPct}%)`}
-                  />
-              )}
-              {failingPct > 0 && (
-                  <div
-                      style={{ width: `${failingPct}%` }}
-                      className="bg-rose-500 transition-all duration-500"
-                      title={`Fallidos: ${failingCount} (${failingPct}%)`}
-                  />
-              )}
-            </div>
-
-            {/* Leyenda interactiva */}
-            <div className="flex flex-wrap items-center gap-4 pt-1 font-mono text-[11px] text-muted-foreground">
-
-              <button
-                  type="button"
-                  onClick={() => setFiltroEstado(filtroEstado === "sin_ci" ? "todos" : "sin_ci")}
-                  className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                      filtroEstado === "sin_ci" ? "font-bold text-foreground underline" : ""
-                  }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-neutral-400" />
-                <span>Sin CI ({sinCiCount})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setFiltroEstado(filtroEstado === "pending" ? "todos" : "pending")}
-                className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                  filtroEstado === "pending" ? "font-bold text-foreground underline" : ""
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span>Pendientes ({pendingCount})</span>
-              </button>
-
-              <button
-                  type="button"
-                  onClick={() => setFiltroEstado(filtroEstado === "success" ? "todos" : "success")}
-                  className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                      filtroEstado === "success" ? "font-bold text-foreground underline" : ""
-                  }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Exitosos ({passingCount})</span>
-              </button>
-              <button
-                  type="button"
-                  onClick={() => setFiltroEstado(filtroEstado === "failure" ? "todos" : "failure")}
-                  className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                      filtroEstado === "failure" ? "font-bold text-foreground underline" : ""
-                  }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span>Fallidos ({failingCount})</span>
-              </button>
-              {filtroEstado !== "todos" && (
-                <button
-                  type="button"
-                  onClick={() => setFiltroEstado("todos")}
-                  className="ml-auto text-primary underline cursor-pointer"
-                >
-                  Mostrar todos
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* Controles de Búsqueda y Filtro de la Lista de Repositorios */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-panel p-4 rounded-xl border border-line">
-            <div className="relative flex-1 max-w-md">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            <div className="flex flex-wrap items-center gap-2.5 flex-1">
+              <div className="relative min-w-[220px] flex-1 max-w-sm">
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  placeholder="Buscar por repositorio, alumno/grupo o commit..."
+                  className="w-full rounded-lg border border-line bg-background pl-9 pr-3 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
                 />
-              </svg>
-              <input
-                type="text"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Buscar por repositorio, alumno/grupo o commit..."
-                className="w-full rounded-lg border border-line bg-background pl-9 pr-3 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
+              </div>
 
-            <div className="flex items-center gap-2">
               <select
                 value={filtroEstado}
                 onChange={(e) => setFiltroEstado(e.target.value)}
@@ -459,7 +352,10 @@ export function PanelMetricasRepositorios({
                 <option value="pending">Solo pendientes</option>
                 <option value="sin_ci">Solo sin CI</option>
               </select>
-              <span className="font-mono text-xs text-muted-foreground">
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
                 {itemsFiltrados.length} {itemsFiltrados.length === 1 ? "repo" : "repos"}
               </span>
             </div>
