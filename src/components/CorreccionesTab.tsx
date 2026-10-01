@@ -449,17 +449,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                         : "[Corrección]"
                     );
 
-                    // Conteo rápido por grupo
-                    const grupoPendientes = grupo.issues.filter(
-                      (i) => (i.estado || "").toUpperCase() === "PENDIENTE"
-                    ).length;
-                    const grupoActualizados = grupo.issues.filter(
-                      (i) => (i.estado || "").toUpperCase() === "ACTUALIZADO"
-                    ).length;
-                    const grupoResueltos = grupo.issues.filter(
-                      (i) => (i.estado || "").toUpperCase() === "RESUELTO"
-                    ).length;
-
                     return (
                       <div
                         key={grupo.grupoId}
