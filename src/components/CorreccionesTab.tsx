@@ -1,14 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import type {
-  CursoResponseDTO,
-  AsignacionResponseDTO,
-  CorreccionGrupoResponseDTO,
-  IssueResponseDTO,
-} from "@/types";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import type { CursoResponseDTO, CorreccionGrupoResponseDTO, AsignacionResponseDTO, IssueResponseDTO } from "@/types";
 import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
 import { IssueEstadoBadge } from "./IssueEstadoBadge";
-import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/lib";
 import githubIcon from "@/assets/github_favicon.svg";
+import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/lib";
 
 interface CorreccionesTabProps {
   curso: CursoResponseDTO;
@@ -111,23 +106,19 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     });
 
     const totalGrupos = correcciones.length;
-    const sinCorreccionesPct =
-      totalGrupos > 0 ? Math.round((sinCorreccionesGrupos / totalGrupos) * 100) : 0;
-    const pendientesPct =
-      totalCorrecciones > 0 ? Math.round((pendientes / totalCorrecciones) * 100) : 0;
-    const actualizadosPct =
-      totalCorrecciones > 0 ? Math.round((actualizados / totalCorrecciones) * 100) : 0;
-    const resueltosPct =
-      totalCorrecciones > 0 ? Math.round((resueltos / totalCorrecciones) * 100) : 0;
+    const sinCorreccionesPct = totalGrupos > 0 ? Math.round((sinCorreccionesGrupos / totalGrupos) * 100) : 0;
+    const pendientesPct = totalCorrecciones > 0 ? Math.round((pendientes / totalCorrecciones) * 100) : 0;
+    const actualizadosPct = totalCorrecciones > 0 ? Math.round((actualizados / totalCorrecciones) * 100) : 0;
+    const resueltosPct = totalCorrecciones > 0 ? Math.round((resueltos / totalCorrecciones) * 100) : 0;
 
     return {
       totalGrupos,
       totalCorrecciones,
-      sinCorreccionesGrupos,
-      sinCorreccionesPct,
       pendientes,
       actualizados,
       resueltos,
+      sinCorreccionesGrupos,
+      sinCorreccionesPct,
       pendientesPct,
       actualizadosPct,
       resueltosPct,
@@ -163,10 +154,10 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   }, [correcciones, busqueda, filtroEstado]);
 
   const formatFecha = (isoString?: string | null) => {
-    if (!isoString) return "—";
+    if (!isoString) return "-";
     try {
-      const date = new Date(isoString);
-      return date.toLocaleDateString("es-AR", {
+      const d = new Date(isoString);
+      return d.toLocaleDateString("es-AR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -178,16 +169,20 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     }
   };
 
+  const handleCardClick = (estadoTarget: string) => {
+    setFiltroEstado((prev) => (prev === estadoTarget ? "todos" : estadoTarget));
+  };
+
   return (
     <div className="space-y-6 animate-rise">
-      {/* Encabezado del panel de correcciones con botón de actualización */}
+      {/* Encabezado del panel de Correcciones */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-panel p-5 rounded-2xl border border-line shadow-xs">
         <div>
           <h3 className="font-display text-lg font-bold text-foreground">
             Panel de Correcciones
           </h3>
           <p className="font-mono text-xs text-muted-foreground mt-0.5">
-            Supervisa las correcciones de cada asignación y revisa si los alumnos realizaron commits posteriores.
+            Seguimiento de correcciones por entrega y estado de commits posteriores de los alumnos.
           </p>
         </div>
 
@@ -276,10 +271,19 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             })}
           </div>
 
-          {/* Tarjetas KPI de Estado de Correcciones */}
+          {/* Tarjetas KPI de Estado de Correcciones (Clickeables como filtros) */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             {/* Total Correcciones */}
-            <div className="rounded-xl border border-line bg-panel p-4 shadow-xs">
+            <button
+              type="button"
+              onClick={() => handleCardClick("todos")}
+              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                filtroEstado === "todos"
+                  ? "border-primary ring-2 ring-primary/30 bg-panel shadow-sm"
+                  : "border-line bg-panel hover:border-foreground/30"
+              }`}
+              title="Click para ver todos los repositorios"
+            >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                   Total Correcciones
@@ -295,10 +299,19 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
               <p className="mt-1 font-mono text-[11px] text-muted-foreground">
                 En {metricas.totalGrupos} {metricas.totalGrupos === 1 ? "repositorio" : "repositorios"}
               </p>
-            </div>
+            </button>
 
             {/* Sin Correcciones */}
-            <div className="rounded-xl border border-line bg-neutral-200 p-4 shadow-xs">
+            <button
+              type="button"
+              onClick={() => handleCardClick("sin_correcciones")}
+              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                filtroEstado === "sin_correcciones"
+                  ? "border-neutral-500 ring-2 ring-neutral-500/30 bg-neutral-200 shadow-sm"
+                  : "border-line bg-neutral-200 hover:border-neutral-400"
+              }`}
+              title="Click para filtrar repositorios sin correcciones"
+            >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                   Sin Correcciones
@@ -313,10 +326,19 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
               <p className="mt-1 font-mono text-[11px] text-muted-foreground">
                 {metricas.sinCorreccionesPct}% de los repos
               </p>
-            </div>
+            </button>
 
             {/* Pendientes */}
-            <div className="rounded-xl border border-line bg-amber-100 p-4 shadow-xs">
+            <button
+              type="button"
+              onClick={() => handleCardClick("pendientes")}
+              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                filtroEstado === "pendientes"
+                  ? "border-amber-500 ring-2 ring-amber-500/40 bg-amber-100 shadow-sm"
+                  : "border-line bg-amber-100 hover:border-amber-400"
+              }`}
+              title="Click para filtrar correcciones pendientes"
+            >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                   Pendientes
@@ -331,10 +353,19 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
               <p className="mt-1 font-mono text-[11px] text-muted-foreground">
                 {metricas.pendientesPct}% del total (sin commits)
               </p>
-            </div>
+            </button>
 
             {/* Actualizadas */}
-            <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-4 shadow-xs">
+            <button
+              type="button"
+              onClick={() => handleCardClick("actualizados")}
+              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                filtroEstado === "actualizados"
+                  ? "border-sky-500 ring-2 ring-sky-500/40 bg-sky-500/10 shadow-sm"
+                  : "border-sky-500/20 bg-sky-500/5 hover:border-sky-500/40"
+              }`}
+              title="Click para filtrar correcciones actualizadas"
+            >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-sky-700 dark:text-sky-300">
                   Actualizadas
@@ -349,10 +380,19 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
               <p className="mt-1 font-mono text-[11px] text-sky-700/80 dark:text-sky-300/80">
                 {metricas.actualizadosPct}% del total (con commits)
               </p>
-            </div>
+            </button>
 
             {/* Resueltas */}
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 shadow-xs">
+            <button
+              type="button"
+              onClick={() => handleCardClick("resueltos")}
+              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                filtroEstado === "resueltos"
+                  ? "border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-500/10 shadow-sm"
+                  : "border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40"
+              }`}
+              title="Click para filtrar correcciones resueltas"
+            >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                   Resueltas
@@ -367,7 +407,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
               <p className="mt-1 font-mono text-[11px] text-emerald-700/80 dark:text-emerald-300/80">
                 {metricas.resueltosPct}% del total (cerradas)
               </p>
-            </div>
+            </button>
           </div>
 
           {/* Controles de Búsqueda y Filtro de Correcciones */}
@@ -428,173 +468,185 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
           {/* Spinner de carga de correcciones */}
           {isLoadingCorrecciones && (
-            <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="font-mono text-xs text-muted-foreground">
-                Consultando correcciones y commits...
+                Consultando correcciones desde GitHub y base de datos...
               </p>
             </div>
           )}
 
-          {/* Lista de Grupos y sus Correcciones */}
+          {/* Listado de Repositorios con sus Correcciones */}
           {!isLoadingCorrecciones && (
-            <div className="space-y-4">
+            <>
               {gruposFiltrados.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-line bg-panel p-8 text-center">
-                  <p className="font-mono text-xs text-muted-foreground">
-                    No se encontraron repositorios o correcciones que coincidan con los filtros aplicados.
+                <div className="rounded-2xl border border-dashed border-line bg-panel p-10 text-center animate-rise">
+                  <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
+                    🔍
+                  </div>
+                  <h4 className="font-display text-base font-bold text-foreground">
+                    No se encontraron repositorios
+                  </h4>
+                  <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
+                    Probá cambiando el texto de búsqueda o el filtro seleccionado.
                   </p>
                 </div>
               ) : (
-                gruposFiltrados.map((grupo) => {
-                  const newIssueUrl = getGitHubNewIssueUrl(
-                    grupo.repoNombre,
-                    `[Corrección] ${asignacionActual?.titulo || "TP"}`
-                  );
-                  const allIssuesUrl = getGitHubIssuesUrl(grupo.repoNombre);
-                  const totalGrupoCorrecciones = grupo.issues.length;
+                <div className="space-y-4">
+                  {gruposFiltrados.map((grupo) => {
+                    const allIssuesUrl = getGitHubIssuesUrl(grupo.repoNombre);
+                    const totalGrupoCorrecciones = grupo.issues.length;
+                    const newIssueUrl = getGitHubNewIssueUrl(
+                      grupo.repoNombre,
+                      asignacionActual?.titulo
+                        ? `[Corrección] ${asignacionActual.titulo}`
+                        : "[Corrección]"
+                    );
 
-                  return (
-                    <div
-                      key={grupo.grupoId}
-                      className="rounded-2xl border border-line bg-panel p-5 shadow-xs space-y-4 transition-all"
-                    >
-                      {/* Cabecera del Grupo/Repositorio */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
-                        <div className="space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-display text-base font-bold text-foreground">
-                              {grupo.nombre || (grupo.integrantes.length === 1 ? `@${grupo.integrantes[0]}` : "Grupo")}
-                            </span>
-                            <div className="flex flex-wrap gap-1 font-mono text-xs text-muted-foreground">
-                              {grupo.integrantes.map((u) => (
-                                <a
-                                  key={u}
-                                  href={`https://github.com/${u}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="hover:text-foreground hover:underline"
-                                >
-                                  @{u}
-                                </a>
-                              ))}
+                    return (
+                      <div
+                        key={grupo.grupoId}
+                        className="rounded-2xl border border-line bg-panel p-5 shadow-xs space-y-4 transition-all hover:border-foreground/20 animate-rise"
+                      >
+                        {/* Cabecera del Grupo/Repo */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-line/60">
+                          <div className="space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {/* Nombre de Grupo o Alumno */}
+                              <h4 className="font-display text-base font-bold text-foreground">
+                                {grupo.nombre || (grupo.integrantes.length === 1 ? `@${grupo.integrantes[0]}` : "Grupo")}
+                              </h4>
+
+                              {/* Badge con cantidad de correcciones */}
+                              <span className="font-mono text-[11px] px-2 py-0.5 rounded-full border border-line bg-panel2 text-muted-foreground">
+                                {totalGrupoCorrecciones} {totalGrupoCorrecciones === 1 ? "corrección" : "correcciones"}
+                              </span>
+                            </div>
+
+                            {/* Integrantes y Repositorio */}
+                            <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
+                              {grupo.integrantes.length > 0 && (
+                                <span>
+                                  Integrantes:{" "}
+                                  <strong className="text-foreground font-medium">
+                                    {grupo.integrantes.map((i) => `@${i}`).join(", ")}
+                                  </strong>
+                                </span>
+                              )}
+                              <span>•</span>
+                              <span className="text-foreground font-medium truncate max-w-xs sm:max-w-md">
+                                {grupo.repoNombre}
+                              </span>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          {/* Botones de acción directos a GitHub */}
+                          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
                             <a
-                              href={grupo.repoHtmlUrl}
+                              href={allIssuesUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors group"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors shadow-2xs"
+                              title="Ver correcciones en GitHub"
                             >
-                              <img src={githubIcon} alt="Repo" className="w-3.5 h-3.5 opacity-80" />
-                              <span className="underline decoration-muted-foreground/40 group-hover:decoration-foreground">
-                                {grupo.repoNombre}
-                              </span>
+                              <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
+                              <span>Ver todos en GitHub ({totalGrupoCorrecciones})</span>
+                              <span className="text-[10px] text-muted-foreground">↗</span>
+                            </a>
+
+                            <a
+                              href={newIssueUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
+                              title="Crear una nueva corrección en el repositorio de GitHub"
+                            >
+                              <span>+ Crear corrección</span>
                               <span className="text-[10px]">↗</span>
                             </a>
                           </div>
                         </div>
 
-                        {/* Botones de acción directos a GitHub */}
-                        <div className="flex flex-wrap items-center gap-2 shrink-0">
-                          <a
-                            href={allIssuesUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors shadow-2xs"
-                            title="Ver todas las correcciones del repositorio en GitHub"
-                          >
-                            <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-                            <span>Ver todas las correcciones ({totalGrupoCorrecciones})</span>
-                          </a>
+                        {/* Lista de Correcciones dentro del grupo */}
+                        {grupo.issues.length === 0 ? (
+                          <div className="p-4 rounded-xl border border-line/60 bg-panel2/40 text-center font-mono text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <span>Aún no se crearon correcciones en este repositorio.</span>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden font-mono text-xs">
+                            {grupo.issues.map((issue: IssueResponseDTO) => (
+                              <div
+                                key={issue.numero}
+                                className="p-3.5 hover:bg-line/20 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                              >
+                                <div className="space-y-1.5 min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-semibold text-muted-foreground">
+                                      #{issue.numero}
+                                    </span>
+                                    <a
+                                      href={issue.htmlUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="font-semibold text-foreground hover:text-primary hover:underline break-words"
+                                      title={issue.titulo}
+                                    >
+                                      {issue.titulo}
+                                    </a>
+                                    <IssueEstadoBadge estado={issue.estado} />
+                                    {issue.tieneCommitsPosteriores && (
+                                      <span
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                        title="El alumno hizo commits posteriores a la creación de esta corrección"
+                                      >
+                                        <span>⚡ Commits posteriores detectados</span>
+                                      </span>
+                                    )}
+                                  </div>
 
-                          <a
-                            href={newIssueUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
-                            title="Crear una nueva corrección en GitHub"
-                          >
-                            <span>+ Crear corrección</span>
-                          </a>
-                        </div>
-                      </div>
+                                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                                    <span>Por @{issue.autor}</span>
+                                    <span>•</span>
+                                    <span>Creada: {formatFecha(issue.fechaCreacion)}</span>
+                                    {issue.fechaCierre && (
+                                      <>
+                                        <span>•</span>
+                                        <span>Cerrada: {formatFecha(issue.fechaCierre)}</span>
+                                      </>
+                                    )}
+                                    {issue.cantComentarios > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <span className="font-medium text-foreground">
+                                          💬 {issue.cantComentarios} {issue.cantComentarios === 1 ? "comentario" : "comentarios"}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
 
-                      {/* Lista de Correcciones del Grupo */}
-                      {grupo.issues.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-line/60 bg-panel2/40 p-4 text-center">
-                          <p className="font-mono text-xs text-muted-foreground">
-                            Aún no se crearon correcciones en este repositorio.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden font-mono text-xs">
-                          {grupo.issues.map((issue: IssueResponseDTO) => (
-                            <div
-                              key={issue.numero}
-                              className="p-3.5 hover:bg-line/20 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                            >
-                              <div className="space-y-1 min-w-0 flex-1">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span className="font-semibold text-muted-foreground">
-                                    #{issue.numero}
-                                  </span>
+                                <div className="shrink-0 self-end sm:self-center">
                                   <a
                                     href={issue.htmlUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="font-semibold text-foreground hover:text-primary hover:underline break-words"
+                                    className="inline-flex items-center gap-1 rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors shadow-2xs"
                                   >
-                                    {issue.titulo}
+                                    <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
+                                    <span>Ver en GitHub</span>
+                                    <span className="text-[10px]">↗</span>
                                   </a>
-                                  <IssueEstadoBadge estado={issue.estado} />
-                                  {issue.tieneCommitsPosteriores && (
-                                    <span
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                                      title="El alumno envió commits después de abrir esta corrección"
-                                    >
-                                      <span>⚡ Commits posteriores detectados</span>
-                                    </span>
-                                  )}
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                                  <span>Por @{issue.autor}</span>
-                                  <span>•</span>
-                                  <span>Creada: {formatFecha(issue.fechaCreacion)}</span>
-                                  {issue.cantComentarios > 0 && (
-                                    <>
-                                      <span>•</span>
-                                      <span className="font-medium text-foreground">
-                                        💬 {issue.cantComentarios} comentario(s)
-                                      </span>
-                                    </>
-                                  )}
                                 </div>
                               </div>
-
-                              <div className="shrink-0 self-end sm:self-center">
-                                <a
-                                  href={issue.htmlUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors"
-                                >
-                                  <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-                                  <span>Ir a la corrección</span>
-                                </a>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </div>
+            </>
           )}
         </>
       )}
