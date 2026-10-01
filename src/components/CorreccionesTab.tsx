@@ -1,7 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import type { CursoResponseDTO, CorreccionGrupoResponseDTO, AsignacionResponseDTO, IssueResponseDTO } from "@/types";
+import type {
+  CursoResponseDTO,
+  CorreccionGrupoResponseDTO,
+  AsignacionResponseDTO,
+  IssueResponseDTO,
+} from "@/types";
 import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
 import { IssueEstadoBadge } from "./IssueEstadoBadge";
+import { PanelHeader } from "./PanelHeader";
+import { KpiCard } from "./KpiCard";
+import { PanelFilterBar } from "./PanelFilterBar";
+import { EmptyState } from "./EmptyState";
 import githubIcon from "@/assets/github_favicon.svg";
 import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/lib";
 
@@ -11,8 +20,12 @@ interface CorreccionesTabProps {
 
 export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
-  const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(null);
-  const [correcciones, setCorrecciones] = useState<CorreccionGrupoResponseDTO[]>([]);
+  const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(
+    null
+  );
+  const [correcciones, setCorrecciones] = useState<
+    CorreccionGrupoResponseDTO[]
+  >([]);
   const [isLoadingAsignaciones, setIsLoadingAsignaciones] = useState(true);
   const [isLoadingCorrecciones, setIsLoadingCorrecciones] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -126,10 +139,22 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     });
 
     const totalGrupos = correcciones.length;
-    const sinCorreccionesPct = totalGrupos > 0 ? Math.round((sinCorreccionesGrupos / totalGrupos) * 100) : 0;
-    const pendientesPct = totalCorrecciones > 0 ? Math.round((pendientes / totalCorrecciones) * 100) : 0;
-    const actualizadosPct = totalCorrecciones > 0 ? Math.round((actualizados / totalCorrecciones) * 100) : 0;
-    const resueltosPct = totalCorrecciones > 0 ? Math.round((resueltos / totalCorrecciones) * 100) : 0;
+    const sinCorreccionesPct =
+      totalGrupos > 0
+        ? Math.round((sinCorreccionesGrupos / totalGrupos) * 100)
+        : 0;
+    const pendientesPct =
+      totalCorrecciones > 0
+        ? Math.round((pendientes / totalCorrecciones) * 100)
+        : 0;
+    const actualizadosPct =
+      totalCorrecciones > 0
+        ? Math.round((actualizados / totalCorrecciones) * 100)
+        : 0;
+    const resueltosPct =
+      totalCorrecciones > 0
+        ? Math.round((resueltos / totalCorrecciones) * 100)
+        : 0;
 
     return {
       totalGrupos,
@@ -163,11 +188,17 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
       if (filtroEstado === "con_correcciones") return g.issues.length > 0;
       if (filtroEstado === "sin_correcciones") return g.issues.length === 0;
       if (filtroEstado === "actualizados")
-        return g.issues.some((i) => (i.estado || "").toUpperCase() === "ACTUALIZADO");
+        return g.issues.some(
+          (i) => (i.estado || "").toUpperCase() === "ACTUALIZADO"
+        );
       if (filtroEstado === "pendientes")
-        return g.issues.some((i) => (i.estado || "").toUpperCase() === "PENDIENTE");
+        return g.issues.some(
+          (i) => (i.estado || "").toUpperCase() === "PENDIENTE"
+        );
       if (filtroEstado === "resueltos")
-        return g.issues.some((i) => (i.estado || "").toUpperCase() === "RESUELTO");
+        return g.issues.some(
+          (i) => (i.estado || "").toUpperCase() === "RESUELTO"
+        );
 
       return true;
     });
@@ -196,39 +227,42 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   return (
     <div className="space-y-6 animate-rise">
       {/* Encabezado del panel de Correcciones */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-panel p-5 rounded-2xl border border-line shadow-xs">
-        <div>
-          <h3 className="font-display text-lg font-bold text-foreground">
-            Panel de Correcciones
-          </h3>
-          <p className="font-mono text-xs text-muted-foreground mt-0.5">
-            Seguimiento de correcciones por entrega y estado de commits posteriores de los alumnos.
-          </p>
-        </div>
-
-        {selectedAsignacionId && (
-          <button
-            type="button"
-            onClick={() => cargarCorrecciones(selectedAsignacionId)}
-            disabled={isLoadingCorrecciones}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
-            title="Recargar el estado de las correcciones"
-          >
-            <svg
-              className={`w-3.5 h-3.5 ${isLoadingCorrecciones ? "animate-spin text-primary" : "text-muted-foreground"}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+      <PanelHeader
+        title="Panel de Correcciones"
+        description="Seguimiento de correcciones por entrega y estado de commits posteriores de los alumnos."
+        actions={
+          selectedAsignacionId ? (
+            <button
+              type="button"
+              onClick={() => cargarCorrecciones(selectedAsignacionId)}
+              disabled={isLoadingCorrecciones}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+              title="Recargar el estado de las correcciones"
             >
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-            <span>{isLoadingCorrecciones ? "Actualizando..." : "Actualizar correcciones"}</span>
-          </button>
-        )}
-      </div>
+              <svg
+                className={`w-3.5 h-3.5 ${
+                  isLoadingCorrecciones
+                    ? "animate-spin text-primary"
+                    : "text-muted-foreground"
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
+              <span>
+                {isLoadingCorrecciones
+                  ? "Actualizando..."
+                  : "Actualizar correcciones"}
+              </span>
+            </button>
+          ) : null
+        }
+      />
 
       {/* Loading inicial de asignaciones */}
       {isLoadingAsignaciones && (
@@ -242,17 +276,11 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
       {/* Si no hay asignaciones creadas */}
       {!isLoadingAsignaciones && asignaciones.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-6 animate-rise">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
-            📋
-          </div>
-          <h4 className="font-display text-lg font-bold text-foreground">
-            No hay asignaciones en este curso
-          </h4>
-          <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
-            Para poder gestionar correcciones, primero debes crear al menos una asignación desde la pestaña "Asignaciones".
-          </p>
-        </div>
+        <EmptyState
+          icon="📋"
+          title="No hay asignaciones en este curso"
+          description='Para poder gestionar correcciones, primero debes crear al menos una asignación desde la pestaña "Asignaciones".'
+        />
       )}
 
       {/* Si hay asignaciones, mostramos selector y contenido */}
@@ -291,193 +319,97 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             })}
           </div>
 
-          {/* Tarjetas KPI de Estado de Correcciones (Clickeables como filtros) */}
+          {/* Tarjetas KPI de Estado de Correcciones */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             {/* Total Correcciones */}
-            <button
-              type="button"
-              onClick={() => handleCardClick("todos")}
-              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                filtroEstado === "todos"
-                  ? "border-primary ring-2 ring-primary/30 bg-panel shadow-sm"
-                  : "border-line bg-panel hover:border-foreground/30"
+            <KpiCard
+              label="Total Correcciones"
+              value={metricas.totalCorrecciones}
+              unit="correcciones"
+              subtext={`En ${metricas.totalGrupos} ${
+                metricas.totalGrupos === 1 ? "repositorio" : "repositorios"
               }`}
+              variant="default"
+              isSelected={filtroEstado === "todos"}
+              onClick={() => handleCardClick("todos")}
               title="Click para ver todos los repositorios"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Total Correcciones
-                </span>
-                <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-60" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-foreground">
-                  {metricas.totalCorrecciones}
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">correcciones</span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                En {metricas.totalGrupos} {metricas.totalGrupos === 1 ? "repositorio" : "repositorios"}
-              </p>
-            </button>
+              icon={
+                <img
+                  src={githubIcon}
+                  alt="GitHub"
+                  className="w-4 h-4 opacity-60"
+                />
+              }
+            />
 
             {/* Sin Correcciones */}
-            <button
-              type="button"
+            <KpiCard
+              label="Sin Correcciones"
+              value={metricas.sinCorreccionesGrupos}
+              subtext={`${metricas.sinCorreccionesPct}% de los repos`}
+              variant="neutral"
+              isSelected={filtroEstado === "sin_correcciones"}
               onClick={() => handleCardClick("sin_correcciones")}
-              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                filtroEstado === "sin_correcciones"
-                  ? "border-neutral-500 ring-2 ring-neutral-500/30 bg-neutral-200 shadow-sm"
-                  : "border-line bg-neutral-200 hover:border-neutral-400"
-              }`}
               title="Click para filtrar repositorios sin correcciones"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Sin Correcciones
-                </span>
-                <span className="w-2 h-2 rounded-full bg-neutral-400" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-foreground">
-                  {metricas.sinCorreccionesGrupos}
-                </span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                {metricas.sinCorreccionesPct}% de los repos
-              </p>
-            </button>
+            />
 
             {/* Pendientes */}
-            <button
-              type="button"
+            <KpiCard
+              label="Pendientes"
+              value={metricas.pendientes}
+              subtext={`${metricas.pendientesPct}% del total`}
+              variant="amber"
+              isSelected={filtroEstado === "pendientes"}
               onClick={() => handleCardClick("pendientes")}
-              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                filtroEstado === "pendientes"
-                  ? "border-amber-500 ring-2 ring-amber-500/40 bg-amber-100 shadow-sm"
-                  : "border-line bg-amber-100 hover:border-amber-400"
-              }`}
               title="Click para filtrar correcciones pendientes"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Pendientes
-                </span>
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-foreground">
-                  {metricas.pendientes}
-                </span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                {metricas.pendientesPct}% del total (sin commits)
-              </p>
-            </button>
+            />
 
             {/* Actualizadas */}
-            <button
-              type="button"
+            <KpiCard
+              label="Actualizadas"
+              value={metricas.actualizados}
+              subtext={`${metricas.actualizadosPct}% del total`}
+              variant="sky"
+              isSelected={filtroEstado === "actualizados"}
               onClick={() => handleCardClick("actualizados")}
-              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                filtroEstado === "actualizados"
-                  ? "border-sky-500 ring-2 ring-sky-500/40 bg-sky-500/10 shadow-sm"
-                  : "border-sky-500/20 bg-sky-500/5 hover:border-sky-500/40"
-              }`}
               title="Click para filtrar correcciones actualizadas"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-sky-700 dark:text-sky-300">
-                  Actualizadas
-                </span>
-                <span className="w-2 h-2 rounded-full bg-sky-500" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-sky-600 dark:text-sky-400">
-                  {metricas.actualizados}
-                </span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-sky-700/80 dark:text-sky-300/80">
-                {metricas.actualizadosPct}% del total (con commits)
-              </p>
-            </button>
+            />
 
             {/* Resueltas */}
-            <button
-              type="button"
+            <KpiCard
+              label="Resueltas"
+              value={metricas.resueltos}
+              subtext={`${metricas.resueltosPct}% del total`}
+              variant="emerald"
+              isSelected={filtroEstado === "resueltos"}
               onClick={() => handleCardClick("resueltos")}
-              className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                filtroEstado === "resueltos"
-                  ? "border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-500/10 shadow-sm"
-                  : "border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40"
-              }`}
               title="Click para filtrar correcciones resueltas"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
-                  Resueltas
-                </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                  {metricas.resueltos}
-                </span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-emerald-700/80 dark:text-emerald-300/80">
-                {metricas.resueltosPct}% del total (cerradas)
-              </p>
-            </button>
+            />
           </div>
 
           {/* Controles de Búsqueda y Filtro de Correcciones */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-panel p-4 rounded-xl border border-line">
-            <div className="flex flex-wrap items-center gap-2.5 flex-1">
-              {/* Input de búsqueda */}
-              <div className="relative min-w-[220px] flex-1 max-w-sm">
-                <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <input
-                  type="text"
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  placeholder="Buscar por repositorio, alumno o grupo..."
-                  className="w-full rounded-lg border border-line bg-background pl-9 pr-3 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              {/* Filtro por estado pegado a la search bar */}
-              <select
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
-                className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
-              >
-                <option value="todos">Todos los repositorios ({correcciones.length})</option>
-                <option value="actualizados">Con correcciones actualizadas</option>
-                <option value="pendientes">Con correcciones pendientes</option>
-                <option value="resueltos">Con correcciones resueltas</option>
-                <option value="con_correcciones">Solo con correcciones</option>
-                <option value="sin_correcciones">Sin correcciones</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
-                {gruposFiltrados.length} {gruposFiltrados.length === 1 ? "repo" : "repos"}
-              </span>
-            </div>
-          </div>
+          <PanelFilterBar
+            searchTerm={busqueda}
+            onSearchChange={setBusqueda}
+            searchPlaceholder="Buscar por repositorio, alumno o grupo..."
+            count={gruposFiltrados.length}
+            countLabel={gruposFiltrados.length === 1 ? "repo" : "repos"}
+          >
+            <select
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value)}
+              className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
+            >
+              <option value="todos">
+                Todos los repositorios ({correcciones.length})
+              </option>
+              <option value="actualizados">Con correcciones actualizadas</option>
+              <option value="pendientes">Con correcciones pendientes</option>
+              <option value="resueltos">Con correcciones resueltas</option>
+              <option value="con_correcciones">Solo con correcciones</option>
+              <option value="sin_correcciones">Sin correcciones</option>
+            </select>
+          </PanelFilterBar>
 
           {/* Mensaje de Error si falla la consulta de correcciones */}
           {error && (
@@ -500,17 +432,11 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
           {!isLoadingCorrecciones && (
             <>
               {gruposFiltrados.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-line bg-panel p-10 text-center animate-rise">
-                  <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
-                    🔍
-                  </div>
-                  <h4 className="font-display text-base font-bold text-foreground">
-                    No se encontraron repositorios
-                  </h4>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
-                    Probá cambiando el texto de búsqueda o el filtro seleccionado.
-                  </p>
-                </div>
+                <EmptyState
+                  icon="🔍"
+                  title="No se encontraron repositorios"
+                  description="Probá cambiando el texto de búsqueda o el filtro seleccionado."
+                />
               ) : (
                 <div className="space-y-4">
                   {gruposFiltrados.map((grupo) => {
@@ -523,17 +449,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                         : "[Corrección]"
                     );
 
-                    // Conteo rápido por grupo
-                    const grupoPendientes = grupo.issues.filter(
-                      (i) => (i.estado || "").toUpperCase() === "PENDIENTE"
-                    ).length;
-                    const grupoActualizados = grupo.issues.filter(
-                      (i) => (i.estado || "").toUpperCase() === "ACTUALIZADO"
-                    ).length;
-                    const grupoResueltos = grupo.issues.filter(
-                      (i) => (i.estado || "").toUpperCase() === "RESUELTO"
-                    ).length;
-
                     return (
                       <div
                         key={grupo.grupoId}
@@ -545,30 +460,19 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                             <div className="flex flex-wrap items-center gap-2">
                               {/* Nombre de Grupo o Alumno */}
                               <h4 className="font-display text-base font-bold text-foreground">
-                                {grupo.nombre || (grupo.integrantes.length === 1 ? `@${grupo.integrantes[0]}` : "Grupo")}
+                                {grupo.nombre ||
+                                  (grupo.integrantes.length === 1
+                                    ? `@${grupo.integrantes[0]}`
+                                    : "Grupo")}
                               </h4>
 
                               {/* Badge con cantidad de correcciones */}
                               <span className="font-mono text-[11px] px-2 py-0.5 rounded-full border border-line bg-panel2 text-muted-foreground">
-                                {totalGrupoCorrecciones} {totalGrupoCorrecciones === 1 ? "corrección" : "correcciones"}
+                                {totalGrupoCorrecciones}{" "}
+                                {totalGrupoCorrecciones === 1
+                                  ? "corrección"
+                                  : "correcciones"}
                               </span>
-
-                              {/* Badges de resumen rápido si tiene correcciones */}
-                              {grupoActualizados > 0 && (
-                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-                                  {grupoActualizados} actualizadas
-                                </span>
-                              )}
-                              {grupoPendientes > 0 && (
-                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                  {grupoPendientes} pendientes
-                                </span>
-                              )}
-                              {grupoResueltos > 0 && (
-                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                  {grupoResueltos} resueltas
-                                </span>
-                              )}
                             </div>
 
                             {/* Integrantes y Repositorio */}
@@ -577,7 +481,9 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                 <span>
                                   Integrantes:{" "}
                                   <strong className="text-foreground font-medium">
-                                    {grupo.integrantes.map((i) => `@${i}`).join(", ")}
+                                    {grupo.integrantes
+                                      .map((i) => `@${i}`)
+                                      .join(", ")}
                                   </strong>
                                 </span>
                               )}
@@ -597,9 +503,15 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors shadow-2xs"
                               title="Ver correcciones en GitHub"
                             >
-                              <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
+                              <img
+                                src={githubIcon}
+                                alt="GitHub"
+                                className="w-3.5 h-3.5 opacity-80"
+                              />
                               <span>Ver en GitHub ({totalGrupoCorrecciones})</span>
-                              <span className="text-[10px] text-muted-foreground">↗</span>
+                              <span className="text-[10px] text-muted-foreground">
+                                ↗
+                              </span>
                             </a>
 
                             <a
@@ -618,7 +530,9 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                         {/* Lista de Correcciones dentro del grupo */}
                         {grupo.issues.length === 0 ? (
                           <div className="p-4 rounded-xl border border-line/60 bg-panel2/40 text-center font-mono text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-3">
-                            <span>Aún no se crearon correcciones en este repositorio.</span>
+                            <span>
+                              Aún no se crearon correcciones en este repositorio.
+                            </span>
                             <a
                               href={newIssueUrl}
                               target="_blank"
@@ -663,18 +577,25 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                   <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                                     <span>Por @{issue.autor}</span>
                                     <span>•</span>
-                                    <span>Creada: {formatFecha(issue.fechaCreacion)}</span>
+                                    <span>
+                                      Creada: {formatFecha(issue.fechaCreacion)}
+                                    </span>
                                     {issue.fechaCierre && (
                                       <>
                                         <span>•</span>
-                                        <span>Cerrada: {formatFecha(issue.fechaCierre)}</span>
+                                        <span>
+                                          Cerrada: {formatFecha(issue.fechaCierre)}
+                                        </span>
                                       </>
                                     )}
                                     {issue.cantComentarios > 0 && (
                                       <>
                                         <span>•</span>
                                         <span className="font-medium text-foreground">
-                                          💬 {issue.cantComentarios} {issue.cantComentarios === 1 ? "comentario" : "comentarios"}
+                                          💬 {issue.cantComentarios}{" "}
+                                          {issue.cantComentarios === 1
+                                            ? "comentario"
+                                            : "comentarios"}
                                         </span>
                                       </>
                                     )}

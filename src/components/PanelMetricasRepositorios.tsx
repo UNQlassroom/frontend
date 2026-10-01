@@ -6,6 +6,10 @@ import type {
 } from "@/types";
 import { obtenerAsignaciones } from "@/services";
 import { CIStatusBadge } from "./CIStatusBadge";
+import { PanelHeader } from "./PanelHeader";
+import { KpiCard } from "./KpiCard";
+import { PanelFilterBar } from "./PanelFilterBar";
+import { EmptyState } from "./EmptyState";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
@@ -34,7 +38,9 @@ export function PanelMetricasRepositorios({
   curso,
 }: PanelMetricasRepositoriosProps) {
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
-  const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(null);
+  const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
@@ -128,7 +134,9 @@ export function PanelMetricasRepositorios({
               (grupo.integrantes.length > 0
                 ? grupo.integrantes.join(", ")
                 : "Sin asignar"),
-            estadoCI: ["success", "failure", "pending", "sin_ci"].includes(estadoValido)
+            estadoCI: ["success", "failure", "pending", "sin_ci"].includes(
+              estadoValido
+            )
               ? estadoValido
               : "sin_ci",
             ultimoCommit: repo.ultimoCommit || "Sin commits registrados",
@@ -160,7 +168,9 @@ export function PanelMetricasRepositorios({
     return datosItems.filter((item) => {
       const matchBusqueda =
         item.repoNombre.toLowerCase().includes(busqueda.toLowerCase().trim()) ||
-        item.alumnoUsername.toLowerCase().includes(busqueda.toLowerCase().trim()) ||
+        item.alumnoUsername
+          .toLowerCase()
+          .includes(busqueda.toLowerCase().trim()) ||
         item.ultimoCommit.toLowerCase().includes(busqueda.toLowerCase().trim());
 
       if (!matchBusqueda) return false;
@@ -176,37 +186,34 @@ export function PanelMetricasRepositorios({
   return (
     <div className="space-y-6 animate-rise">
       {/* Encabezado del panel de métricas con botón de actualización */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-panel p-5 rounded-2xl border border-line shadow-xs">
-        <div>
-          <h3 className="font-display text-lg font-bold text-foreground">
-            Panel de Métricas de Repositorios (CI/CD)
-          </h3>
-          <p className="font-mono text-xs text-muted-foreground mt-0.5">
-            Monitoreo en tiempo real de los pipelines de GitHub Actions, fechas y actividad de commits de las asignaciones.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={cargarDatos}
-          disabled={isLoading}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
-          title="Consultar datos actualizados de la base de datos y GitHub"
-        >
-          <svg
-            className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-primary" : "text-muted-foreground"}`}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      <PanelHeader
+        title="Panel de Métricas de Repositorios (CI/CD)"
+        description="Monitoreo en tiempo real de los pipelines de GitHub Actions, fechas y actividad de commits de las asignaciones."
+        actions={
+          <button
+            type="button"
+            onClick={cargarDatos}
+            disabled={isLoading}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
+            title="Consultar datos actualizados de la base de datos y GitHub"
           >
-            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-          </svg>
-          <span>{isLoading ? "Actualizando..." : "Actualizar métricas"}</span>
-        </button>
-      </div>
+            <svg
+              className={`w-3.5 h-3.5 ${
+                isLoading ? "animate-spin text-primary" : "text-muted-foreground"
+              }`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+            <span>{isLoading ? "Actualizando..." : "Actualizar métricas"}</span>
+          </button>
+        }
+      />
 
       {/* Estado: Cargando */}
       {isLoading && (
@@ -234,17 +241,11 @@ export function PanelMetricasRepositorios({
 
       {/* Estado sin asignaciones creadas */}
       {!isLoading && !error && asignaciones.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-6 animate-rise">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
-            📋
-          </div>
-          <h4 className="font-display text-lg font-bold text-foreground">
-            No hay asignaciones en este curso
-          </h4>
-          <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
-            Para poder monitorear repositorios, primero debes crear al menos una asignación desde la pestaña "Asignaciones".
-          </p>
-        </div>
+        <EmptyState
+          icon="📋"
+          title="No hay asignaciones en este curso"
+          description='Para poder monitorear repositorios, primero debes crear al menos una asignación desde la pestaña "Asignaciones".'
+        />
       )}
 
       {/* Si hay asignaciones, mostramos selector y contenido */}
@@ -285,203 +286,99 @@ export function PanelMetricasRepositorios({
 
           {/* Si la asignación seleccionada no tiene repositorios generados */}
           {datosItems.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-6 animate-rise">
-              <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
-                📊
-              </div>
-              <h4 className="font-display text-lg font-bold text-foreground">
-                No hay repositorios en esta asignación
-              </h4>
-              <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
-                Aún no se han generado repositorios para los grupos o alumnos de esta asignación.
-              </p>
-            </div>
+            <EmptyState
+              icon="📊"
+              title="No hay repositorios en esta asignación"
+              description="Aún no se han generado repositorios para los grupos o alumnos de esta asignación."
+            />
           ) : (
             <>
-              {/* Tarjetas KPI de Estado de Pipelines (Clickeables como filtros) */}
+              {/* Tarjetas KPI de Estado de Pipelines */}
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
                 {/* Total Repositorios */}
-                <button
-                  type="button"
+                <KpiCard
+                  label="Total Monitoreados"
+                  value={total}
+                  unit="repos"
+                  subtext={`Curso: ${curso.materia}`}
+                  variant="default"
+                  isSelected={filtroEstado === "todos"}
                   onClick={() => handleCardClick("todos")}
-                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                    filtroEstado === "todos"
-                      ? "border-primary ring-2 ring-primary/30 bg-panel shadow-sm"
-                      : "border-line bg-panel hover:border-foreground/30"
-                  }`}
                   title="Click para ver todos los repositorios"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                      Total Monitoreados
-                    </span>
-                    <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-60" />
-                  </div>
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="font-suez text-3xl font-bold text-foreground">
-                      {total}
-                    </span>
-                    <span className="font-mono text-xs text-muted-foreground">repos</span>
-                  </div>
-                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                    Curso: {curso.materia}
-                  </p>
-                </button>
+                  icon={
+                    <img
+                      src={githubIcon}
+                      alt="GitHub"
+                      className="w-4 h-4 opacity-60"
+                    />
+                  }
+                />
 
                 {/* Sin CI */}
-                <button
-                  type="button"
+                <KpiCard
+                  label="Sin CI"
+                  value={sinCiCount}
+                  subtext={`${sinCiPct}% del total`}
+                  variant="neutral"
+                  isSelected={filtroEstado === "sin_ci"}
                   onClick={() => handleCardClick("sin_ci")}
-                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                    filtroEstado === "sin_ci"
-                      ? "border-neutral-500 ring-2 ring-neutral-500/30 bg-neutral-200 shadow-sm"
-                      : "border-line bg-neutral-200 hover:border-neutral-400"
-                  }`}
                   title="Click para filtrar repositorios sin CI"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                      Sin CI
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-neutral-400" />
-                  </div>
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="font-suez text-3xl font-bold text-foreground">
-                      {sinCiCount}
-                    </span>
-                  </div>
-                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                    {sinCiPct}% del total
-                  </p>
-                </button>
+                />
 
                 {/* Pending */}
-                <button
-                  type="button"
+                <KpiCard
+                  label="CI En Ejecución"
+                  value={pendingCount}
+                  subtext={`${pendingPct}% del total`}
+                  variant="amber"
+                  isSelected={filtroEstado === "pending"}
                   onClick={() => handleCardClick("pending")}
-                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                    filtroEstado === "pending"
-                      ? "border-amber-500 ring-2 ring-amber-500/40 bg-amber-100 shadow-sm"
-                      : "border-line bg-amber-100 hover:border-amber-400"
-                  }`}
                   title="Click para filtrar CI en ejecución"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                      CI En Ejecución
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  </div>
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="font-suez text-3xl font-bold text-foreground">
-                      {pendingCount}
-                    </span>
-                  </div>
-                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                    {pendingPct}% del total
-                  </p>
-                </button>
+                />
 
                 {/* CI Passing */}
-                <button
-                  type="button"
+                <KpiCard
+                  label="CI Exitosos"
+                  value={passingCount}
+                  subtext={`${passingPct}% del total`}
+                  variant="emerald"
+                  isSelected={filtroEstado === "success"}
                   onClick={() => handleCardClick("success")}
-                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                    filtroEstado === "success"
-                      ? "border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-500/10 shadow-sm"
-                      : "border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40"
-                  }`}
                   title="Click para filtrar CI exitosos"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-emerald-700">
-                      CI Exitosos
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  </div>
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="font-suez text-3xl font-bold text-emerald-600">
-                      {passingCount}
-                    </span>
-                  </div>
-                  <p className="mt-1 font-mono text-[11px] text-emerald-700/80">
-                    {passingPct}% del total
-                  </p>
-                </button>
+                />
 
                 {/* CI Failing */}
-                <button
-                  type="button"
+                <KpiCard
+                  label="CI Fallidos"
+                  value={failingCount}
+                  subtext={`${failingPct}% del total`}
+                  variant="rose"
+                  isSelected={filtroEstado === "failure"}
                   onClick={() => handleCardClick("failure")}
-                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
-                    filtroEstado === "failure"
-                      ? "border-rose-500 ring-2 ring-rose-500/40 bg-rose-500/10 shadow-sm"
-                      : "border-rose-500/20 bg-rose-500/5 hover:border-rose-500/40"
-                  }`}
                   title="Click para filtrar CI fallidos"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-rose-700">
-                      CI Fallidos
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  </div>
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="font-suez text-3xl font-bold text-rose-600">
-                      {failingCount}
-                    </span>
-                  </div>
-                  <p className="mt-1 font-mono text-[11px] text-rose-700/80">
-                    {failingPct}% del total
-                  </p>
-                </button>
+                />
               </div>
 
               {/* Controles de Búsqueda y Filtro de la Lista de Repositorios */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-panel p-4 rounded-xl border border-line">
-                <div className="flex flex-wrap items-center gap-2.5 flex-1">
-                  <div className="relative min-w-[220px] flex-1 max-w-sm">
-                    <svg
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-                    <input
-                      type="text"
-                      value={busqueda}
-                      onChange={(e) => setBusqueda(e.target.value)}
-                      placeholder="Buscar por repositorio, alumno/grupo o commit..."
-                      className="w-full rounded-lg border border-line bg-background pl-9 pr-3 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
-                  </div>
-
-                  <select
-                    value={filtroEstado}
-                    onChange={(e) => setFiltroEstado(e.target.value)}
-                    className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
-                  >
-                    <option value="todos">Todos los pipelines</option>
-                    <option value="success">Solo exitosos</option>
-                    <option value="failure">Solo fallidos</option>
-                    <option value="pending">Solo pendientes</option>
-                    <option value="sin_ci">Solo sin CI</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
-                    {itemsFiltrados.length} {itemsFiltrados.length === 1 ? "repo" : "repos"}
-                  </span>
-                </div>
-              </div>
+              <PanelFilterBar
+                searchTerm={busqueda}
+                onSearchChange={setBusqueda}
+                searchPlaceholder="Buscar por repositorio, alumno/grupo o commit..."
+                count={itemsFiltrados.length}
+                countLabel={itemsFiltrados.length === 1 ? "repo" : "repos"}
+              >
+                <select
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                  className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
+                >
+                  <option value="todos">Todos los pipelines</option>
+                  <option value="success">Solo exitosos</option>
+                  <option value="failure">Solo fallidos</option>
+                  <option value="pending">Solo pendientes</option>
+                  <option value="sin_ci">Solo sin CI</option>
+                </select>
+              </PanelFilterBar>
 
               {/* Tabla detallada de estado de Repositorios y Commits */}
               <div className="overflow-x-auto rounded-xl border border-line bg-panel shadow-sm">
@@ -511,9 +408,15 @@ export function PanelMetricasRepositorios({
                             className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors max-w-[240px]"
                             title={item.repoUrl}
                           >
-                            <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80 shrink-0" />
+                            <img
+                              src={githubIcon}
+                              alt="GitHub"
+                              className="w-3.5 h-3.5 opacity-80 shrink-0"
+                            />
                             <span className="truncate">{item.repoNombre}</span>
-                            <span className="text-[10px] text-muted-foreground shrink-0">↗</span>
+                            <span className="text-[10px] text-muted-foreground shrink-0">
+                              ↗
+                            </span>
                           </a>
                         </td>
 
@@ -557,7 +460,9 @@ export function PanelMetricasRepositorios({
                             className="text-[11px] text-muted-foreground"
                             title={
                               item.fechaUltimoCommit
-                                ? new Date(item.fechaUltimoCommit).toLocaleString("es-AR")
+                                ? new Date(
+                                    item.fechaUltimoCommit
+                                  ).toLocaleString("es-AR")
                                 : "Sin fecha registrada"
                             }
                           >
