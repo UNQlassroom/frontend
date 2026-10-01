@@ -123,7 +123,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="font-display text-2xl font-bold tracking-tight text-foreground">
-            Trabajos Prácticos
+            Asignaciones
           </h3>
           <p className="mt-0.5 font-mono text-xs text-muted-foreground">
             Crea y administra asignaciones individuales o grupales integradas con GitHub.
