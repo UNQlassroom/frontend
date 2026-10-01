@@ -5,10 +5,11 @@ import {
   AlumnosTable,
   AsignacionesTab,
   PanelMetricasRepositorios,
+  CorreccionesTab,
   InvitarAlumnosModal,
 } from "@/components";
 
-type TabType = "alumnos" | "asignaciones" | "metricas";
+type TabType = "alumnos" | "asignaciones" | "metricas" | "correcciones";
 
 export const CursoDetalleDocente = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +19,9 @@ export const CursoDetalleDocente = () => {
   // Tab activo sincronizado con query param opcional
   const tabParam = searchParams.get("tab") as TabType | null;
   const [activeTab, setActiveTab] = useState<TabType>(
-    tabParam === "asignaciones" || tabParam === "metricas" ? tabParam : "alumnos"
+    tabParam === "asignaciones" || tabParam === "metricas" || tabParam === "correcciones"
+      ? tabParam
+      : "alumnos"
   );
 
   const [openInvitarModal, setOpenInvitarModal] = useState(false);
@@ -151,12 +154,12 @@ export const CursoDetalleDocente = () => {
       {/* Navegación interna mediante pestañas */}
       <section className="space-y-6">
         <div className="border-b border-line">
-          <nav className="flex items-center gap-2 -mb-px" aria-label="Pestañas del curso">
+          <nav className="flex items-center gap-2 -mb-px overflow-x-auto" aria-label="Pestañas del curso">
             {/* Pestaña Alumnos */}
             <button
               type="button"
               onClick={() => handleTabChange("alumnos")}
-              className={`inline-flex items-center gap-2 py-3 px-4 font-mono text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
+              className={`inline-flex items-center gap-2 py-3 px-4 font-mono text-xs font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
                 activeTab === "alumnos"
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
@@ -178,7 +181,7 @@ export const CursoDetalleDocente = () => {
             <button
               type="button"
               onClick={() => handleTabChange("asignaciones")}
-              className={`inline-flex items-center gap-2 py-3 px-4 font-mono text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
+              className={`inline-flex items-center gap-2 py-3 px-4 font-mono text-xs font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
                 activeTab === "asignaciones"
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
@@ -187,11 +190,24 @@ export const CursoDetalleDocente = () => {
               <span>Asignaciones</span>
             </button>
 
+            {/* Pestaña Correcciones e Issues */}
+            <button
+              type="button"
+              onClick={() => handleTabChange("correcciones")}
+              className={`inline-flex items-center gap-2 py-3 px-4 font-mono text-xs font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
+                activeTab === "correcciones"
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
+              }`}
+            >
+              <span>Correcciones</span>
+            </button>
+
             {/* Pestaña Métricas de Repositorios */}
             <button
               type="button"
               onClick={() => handleTabChange("metricas")}
-              className={`inline-flex items-center gap-2 py-3 px-4 font-mono text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
+              className={`inline-flex items-center gap-2 py-3 px-4 font-mono text-xs font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
                 activeTab === "metricas"
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
@@ -219,6 +235,10 @@ export const CursoDetalleDocente = () => {
 
           {activeTab === "asignaciones" && (
             <AsignacionesTab curso={curso} alumnos={alumnos} />
+          )}
+
+          {activeTab === "correcciones" && (
+            <CorreccionesTab curso={curso} />
           )}
 
           {activeTab === "metricas" && (

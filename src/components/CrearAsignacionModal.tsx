@@ -209,7 +209,7 @@ export function CrearAsignacionModal({
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              Trabajos Prácticos
+                Nueva Asignación
             </p>
             <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-foreground">
               Crear asignación
