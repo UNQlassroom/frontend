@@ -14,3 +14,7 @@ export * from "./PanelMetricasRepositorios.tsx";
 export * from "./AsignacionesAlumnoList.tsx";
 export * from "./IssueEstadoBadge.tsx";
 export * from "./CorreccionesTab.tsx";
+export * from "./PanelHeader.tsx";
+export * from "./KpiCard.tsx";
+export * from "./PanelFilterBar.tsx";
+export * from "./EmptyState.tsx";
