@@ -484,23 +484,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                   ? "corrección"
                                   : "correcciones"}
                               </span>
-
-                              {/* Badges de resumen rápido si tiene correcciones */}
-                              {grupoActualizados > 0 && (
-                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-                                  {grupoActualizados} actualizadas
-                                </span>
-                              )}
-                              {grupoPendientes > 0 && (
-                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                  {grupoPendientes} pendientes
-                                </span>
-                              )}
-                              {grupoResueltos > 0 && (
-                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                  {grupoResueltos} resueltas
-                                </span>
-                              )}
                             </div>
 
                             {/* Integrantes y Repositorio */}
