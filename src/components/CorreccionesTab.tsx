@@ -74,7 +74,18 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
         setCorrecciones(res.data);
       } catch (err: unknown) {
         console.error("Error al cargar correcciones:", err);
-        setError("No se pudieron obtener las correcciones de esta asignación.");
+        if (
+          typeof err === "object" &&
+          err !== null &&
+          "code" in err &&
+          (err as { code?: string }).code === "ECONNABORTED"
+        ) {
+          setError(
+            "La consulta de correcciones a GitHub tardó más de lo esperado. Por favor reintentá en unos instantes."
+          );
+        } else {
+          setError("No se pudieron obtener las correcciones de esta asignación.");
+        }
       } finally {
         setIsLoadingCorrecciones(false);
       }
@@ -98,7 +109,18 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
       .catch((err: unknown) => {
         if (!ignore) {
           console.error("Error al cargar correcciones:", err);
-          setError("No se pudieron obtener las correcciones de esta asignación.");
+          if (
+            typeof err === "object" &&
+            err !== null &&
+            "code" in err &&
+            (err as { code?: string }).code === "ECONNABORTED"
+          ) {
+            setError(
+              "La consulta de correcciones a GitHub tardó más de lo esperado. Por favor reintentá en unos instantes."
+            );
+          } else {
+            setError("No se pudieron obtener las correcciones de esta asignación.");
+          }
         }
       })
       .finally(() => {
@@ -357,7 +379,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <KpiCard
               label="Pendientes"
               value={metricas.pendientes}
-              subtext={`${metricas.pendientesPct}% del total`}
+              subtext={`${metricas.pendientesPct}% del total (sin commits)`}
               variant="amber"
               isSelected={filtroEstado === "pendientes"}
               onClick={() => handleCardClick("pendientes")}
@@ -368,7 +390,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <KpiCard
               label="Actualizadas"
               value={metricas.actualizados}
-              subtext={`${metricas.actualizadosPct}% del total`}
+              subtext={`${metricas.actualizadosPct}% del total (con commits)`}
               variant="sky"
               isSelected={filtroEstado === "actualizados"}
               onClick={() => handleCardClick("actualizados")}
@@ -379,7 +401,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <KpiCard
               label="Resueltas"
               value={metricas.resueltos}
-              subtext={`${metricas.resueltosPct}% del total`}
+              subtext={`${metricas.resueltosPct}% del total (cerradas)`}
               variant="emerald"
               isSelected={filtroEstado === "resueltos"}
               onClick={() => handleCardClick("resueltos")}
@@ -449,6 +471,17 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                         : "[Corrección]"
                     );
 
+                    // Conteo rápido por grupo
+                    const grupoPendientes = grupo.issues.filter(
+                      (i) => (i.estado || "").toUpperCase() === "PENDIENTE"
+                    ).length;
+                    const grupoActualizados = grupo.issues.filter(
+                      (i) => (i.estado || "").toUpperCase() === "ACTUALIZADO"
+                    ).length;
+                    const grupoResueltos = grupo.issues.filter(
+                      (i) => (i.estado || "").toUpperCase() === "RESUELTO"
+                    ).length;
+
                     return (
                       <div
                         key={grupo.grupoId}
@@ -473,6 +506,23 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                   ? "corrección"
                                   : "correcciones"}
                               </span>
+
+                              {/* Badges de resumen rápido si tiene correcciones */}
+                              {grupoActualizados > 0 && (
+                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                                  {grupoActualizados} actualizadas
+                                </span>
+                              )}
+                              {grupoPendientes > 0 && (
+                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                  {grupoPendientes} pendientes
+                                </span>
+                              )}
+                              {grupoResueltos > 0 && (
+                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                  {grupoResueltos} resueltas
+                                </span>
+                              )}
                             </div>
 
                             {/* Integrantes y Repositorio */}
