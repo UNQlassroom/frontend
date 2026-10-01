@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import type {
   AlumnoMiembroDeUnCursoDTO,
   AsignacionResponseDTO,
@@ -34,6 +34,7 @@ export function PanelMetricasRepositorios({
   curso,
 }: PanelMetricasRepositoriosProps) {
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
+  const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
@@ -45,6 +46,16 @@ export function PanelMetricasRepositorios({
     try {
       const response = await obtenerAsignaciones(curso.id);
       setAsignaciones(response.data);
+      if (response.data.length > 0) {
+        setSelectedAsignacionId((prev) => {
+          if (prev && response.data.some((a) => a.id === prev)) {
+            return prev;
+          }
+          return response.data[0].id;
+        });
+      } else {
+        setSelectedAsignacionId(null);
+      }
     } catch (err: unknown) {
       console.error("Error al cargar métricas de repositorios desde la BD:", err);
       setError("No se pudieron cargar las asignaciones y repositorios del curso.");
@@ -60,6 +71,16 @@ export function PanelMetricasRepositorios({
       .then((response) => {
         if (!ignore) {
           setAsignaciones(response.data);
+          if (response.data.length > 0) {
+            setSelectedAsignacionId((prev) => {
+              if (prev && response.data.some((a) => a.id === prev)) {
+                return prev;
+              }
+              return response.data[0].id;
+            });
+          } else {
+            setSelectedAsignacionId(null);
+          }
         }
       })
       .catch((err: unknown) => {
@@ -79,12 +100,16 @@ export function PanelMetricasRepositorios({
     };
   }, [curso.id]);
 
-  // Extraer repositorios reales persistidos en la base de datos para este curso
+  // Extraer repositorios filtrados por la asignación seleccionada
   const datosItems: ItemMetrica[] = useMemo(() => {
     if (!asignaciones || asignaciones.length === 0) return [];
+    const asignacionesAProcesar = selectedAsignacionId
+      ? asignaciones.filter((a) => a.id === selectedAsignacionId)
+      : asignaciones;
+
     const items: ItemMetrica[] = [];
 
-    asignaciones.forEach((asig) => {
+    asignacionesAProcesar.forEach((asig) => {
       asig.grupos.forEach((grupo, idx) => {
         if (grupo.repositorio) {
           const repo = grupo.repositorio;
@@ -116,7 +141,7 @@ export function PanelMetricasRepositorios({
     });
 
     return items;
-  }, [asignaciones]);
+  }, [asignaciones, selectedAsignacionId]);
 
   // Cálculo de estadísticas consolidadas reales
   const total = datosItems.length;
@@ -143,6 +168,10 @@ export function PanelMetricasRepositorios({
       return item.estadoCI === filtroEstado;
     });
   }, [datosItems, busqueda, filtroEstado]);
+
+  const handleCardClick = (estadoTarget: string) => {
+    setFiltroEstado((prev) => (prev === estadoTarget ? "todos" : estadoTarget));
+  };
 
   return (
     <div className="space-y-6 animate-rise">
@@ -203,335 +232,349 @@ export function PanelMetricasRepositorios({
         </div>
       )}
 
-      {/* Estado: Sin repositorios creados (Empty State) */}
-      {!isLoading && !error && datosItems.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-6">
+      {/* Estado sin asignaciones creadas */}
+      {!isLoading && !error && asignaciones.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-6 animate-rise">
           <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
-            📊
+            📋
           </div>
           <h4 className="font-display text-lg font-bold text-foreground">
-            No hay repositorios para monitorear
+            No hay asignaciones en este curso
           </h4>
           <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
-            Aún no se han generado repositorios en este curso. Creá asignaciones en la pestaña "Asignaciones" para que se creen los repositorios y se visualicen sus pipelines, commits y estados acá.
+            Para poder monitorear repositorios, primero debes crear al menos una asignación desde la pestaña "Asignaciones".
           </p>
         </div>
       )}
 
-      {/* Estado con datos reales */}
-      {!isLoading && !error && datosItems.length > 0 && (
+      {/* Si hay asignaciones, mostramos selector y contenido */}
+      {!isLoading && !error && asignaciones.length > 0 && (
         <>
-          {/* Tarjetas KPI de Estado de Pipelines */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {/* Total Repositorios */}
-            <div className="rounded-xl border border-line bg-panel p-4 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Total Monitoreados
-                </span>
-                <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-60" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-foreground">
-                  {total}
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">repos</span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                Curso: {curso.materia}
-              </p>
-            </div>
-
-            {/* CI Passing */}
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-emerald-700">
-                  CI Passing
-                </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-emerald-600">
-                  {passingCount}
-                </span>
-                <span className="font-mono text-xs text-emerald-700 font-semibold">
-                  {passingPct}%
-                </span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-emerald-700/80">
-                Builds y pruebas exitosas
-              </p>
-            </div>
-
-            {/* CI Failing */}
-            <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-rose-700">
-                  CI Failing
-                </span>
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-rose-600">
-                  {failingCount}
-                </span>
-                <span className="font-mono text-xs text-rose-700 font-semibold">
-                  {failingPct}%
-                </span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-rose-700/80">
-                Requieren atención del alumno
-              </p>
-            </div>
-
-            {/* Pending & Sin CI */}
-            <div className="rounded-xl border border-line bg-panel p-4 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  En Ejecución / Sin CI
-                </span>
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-foreground">
-                  {pendingCount + sinCiCount}
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  ({pendingCount} pending / {sinCiCount} sin CI)
-                </span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                {pendingPct + sinCiPct}% del total
-              </p>
-            </div>
+          {/* Selector de Asignación idéntico al de Correcciones */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-line">
+            <span className="font-mono text-xs font-semibold text-muted-foreground shrink-0 mr-1">
+              Asignación:
+            </span>
+            {asignaciones.map((asig) => {
+              const isSelected = asig.id === selectedAsignacionId;
+              return (
+                <button
+                  key={asig.id}
+                  type="button"
+                  onClick={() => setSelectedAsignacionId(asig.id)}
+                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "bg-panel2 border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
+                  }`}
+                >
+                  <span>{asig.titulo}</span>
+                  <span
+                    className={`rounded-full px-1.5 py-0.2 text-[10px] ${
+                      isSelected
+                        ? "bg-primary-foreground/20 text-primary-foreground"
+                        : "bg-line/60 text-muted-foreground"
+                    }`}
+                  >
+                    {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Barra visual de distribución de Pipelines (Health Bar) */}
-          <div className="rounded-2xl border border-line bg-panel p-5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between font-mono text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground">Distribución de Pipelines CI/CD</span>
-              <span>{passingPct}% tasa de aprobación</span>
+          {/* Si la asignación seleccionada no tiene repositorios generados */}
+          {datosItems.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-6 animate-rise">
+              <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
+                📊
+              </div>
+              <h4 className="font-display text-lg font-bold text-foreground">
+                No hay repositorios en esta asignación
+              </h4>
+              <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
+                Aún no se han generado repositorios para los grupos o alumnos de esta asignación.
+              </p>
             </div>
-
-            {/* Barra segmentada */}
-            <div className="h-3.5 w-full rounded-full bg-line/60 overflow-hidden flex">
-              {passingPct > 0 && (
-                <div
-                  style={{ width: `${passingPct}%` }}
-                  className="bg-emerald-500 transition-all duration-500"
-                  title={`Passing: ${passingCount} (${passingPct}%)`}
-                />
-              )}
-              {failingPct > 0 && (
-                <div
-                  style={{ width: `${failingPct}%` }}
-                  className="bg-rose-500 transition-all duration-500"
-                  title={`Failing: ${failingCount} (${failingPct}%)`}
-                />
-              )}
-              {pendingPct > 0 && (
-                <div
-                  style={{ width: `${pendingPct}%` }}
-                  className="bg-amber-500 transition-all duration-500"
-                  title={`Pending: ${pendingCount} (${pendingPct}%)`}
-                />
-              )}
-              {sinCiPct > 0 && (
-                <div
-                  style={{ width: `${sinCiPct}%` }}
-                  className="bg-neutral-400 transition-all duration-500"
-                  title={`Sin CI: ${sinCiCount} (${sinCiPct}%)`}
-                />
-              )}
-            </div>
-
-            {/* Leyenda interactiva */}
-            <div className="flex flex-wrap items-center gap-4 pt-1 font-mono text-[11px] text-muted-foreground">
-              <button
-                type="button"
-                onClick={() => setFiltroEstado(filtroEstado === "success" ? "todos" : "success")}
-                className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                  filtroEstado === "success" ? "font-bold text-foreground underline" : ""
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Success ({passingCount})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setFiltroEstado(filtroEstado === "failure" ? "todos" : "failure")}
-                className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                  filtroEstado === "failure" ? "font-bold text-foreground underline" : ""
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span>Failure ({failingCount})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setFiltroEstado(filtroEstado === "pending" ? "todos" : "pending")}
-                className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                  filtroEstado === "pending" ? "font-bold text-foreground underline" : ""
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span>Pending ({pendingCount})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setFiltroEstado(filtroEstado === "sin_ci" ? "todos" : "sin_ci")}
-                className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                  filtroEstado === "sin_ci" ? "font-bold text-foreground underline" : ""
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-neutral-400" />
-                <span>Sin CI ({sinCiCount})</span>
-              </button>
-              {filtroEstado !== "todos" && (
+          ) : (
+            <>
+              {/* Tarjetas KPI de Estado de Pipelines (Clickeables como filtros) */}
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+                {/* Total Repositorios */}
                 <button
                   type="button"
-                  onClick={() => setFiltroEstado("todos")}
-                  className="ml-auto text-primary underline cursor-pointer"
+                  onClick={() => handleCardClick("todos")}
+                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                    filtroEstado === "todos"
+                      ? "border-primary ring-2 ring-primary/30 bg-panel shadow-sm"
+                      : "border-line bg-panel hover:border-foreground/30"
+                  }`}
+                  title="Click para ver todos los repositorios"
                 >
-                  Mostrar todos
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                      Total Monitoreados
+                    </span>
+                    <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-60" />
+                  </div>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="font-suez text-3xl font-bold text-foreground">
+                      {total}
+                    </span>
+                    <span className="font-mono text-xs text-muted-foreground">repos</span>
+                  </div>
+                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                    Curso: {curso.materia}
+                  </p>
                 </button>
-              )}
-            </div>
-          </div>
 
-          {/* Controles de Búsqueda y Filtro de la Lista de Repositorios */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-panel p-4 rounded-xl border border-line">
-            <div className="relative flex-1 max-w-md">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Buscar por repositorio, alumno/grupo o commit..."
-                className="w-full rounded-lg border border-line bg-background pl-9 pr-3 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
+                {/* Sin CI */}
+                <button
+                  type="button"
+                  onClick={() => handleCardClick("sin_ci")}
+                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                    filtroEstado === "sin_ci"
+                      ? "border-neutral-500 ring-2 ring-neutral-500/30 bg-neutral-200 shadow-sm"
+                      : "border-line bg-neutral-200 hover:border-neutral-400"
+                  }`}
+                  title="Click para filtrar repositorios sin CI"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                      Sin CI
+                    </span>
+                    <span className="w-2 h-2 rounded-full bg-neutral-400" />
+                  </div>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="font-suez text-3xl font-bold text-foreground">
+                      {sinCiCount}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                    {sinCiPct}% del total
+                  </p>
+                </button>
 
-            <div className="flex items-center gap-2">
-              <select
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
-                className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
-              >
-                <option value="todos">Todos los pipelines</option>
-                <option value="success">Solo Passing</option>
-                <option value="failure">Solo Failing</option>
-                <option value="pending">Solo Pending</option>
-                <option value="sin_ci">Solo Sin CI</option>
-              </select>
-              <span className="font-mono text-xs text-muted-foreground">
-                {itemsFiltrados.length} {itemsFiltrados.length === 1 ? "repo" : "repos"}
-              </span>
-            </div>
-          </div>
+                {/* Pending */}
+                <button
+                  type="button"
+                  onClick={() => handleCardClick("pending")}
+                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                    filtroEstado === "pending"
+                      ? "border-amber-500 ring-2 ring-amber-500/40 bg-amber-100 shadow-sm"
+                      : "border-line bg-amber-100 hover:border-amber-400"
+                  }`}
+                  title="Click para filtrar CI en ejecución"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                      CI En Ejecución
+                    </span>
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  </div>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="font-suez text-3xl font-bold text-foreground">
+                      {pendingCount}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                    {pendingPct}% del total
+                  </p>
+                </button>
 
-          {/* Tabla detallada de estado de Repositorios y Commits */}
-          <div className="overflow-x-auto rounded-xl border border-line bg-panel shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-line bg-panel2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th className="py-3 px-4">Repositorio</th>
-                  <th className="py-3 px-4">Alumno / Grupo</th>
-                  <th className="py-3 px-4">Pipeline CI/CD</th>
-                  <th className="py-3 px-4">Último Commit</th>
-                  <th className="py-3 px-4">Rama</th>
-                  <th className="py-3 px-4">Fecha Commit</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line/70 font-mono text-xs">
-                {itemsFiltrados.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-line/20 transition-colors group"
+                {/* CI Passing */}
+                <button
+                  type="button"
+                  onClick={() => handleCardClick("success")}
+                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                    filtroEstado === "success"
+                      ? "border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-500/10 shadow-sm"
+                      : "border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40"
+                  }`}
+                  title="Click para filtrar CI exitosos"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-emerald-700">
+                      CI Exitosos
+                    </span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  </div>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="font-suez text-3xl font-bold text-emerald-600">
+                      {passingCount}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-mono text-[11px] text-emerald-700/80">
+                    {passingPct}% del total
+                  </p>
+                </button>
+
+                {/* CI Failing */}
+                <button
+                  type="button"
+                  onClick={() => handleCardClick("failure")}
+                  className={`rounded-xl border p-4 shadow-xs text-left cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-md ${
+                    filtroEstado === "failure"
+                      ? "border-rose-500 ring-2 ring-rose-500/40 bg-rose-500/10 shadow-sm"
+                      : "border-rose-500/20 bg-rose-500/5 hover:border-rose-500/40"
+                  }`}
+                  title="Click para filtrar CI fallidos"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-rose-700">
+                      CI Fallidos
+                    </span>
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
+                  </div>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="font-suez text-3xl font-bold text-rose-600">
+                      {failingCount}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-mono text-[11px] text-rose-700/80">
+                    {failingPct}% del total
+                  </p>
+                </button>
+              </div>
+
+              {/* Controles de Búsqueda y Filtro de la Lista de Repositorios */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-panel p-4 rounded-xl border border-line">
+                <div className="flex flex-wrap items-center gap-2.5 flex-1">
+                  <div className="relative min-w-[220px] flex-1 max-w-sm">
+                    <svg
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    <input
+                      type="text"
+                      value={busqueda}
+                      onChange={(e) => setBusqueda(e.target.value)}
+                      placeholder="Buscar por repositorio, alumno/grupo o commit..."
+                      className="w-full rounded-lg border border-line bg-background pl-9 pr-3 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+
+                  <select
+                    value={filtroEstado}
+                    onChange={(e) => setFiltroEstado(e.target.value)}
+                    className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
                   >
-                    {/* Repositorio */}
-                    <td className="py-3.5 px-4">
-                      <a
-                        href={item.repoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors max-w-[240px]"
-                        title={item.repoUrl}
+                    <option value="todos">Todos los pipelines</option>
+                    <option value="success">Solo exitosos</option>
+                    <option value="failure">Solo fallidos</option>
+                    <option value="pending">Solo pendientes</option>
+                    <option value="sin_ci">Solo sin CI</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+                    {itemsFiltrados.length} {itemsFiltrados.length === 1 ? "repo" : "repos"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Tabla detallada de estado de Repositorios y Commits */}
+              <div className="overflow-x-auto rounded-xl border border-line bg-panel shadow-sm">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-line bg-panel2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                      <th className="py-3 px-4">Repositorio</th>
+                      <th className="py-3 px-4">Alumno / Grupo</th>
+                      <th className="py-3 px-4">Pipeline CI/CD</th>
+                      <th className="py-3 px-4">Último Commit</th>
+                      <th className="py-3 px-4">Rama</th>
+                      <th className="py-3 px-4">Fecha Commit</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line/70 font-mono text-xs">
+                    {itemsFiltrados.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-line/20 transition-colors group"
                       >
-                        <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80 shrink-0" />
-                        <span className="truncate">{item.repoNombre}</span>
-                        <span className="text-[10px] text-muted-foreground shrink-0">↗</span>
-                      </a>
-                    </td>
+                        {/* Repositorio */}
+                        <td className="py-3.5 px-4">
+                          <a
+                            href={item.repoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors max-w-[240px]"
+                            title={item.repoUrl}
+                          >
+                            <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80 shrink-0" />
+                            <span className="truncate">{item.repoNombre}</span>
+                            <span className="text-[10px] text-muted-foreground shrink-0">↗</span>
+                          </a>
+                        </td>
 
-                    {/* Alumno o Grupo */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="font-medium text-foreground">
-                        {item.alumnoUsername}
-                      </span>
-                    </td>
+                        {/* Alumno o Grupo */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span className="font-medium text-foreground">
+                            {item.alumnoUsername}
+                          </span>
+                        </td>
 
-                    {/* Pipeline CI/CD */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <CIStatusBadge estado={item.estadoCI} />
-                    </td>
+                        {/* Pipeline CI/CD */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <CIStatusBadge estado={item.estadoCI} />
+                        </td>
 
-                    {/* Último commit */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5 min-w-[200px] max-w-[320px]">
-                        <span className="rounded bg-panel2 border border-line px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground shrink-0">
-                          {item.commitHash}
-                        </span>
-                        <span
-                          className="truncate text-foreground text-[11px]"
-                          title={item.ultimoCommit}
-                        >
-                          {obtenerPrimerLineaCommit(item.ultimoCommit)}
-                        </span>
-                      </div>
-                    </td>
+                        {/* Último commit */}
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-1.5 min-w-[200px] max-w-[320px]">
+                            <span className="rounded bg-panel2 border border-line px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground shrink-0">
+                              {item.commitHash}
+                            </span>
+                            <span
+                              className="truncate text-foreground text-[11px]"
+                              title={item.ultimoCommit}
+                            >
+                              {obtenerPrimerLineaCommit(item.ultimoCommit)}
+                            </span>
+                          </div>
+                        </td>
 
-                    {/* Rama */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-[11px] text-muted-foreground">
-                        {item.branch}
-                      </span>
-                    </td>
+                        {/* Rama */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-[11px] text-muted-foreground">
+                            {item.branch}
+                          </span>
+                        </td>
 
-                    {/* Fecha commit */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <div
-                        className="text-[11px] text-muted-foreground"
-                        title={
-                          item.fechaUltimoCommit
-                            ? new Date(item.fechaUltimoCommit).toLocaleString("es-AR")
-                            : "Sin fecha registrada"
-                        }
-                      >
-                        <span className="text-foreground font-medium">
-                          {item.fechaUltimoCommit
-                            ? formatearFechaCommit(item.fechaUltimoCommit)
-                            : "Sin actividad"}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        {/* Fecha commit */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <div
+                            className="text-[11px] text-muted-foreground"
+                            title={
+                              item.fechaUltimoCommit
+                                ? new Date(item.fechaUltimoCommit).toLocaleString("es-AR")
+                                : "Sin fecha registrada"
+                            }
+                          >
+                            <span className="text-foreground font-medium">
+                              {item.fechaUltimoCommit
+                                ? formatearFechaCommit(item.fechaUltimoCommit)
+                                : "Sin actividad"}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

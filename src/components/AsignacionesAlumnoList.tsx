@@ -1,11 +1,13 @@
 import { useState } from "react";
-import type { AsignacionAlumnoDTO, EstadoEntrega } from "@/types";
-import { useAuth } from "@/hooks";
+import type { AsignacionAlumnoDTO, EstadoEntrega, CorreccionGrupoResponseDTO } from "@/types";
+import { obtenerCorrecciones } from "@/services";
 import { CIStatusBadge } from "./CIStatusBadge";
 import { ConfirmarReentregaModal } from "./ConfirmarReentregaModal";
+import { IssueEstadoBadge } from "./IssueEstadoBadge";
 import githubIcon from "@/assets/github_favicon.svg";
 
 interface AsignacionesAlumnoListProps {
+  cursoId?: number;
   asignaciones: AsignacionAlumnoDTO[];
   isLoading?: boolean;
   error?: string | null;
@@ -15,6 +17,7 @@ interface AsignacionesAlumnoListProps {
 }
 
 export function AsignacionesAlumnoList({
+  cursoId,
   asignaciones,
   isLoading,
   error,
@@ -22,11 +25,23 @@ export function AsignacionesAlumnoList({
   onEntregar,
   entregandoId,
 }: AsignacionesAlumnoListProps) {
-  const { user } = useAuth();
   const [filtro, setFiltro] = useState<EstadoEntrega | "todas">("todas");
   const [copiedId, setCopiedId] = useState<string | number | null>(null);
   const [entregaError, setEntregaError] = useState<{ id: string | number; message: string } | null>(null);
   const [asignacionParaReentregar, setAsignacionParaReentregar] = useState<AsignacionAlumnoDTO | null>(null);
+
+  // Estado para la sección desplegable de correcciones e issues
+  const [expandedCorrecciones, setExpandedCorrecciones] = useState<Set<number>>(new Set());
+  const [correccionesPorAsig, setCorreccionesPorAsig] = useState<
+    Record<
+      number,
+      {
+        loading: boolean;
+        error: string | null;
+        grupo: CorreccionGrupoResponseDTO | null;
+      }
+    >
+  >({});
 
   const asignacionesFiltradas =
     filtro === "todas"
@@ -62,6 +77,47 @@ export function AsignacionesAlumnoList({
           : "Error al registrar la entrega. Intentalo nuevamente.";
       setEntregaError({ id: asigId, message: msg });
       throw err;
+    }
+  };
+
+  const cargarCorreccionParaAsig = async (asigId: number) => {
+    if (!cursoId) return;
+    setCorreccionesPorAsig((prev) => ({
+      ...prev,
+      [asigId]: { loading: true, error: null, grupo: prev[asigId]?.grupo ?? null },
+    }));
+    try {
+      const res = await obtenerCorrecciones(cursoId, asigId);
+      const miGrupo = res.data[0] || null;
+      setCorreccionesPorAsig((prev) => ({
+        ...prev,
+        [asigId]: { loading: false, error: null, grupo: miGrupo },
+      }));
+    } catch (err: unknown) {
+      console.error("Error al cargar correcciones de asignacion:", err);
+      setCorreccionesPorAsig((prev) => ({
+        ...prev,
+        [asigId]: {
+          loading: false,
+          error: "No se pudieron obtener las correcciones e issues.",
+          grupo: null,
+        },
+      }));
+    }
+  };
+
+  const toggleCorrecciones = async (asigId: number) => {
+    const isCurrentlyOpen = expandedCorrecciones.has(asigId);
+    const next = new Set(expandedCorrecciones);
+    if (isCurrentlyOpen) {
+      next.delete(asigId);
+      setExpandedCorrecciones(next);
+    } else {
+      next.add(asigId);
+      setExpandedCorrecciones(next);
+      if (!correccionesPorAsig[asigId] && cursoId) {
+        await cargarCorreccionParaAsig(asigId);
+      }
     }
   };
 
@@ -119,13 +175,13 @@ export function AsignacionesAlumnoList({
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-        <p className="text-sm text-destructive font-medium mb-3">{error}</p>
+      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center animate-rise">
+        <p className="font-mono text-xs text-destructive mb-3">{error}</p>
         {onRetry && (
           <button
             type="button"
             onClick={onRetry}
-            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
+            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
           >
             Reintentar
           </button>
@@ -135,53 +191,50 @@ export function AsignacionesAlumnoList({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Barra superior con filtros por estado de entrega */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-panel p-4 rounded-xl border border-line">
-        <div className="flex flex-wrap items-center gap-1.5">
+    <div className="space-y-4">
+      {/* Barra de Filtros por Estado */}
+      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1.5 font-mono text-xs">
           <button
             type="button"
             onClick={() => setFiltro("todas")}
-            className={`px-3 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
               filtro === "todas"
-                ? "bg-primary text-primary-foreground"
-                : "border border-line bg-panel2 text-muted-foreground hover:text-foreground"
+                ? "bg-foreground text-background font-semibold shadow-xs"
+                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
             }`}
           >
             Todas ({conteo.todas})
           </button>
-
           <button
             type="button"
             onClick={() => setFiltro("pendiente")}
-            className={`px-3 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
               filtro === "pendiente"
-                ? "bg-amber-600 text-white"
-                : "border border-line bg-panel2 text-muted-foreground hover:text-foreground"
+                ? "bg-amber-600 text-white font-semibold shadow-xs"
+                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
             }`}
           >
             Pendientes ({conteo.pendiente})
           </button>
-
           <button
             type="button"
             onClick={() => setFiltro("entregado")}
-            className={`px-3 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
               filtro === "entregado"
-                ? "bg-sky-600 text-white"
-                : "border border-line bg-panel2 text-muted-foreground hover:text-foreground"
+                ? "bg-sky-600 text-white font-semibold shadow-xs"
+                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
             }`}
           >
             Entregadas ({conteo.entregado})
           </button>
-
           <button
             type="button"
             onClick={() => setFiltro("corregido")}
-            className={`px-3 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
               filtro === "corregido"
-                ? "bg-emerald-600 text-white"
-                : "border border-line bg-panel2 text-muted-foreground hover:text-foreground"
+                ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
             }`}
           >
             Corregidas ({conteo.corregido})
@@ -189,13 +242,13 @@ export function AsignacionesAlumnoList({
         </div>
       </div>
 
-      {/* Estado vacío cuando no hay asignaciones en general */}
+      {/* Lista de Asignaciones */}
       {asignaciones.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto my-8 animate-rise">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-line/40 border border-line flex items-center justify-center text-2xl mb-4 text-foreground shadow-xs">
+        <div className="rounded-2xl border border-dashed border-line bg-panel p-10 text-center animate-rise">
+          <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
             📚
           </div>
-          <h3 className="font-display text-xl font-bold text-foreground tracking-tight">
+          <h3 className="font-display text-lg font-bold text-foreground">
             No tenés asignaciones asignadas
           </h3>
           <p className="mt-2 font-mono text-xs text-muted-foreground leading-relaxed">
@@ -203,143 +256,102 @@ export function AsignacionesAlumnoList({
           </p>
         </div>
       ) : asignacionesFiltradas.length === 0 ? (
-        /* Estado vacío del filtro seleccionado */
-        <div className="rounded-2xl border border-line bg-panel p-8 text-center text-muted-foreground font-mono text-xs my-6">
-          No hay asignaciones en estado <span className="font-semibold text-foreground">"{filtro}"</span>.
+        <div className="rounded-2xl border border-dashed border-line bg-panel p-8 text-center animate-rise">
+          <p className="font-mono text-xs text-muted-foreground">
+            No hay asignaciones con el estado seleccionado ({filtro}).
+          </p>
         </div>
       ) : (
-        /* Tarjetas de Asignaciones para el Alumno */
-        <div className="grid gap-5">
+        <div className="space-y-4">
           {asignacionesFiltradas.map((asig) => {
+            const asigIdNum = Number(asig.id);
             const badge = getBadgeEstado(asig.estadoEntrega);
             const notaMaxima = asig.notaMaxima ?? 10;
             const tieneNota = typeof asig.calificacion === "number";
             const isVencida = asig.fechaLimite ? new Date() > new Date(asig.fechaLimite) : false;
+            const isCorreccionesOpen = expandedCorrecciones.has(asigIdNum);
+            const asigCorreccion = correccionesPorAsig[asigIdNum];
 
             return (
               <div
                 key={asig.id}
-                className="rounded-2xl border border-line bg-panel p-6 shadow-xs flex flex-col justify-between hover:border-foreground/20 transition-colors animate-rise space-y-5"
+                className="rounded-2xl border border-line bg-panel p-5 shadow-xs space-y-4 transition-all animate-rise"
               >
-                {/* Cabecera de la tarjeta: Título, Tipo, Estado de entrega y CI */}
+                {/* Cabecera de la Asignación: Tipo, Fechas, Estado y Calificación */}
                 <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                   <div className="space-y-2 flex-1">
+                    {/* Metadatos y Badges */}
                     <div className="flex flex-wrap items-center gap-2">
-                      {/* Badge de Tipo: Individual o Grupal */}
                       <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] font-medium text-foreground">
                         {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                       </span>
 
                       {/* Badge de Estado de Entrega */}
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-mono text-[11px] font-medium ${badge.classes}`}
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-mono text-[11px] font-semibold ${badge.classes}`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${badge.dotColor}`} />
                         <span>{badge.label}</span>
                       </span>
 
-                      {/* Badge de CI */}
-                      {asig.estadoCI && (
-                        <CIStatusBadge estado={asig.estadoCI} showIcon={true} />
+                      {/* Estado CI/CD */}
+                      {asig.repoUrl && (
+                        <CIStatusBadge estado={asig.estadoCI} />
                       )}
 
-                      {/* Indicador de Fecha Límite */}
-                      {asig.fechaLimiteFormatted && (
-                        <span className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 font-mono text-[11px] ${
-                          isVencida && asig.estadoEntrega === "pendiente"
-                            ? "border-destructive/30 bg-destructive/10 text-destructive font-medium"
-                            : "border-line bg-panel2 text-muted-foreground"
-                        }`}>
-                          <span>Fecha límite:</span>
+                      {/* Integrantes si es grupal */}
+                      {asig.tipo === "GRUPAL" && asig.integrantes && asig.integrantes.length > 0 && (
+                        <div className="flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
+                          <span>Grupo:</span>
                           <span className="font-semibold text-foreground">
-                            {asig.fechaLimiteFormatted}
+                            {asig.grupoNombre || asig.integrantes.map((i) => `@${i}`).join(", ")}
                           </span>
-                          {isVencida && asig.estadoEntrega === "pendiente" && (
-                            <span className="text-[10px] uppercase font-bold ml-1">(Vencida)</span>
-                          )}
-                        </span>
+                        </div>
                       )}
                     </div>
 
-                    <h3 className="font-display text-xl font-bold text-foreground">
+                    {/* Título de la Asignación */}
+                    <h3 className="font-display text-xl font-bold tracking-tight text-foreground">
                       {asig.titulo}
                     </h3>
+
+                    {/* Descripción */}
                     {asig.descripcion && (
-                      <p className="font-mono text-xs text-muted-foreground leading-relaxed">
+                      <p className="font-mono text-xs text-muted-foreground leading-relaxed max-w-3xl">
                         {asig.descripcion}
                       </p>
                     )}
 
-                    {/* Visualización de Grupo y Compañeros */}
-                    {asig.tipo === "GRUPAL" ? (
-                      <div className="mt-3 p-3.5 rounded-xl border border-line bg-panel2/60 space-y-2.5">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-                              Grupo asignado:
-                            </span>
-                            <span className="inline-flex items-center rounded-md border border-primary/30 bg-primary/10 px-2.5 py-0.5 font-mono text-xs font-bold text-foreground">
-                              {asig.grupoNombre || "Sin nombre asignado"}
-                            </span>
-                          </div>
-                          <span className="font-mono text-[10px] text-muted-foreground">
-                            {asig.integrantes?.length || 0} integrante{(asig.integrantes?.length || 0) !== 1 ? "s" : ""}
+                    {/* Fechas de Entrega y Límite */}
+                    <div className="flex flex-wrap items-center gap-4 pt-1 font-mono text-xs text-muted-foreground">
+                      {asig.fechaLimite && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground/80">Fecha límite:</span>
+                          <span
+                            className={`font-semibold ${
+                              isVencida && asig.estadoEntrega === "pendiente"
+                                ? "text-destructive font-bold"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {asig.fechaLimiteFormatted || formatFechaLegible(asig.fechaLimite)}
                           </span>
                         </div>
+                      )}
 
-                        {asig.integrantes && asig.integrantes.length > 0 && (
-                          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-line/50">
-                            <span className="font-mono text-[11px] text-muted-foreground font-medium">
-                              Integrantes:
-                            </span>
-                            {asig.integrantes.map((username) => {
-                              const esYo = user?.username === username;
-                              return (
-                                <a
-                                  key={username}
-                                  href={`https://github.com/${username}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-mono transition-colors group shadow-2xs ${
-                                    esYo
-                                      ? "border-primary/40 bg-primary/10 text-foreground font-semibold"
-                                      : "border-line bg-background text-foreground hover:bg-line/40"
-                                  }`}
-                                  title={`Ver perfil de GitHub de @${username}${esYo ? " (Tu usuario)" : ""}`}
-                                >
-                                  <img
-                                    src={`https://github.com/${username}.png?size=64`}
-                                    alt={username}
-                                    className="w-5 h-5 rounded-full object-cover border border-line shrink-0"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = "none";
-                                    }}
-                                  />
-                                  <span>@{username}</span>
-                                  {esYo && (
-                                    <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary text-primary-foreground">
-                                      Vos
-                                    </span>
-                                  )}
-                                  <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                    ↗
-                                  </span>
-                                </a>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
-                        <span>Trabajo individual · Repositorio de trabajo personal</span>
-                      </div>
-                    )}
+                      {asig.fechaEntregadaFormatted && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground/80">Entregado el:</span>
+                          <span className="font-semibold text-foreground">
+                            {asig.fechaEntregadaFormatted}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Panel de Calificación Obtenida */}
-                  <div className="shrink-0 bg-panel2 border border-line rounded-xl p-3.5 flex flex-col items-start lg:items-end justify-center min-w-[170px]">
+                  {/* Panel Lateral: Calificación y Estado de la Nota */}
+                  <div className="flex flex-col items-start lg:items-end justify-between self-start shrink-0 rounded-xl border border-line bg-panel2 p-3.5 min-w-[140px] text-left lg:text-right">
                     <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                       Calificación
                     </span>
@@ -406,6 +418,138 @@ export function AsignacionesAlumnoList({
                     <div className="p-3 rounded-lg border border-primary/10 bg-panel font-mono text-xs text-foreground whitespace-pre-wrap leading-relaxed shadow-2xs">
                       {asig.observaciones}
                     </div>
+                  </div>
+                )}
+
+                {/* Sección Desplegable de Correcciones e Issues en GitHub */}
+                {cursoId && (
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => toggleCorrecciones(asigIdNum)}
+                      className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
+                    >
+                      <span className="text-primary font-bold transition-transform duration-150">
+                        {isCorreccionesOpen ? "▾" : "▸"}
+                      </span>
+                      <span className="font-semibold underline decoration-line group-hover:decoration-foreground">
+                        {isCorreccionesOpen ? "Ocultar correcciones e issues en GitHub" : "Ver correcciones e issues en GitHub"}
+                      </span>
+                      {asigCorreccion?.grupo?.issues && (
+                        <span className="rounded-full bg-line/60 px-2 py-0.2 text-[10px] text-muted-foreground font-semibold">
+                          {asigCorreccion.grupo.issues.length}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Panel desplegable */}
+                    {isCorreccionesOpen && (
+                      <div className="mt-3 p-4 rounded-xl border border-line bg-panel2/60 space-y-3 animate-rise">
+                        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-line">
+                          <div className="flex items-center gap-2 font-mono text-xs font-bold text-foreground">
+                            <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
+                            <span>Correcciones del docente en GitHub</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => cargarCorreccionParaAsig(asigIdNum)}
+                            disabled={asigCorreccion?.loading}
+                            className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
+                            title="Recargar issues desde GitHub"
+                          >
+                            <svg
+                              className={`w-3 h-3 ${asigCorreccion?.loading ? "animate-spin text-primary" : ""}`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                            </svg>
+                            <span>{asigCorreccion?.loading ? "Actualizando..." : "Actualizar"}</span>
+                          </button>
+                        </div>
+
+                        {asigCorreccion?.loading ? (
+                          <div className="flex items-center justify-center py-6 gap-2">
+                            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            <span className="font-mono text-xs text-muted-foreground">
+                              Consultando issues en GitHub...
+                            </span>
+                          </div>
+                        ) : asigCorreccion?.error ? (
+                          <div className="p-3 rounded-lg border border-destructive/20 bg-destructive/5 text-center font-mono text-xs text-destructive">
+                            <span>{asigCorreccion.error}</span>
+                          </div>
+                        ) : !asigCorreccion?.grupo || asigCorreccion.grupo.issues.length === 0 ? (
+                          <div className="p-3.5 rounded-lg border border-line/60 bg-panel text-center font-mono text-xs text-muted-foreground">
+                            <span>No tenés correcciones ni issues asignados para este trabajo en GitHub.</span>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-line/60 rounded-lg border border-line bg-panel overflow-hidden font-mono text-xs">
+                            {asigCorreccion.grupo.issues.map((issue) => (
+                              <div
+                                key={issue.numero}
+                                className="p-3 hover:bg-line/10 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                              >
+                                <div className="space-y-1 min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-semibold text-muted-foreground">
+                                      #{issue.numero}
+                                    </span>
+                                    <a
+                                      href={issue.htmlUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="font-semibold text-foreground hover:text-primary hover:underline break-words"
+                                    >
+                                      {issue.titulo}
+                                    </a>
+                                    <IssueEstadoBadge estado={issue.estado} />
+                                    {issue.tieneCommitsPosteriores && (
+                                      <span
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                        title="Tus commits en el repositorio son posteriores a la apertura de este issue"
+                                      >
+                                        <span>⚡ Commits posteriores detectados</span>
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                                    <span>Por @{issue.autor}</span>
+                                    <span>•</span>
+                                    <span>Creado: {formatFechaLegible(issue.fechaCreacion)}</span>
+                                    {issue.cantComentarios > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <span className="font-medium text-foreground">
+                                          💬 {issue.cantComentarios} comentario(s)
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="shrink-0 self-end sm:self-center">
+                                  <a
+                                    href={issue.htmlUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+                                  >
+                                    <span>Ver en GitHub</span>
+                                    <span className="text-[10px]">↗</span>
+                                  </a>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 

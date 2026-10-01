@@ -12,3 +12,5 @@ export * from "./ConfirmarReentregaModal.tsx";
 export * from "./AsignacionesTab.tsx";
 export * from "./PanelMetricasRepositorios.tsx";
 export * from "./AsignacionesAlumnoList.tsx";
+export * from "./IssueEstadoBadge.tsx";
+export * from "./CorreccionesTab.tsx";

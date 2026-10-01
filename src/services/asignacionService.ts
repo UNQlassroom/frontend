@@ -6,6 +6,7 @@ import type {
   CalificarAsignacionRequestDTO,
   TemplateRepoResponseDTO,
   CrearTemplateRepoRequestDTO,
+  CorreccionGrupoResponseDTO,
 } from "@/types";
 
 export const asignacionService = {
@@ -78,6 +79,20 @@ export const asignacionService = {
   },
 
   /**
+   * Envía la petición GET /cursos/{cursoId}/asignaciones/{asignacionId}/correcciones
+   * Docente: Obtiene los grupos con sus issues calculados (PENDIENTE, ACTUALIZADO, RESUELTO).
+   * Alumno: Obtiene únicamente su grupo con sus issues calculados.
+   */
+  obtenerCorrecciones: (
+    cursoId: number,
+    asignacionId: number
+  ): Promise<ApiResponse<CorreccionGrupoResponseDTO[]>> => {
+    return get<CorreccionGrupoResponseDTO[]>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/correcciones`
+    );
+  },
+
+  /**
    * Envía la petición GET /templates
    * Lista los repositorios plantillas disponibles en la organización
    */
@@ -105,6 +120,7 @@ export const {
   obtenerAsignacionPorId,
   entregarAsignacion,
   calificarAsignacion,
+  obtenerCorrecciones,
   listarTemplates,
   crearTemplate,
 } = asignacionService;

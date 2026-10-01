@@ -59,6 +59,31 @@ export interface CrearTemplateRepoRequestDTO {
   description?: string;
 }
 
+// Estados y DTOs para Issues y Correcciones
+export type EstadoIssue = "PENDIENTE" | "ACTUALIZADO" | "RESUELTO";
+
+export interface IssueResponseDTO {
+  numero: number;
+  titulo: string;
+  htmlUrl: string;
+  autor: string;
+  estado: EstadoIssue | string;
+  tieneCommitsPosteriores: boolean;
+  cantComentarios: number;
+  fechaCreacion: string;
+  fechaActualizacion: string;
+  fechaCierre?: string | null;
+}
+
+export interface CorreccionGrupoResponseDTO {
+  grupoId: number;
+  nombre: string | null;
+  integrantes: string[];
+  repoNombre: string;
+  repoHtmlUrl: string;
+  issues: IssueResponseDTO[];
+}
+
 // Interfaz para la vista de Alumno
 export type EstadoEntrega = "pendiente" | "entregado" | "corregido";
 
