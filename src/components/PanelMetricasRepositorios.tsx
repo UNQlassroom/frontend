@@ -222,7 +222,7 @@ export function PanelMetricasRepositorios({
       {!isLoading && !error && datosItems.length > 0 && (
         <>
           {/* Tarjetas KPI de Estado de Pipelines */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             {/* Total Repositorios */}
             <div className="rounded-xl border border-line bg-panel p-4 shadow-xs">
               <div className="flex items-center justify-between">
@@ -242,11 +242,53 @@ export function PanelMetricasRepositorios({
               </p>
             </div>
 
+          {/* Sin CI */}
+          <div className="rounded-xl border border-line bg-neutral-200 p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                  Sin CI
+                </span>
+              <span className="w-2 h-2 rounded-full bg-neutral-400" />
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+                <span className="font-suez text-3xl font-bold text-foreground">
+                  {sinCiCount}
+                </span>
+              <span className="font-mono text-xs text-muted-foreground">
+                  ({sinCiCount} sin CI)
+                </span>
+            </div>
+            <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+              {sinCiPct}% del total
+            </p>
+          </div>
+
+            {/* Pending */}
+            <div className="rounded-xl border border-line bg-panel p-4 shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                  En Ejecución
+                </span>
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="font-suez text-3xl font-bold text-foreground">
+                  {pendingCount}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  ({pendingCount} pendientes)
+                </span>
+              </div>
+              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                {pendingPct}% del total
+              </p>
+            </div>
+
             {/* CI Passing */}
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-emerald-700">
-                  CI Passing
+                  Exitosos
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
               </div>
@@ -267,7 +309,7 @@ export function PanelMetricasRepositorios({
             <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-rose-700">
-                  CI Failing
+                  Fallidos
                 </span>
                 <span className="w-2 h-2 rounded-full bg-rose-500" />
               </div>
@@ -283,28 +325,7 @@ export function PanelMetricasRepositorios({
                 Requieren atención del alumno
               </p>
             </div>
-
-            {/* Pending & Sin CI */}
-            <div className="rounded-xl border border-line bg-panel p-4 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  En Ejecución / Sin CI
-                </span>
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-suez text-3xl font-bold text-foreground">
-                  {pendingCount + sinCiCount}
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  ({pendingCount} pending / {sinCiCount} sin CI)
-                </span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                {pendingPct + sinCiPct}% del total
-              </p>
-            </div>
-          </div>
+        </div>
 
           {/* Barra visual de distribución de Pipelines (Health Bar) */}
           <div className="rounded-2xl border border-line bg-panel p-5 shadow-xs space-y-3">
@@ -315,27 +336,6 @@ export function PanelMetricasRepositorios({
 
             {/* Barra segmentada */}
             <div className="h-3.5 w-full rounded-full bg-line/60 overflow-hidden flex">
-              {passingPct > 0 && (
-                <div
-                  style={{ width: `${passingPct}%` }}
-                  className="bg-emerald-500 transition-all duration-500"
-                  title={`Passing: ${passingCount} (${passingPct}%)`}
-                />
-              )}
-              {failingPct > 0 && (
-                <div
-                  style={{ width: `${failingPct}%` }}
-                  className="bg-rose-500 transition-all duration-500"
-                  title={`Failing: ${failingCount} (${failingPct}%)`}
-                />
-              )}
-              {pendingPct > 0 && (
-                <div
-                  style={{ width: `${pendingPct}%` }}
-                  className="bg-amber-500 transition-all duration-500"
-                  title={`Pending: ${pendingCount} (${pendingPct}%)`}
-                />
-              )}
               {sinCiPct > 0 && (
                 <div
                   style={{ width: `${sinCiPct}%` }}
@@ -343,29 +343,41 @@ export function PanelMetricasRepositorios({
                   title={`Sin CI: ${sinCiCount} (${sinCiPct}%)`}
                 />
               )}
+              {pendingPct > 0 && (
+                  <div
+                      style={{ width: `${pendingPct}%` }}
+                      className="bg-amber-500 transition-all duration-500"
+                      title={`Pendientes: ${pendingCount} (${pendingPct}%)`}
+                  />
+              )}
+              {passingPct > 0 && (
+                  <div
+                      style={{ width: `${passingPct}%` }}
+                      className="bg-emerald-500 transition-all duration-500"
+                      title={`Exitosos: ${passingCount} (${passingPct}%)`}
+                  />
+              )}
+              {failingPct > 0 && (
+                  <div
+                      style={{ width: `${failingPct}%` }}
+                      className="bg-rose-500 transition-all duration-500"
+                      title={`Fallidos: ${failingCount} (${failingPct}%)`}
+                  />
+              )}
             </div>
 
             {/* Leyenda interactiva */}
             <div className="flex flex-wrap items-center gap-4 pt-1 font-mono text-[11px] text-muted-foreground">
+
               <button
-                type="button"
-                onClick={() => setFiltroEstado(filtroEstado === "success" ? "todos" : "success")}
-                className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                  filtroEstado === "success" ? "font-bold text-foreground underline" : ""
-                }`}
+                  type="button"
+                  onClick={() => setFiltroEstado(filtroEstado === "sin_ci" ? "todos" : "sin_ci")}
+                  className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
+                      filtroEstado === "sin_ci" ? "font-bold text-foreground underline" : ""
+                  }`}
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Success ({passingCount})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setFiltroEstado(filtroEstado === "failure" ? "todos" : "failure")}
-                className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                  filtroEstado === "failure" ? "font-bold text-foreground underline" : ""
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span>Failure ({failingCount})</span>
+                <span className="w-2 h-2 rounded-full bg-neutral-400" />
+                <span>Sin CI ({sinCiCount})</span>
               </button>
               <button
                 type="button"
@@ -375,17 +387,28 @@ export function PanelMetricasRepositorios({
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span>Pending ({pendingCount})</span>
+                <span>Pendientes ({pendingCount})</span>
+              </button>
+
+              <button
+                  type="button"
+                  onClick={() => setFiltroEstado(filtroEstado === "success" ? "todos" : "success")}
+                  className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
+                      filtroEstado === "success" ? "font-bold text-foreground underline" : ""
+                  }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Exitosos ({passingCount})</span>
               </button>
               <button
-                type="button"
-                onClick={() => setFiltroEstado(filtroEstado === "sin_ci" ? "todos" : "sin_ci")}
-                className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
-                  filtroEstado === "sin_ci" ? "font-bold text-foreground underline" : ""
-                }`}
+                  type="button"
+                  onClick={() => setFiltroEstado(filtroEstado === "failure" ? "todos" : "failure")}
+                  className={`inline-flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors ${
+                      filtroEstado === "failure" ? "font-bold text-foreground underline" : ""
+                  }`}
               >
-                <span className="w-2 h-2 rounded-full bg-neutral-400" />
-                <span>Sin CI ({sinCiCount})</span>
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                <span>Fallidos ({failingCount})</span>
               </button>
               {filtroEstado !== "todos" && (
                 <button
@@ -431,10 +454,10 @@ export function PanelMetricasRepositorios({
                 className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
               >
                 <option value="todos">Todos los pipelines</option>
-                <option value="success">Solo Passing</option>
-                <option value="failure">Solo Failing</option>
-                <option value="pending">Solo Pending</option>
-                <option value="sin_ci">Solo Sin CI</option>
+                <option value="success">Solo exitosos</option>
+                <option value="failure">Solo fallidos</option>
+                <option value="pending">Solo pendientes</option>
+                <option value="sin_ci">Solo sin CI</option>
               </select>
               <span className="font-mono text-xs text-muted-foreground">
                 {itemsFiltrados.length} {itemsFiltrados.length === 1 ? "repo" : "repos"}

@@ -17,7 +17,6 @@ export const CursoDetalleAlumno = () => {
     asignaciones,
     isLoading: isLoadingAsignaciones,
     error: errorAsignaciones,
-    estadisticas,
     cargarAsignaciones,
     entregar,
     entregandoId,
@@ -116,45 +115,6 @@ export const CursoDetalleAlumno = () => {
               )}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Resumen de Estado de Asignaciones / TPs */}
-      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-line bg-panel p-4 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            Total de Asignaciones
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-foreground">
-            {estadisticas.totalAsignaciones}
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-semibold">
-            Corregidas
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-            {estadisticas.corregidas}
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-semibold">
-            Entregadas
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {estadisticas.entregadas}
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-semibold">
-            Pendientes
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-amber-600 dark:text-amber-400">
-            {estadisticas.pendientes}
-          </p>
         </div>
       </section>
 
