@@ -24,8 +24,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   // Cargar asignaciones del curso al montar
   useEffect(() => {
     let ignore = false;
-    setIsLoadingAsignaciones(true);
-    setError(null);
 
     obtenerAsignaciones(curso.id)
       .then((res) => {
@@ -72,12 +70,34 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   );
 
   useEffect(() => {
-    if (selectedAsignacionId) {
-      cargarCorrecciones(selectedAsignacionId);
-    } else {
-      setCorrecciones([]);
+    let ignore = false;
+
+    if (!selectedAsignacionId) {
+      return;
     }
-  }, [selectedAsignacionId, cargarCorrecciones]);
+
+    obtenerCorrecciones(curso.id, selectedAsignacionId)
+      .then((res) => {
+        if (!ignore) {
+          setCorrecciones(res.data);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!ignore) {
+          console.error("Error al cargar correcciones:", err);
+          setError("No se pudieron obtener las correcciones de esta asignación.");
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoadingCorrecciones(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [curso.id, selectedAsignacionId]);
 
   const asignacionActual = useMemo(
     () => asignaciones.find((a) => a.id === selectedAsignacionId),
@@ -503,6 +523,17 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                         : "[Corrección]"
                     );
 
+                    // Conteo rápido por grupo
+                    const grupoPendientes = grupo.issues.filter(
+                      (i) => (i.estado || "").toUpperCase() === "PENDIENTE"
+                    ).length;
+                    const grupoActualizados = grupo.issues.filter(
+                      (i) => (i.estado || "").toUpperCase() === "ACTUALIZADO"
+                    ).length;
+                    const grupoResueltos = grupo.issues.filter(
+                      (i) => (i.estado || "").toUpperCase() === "RESUELTO"
+                    ).length;
+
                     return (
                       <div
                         key={grupo.grupoId}
@@ -521,6 +552,23 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               <span className="font-mono text-[11px] px-2 py-0.5 rounded-full border border-line bg-panel2 text-muted-foreground">
                                 {totalGrupoCorrecciones} {totalGrupoCorrecciones === 1 ? "corrección" : "correcciones"}
                               </span>
+
+                              {/* Badges de resumen rápido si tiene correcciones */}
+                              {grupoActualizados > 0 && (
+                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                                  {grupoActualizados} actualizadas
+                                </span>
+                              )}
+                              {grupoPendientes > 0 && (
+                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                  {grupoPendientes} pendientes
+                                </span>
+                              )}
+                              {grupoResueltos > 0 && (
+                                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                  {grupoResueltos} resueltas
+                                </span>
+                              )}
                             </div>
 
                             {/* Integrantes y Repositorio */}
@@ -550,7 +598,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               title="Ver correcciones en GitHub"
                             >
                               <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
-                              <span>Ver todos en GitHub ({totalGrupoCorrecciones})</span>
+                              <span>Ver en GitHub ({totalGrupoCorrecciones})</span>
                               <span className="text-[10px] text-muted-foreground">↗</span>
                             </a>
 
@@ -571,6 +619,14 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                         {grupo.issues.length === 0 ? (
                           <div className="p-4 rounded-xl border border-line/60 bg-panel2/40 text-center font-mono text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-3">
                             <span>Aún no se crearon correcciones en este repositorio.</span>
+                            <a
+                              href={newIssueUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline font-semibold font-mono text-xs inline-flex items-center gap-1"
+                            >
+                              Crear la primera corrección ↗
+                            </a>
                           </div>
                         ) : (
                           <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden font-mono text-xs">
@@ -632,7 +688,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1 rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors shadow-2xs"
                                   >
-                                    <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
                                     <span>Ver en GitHub</span>
                                     <span className="text-[10px]">↗</span>
                                   </a>
