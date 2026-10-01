@@ -116,7 +116,9 @@ export function CrearAsignacionModal({
           // Si el alumno estaba en otro grupo, lo removemos de allí para no duplicarlo
           return {
             ...g,
-            integrantesUsernames: g.integrantesUsernames.filter((u) => u !== username),
+            integrantesUsernames: g.integrantesUsernames.filter(
+              (u) => u !== username
+            ),
           };
         }
         const existe = g.integrantesUsernames.includes(username);
@@ -185,13 +187,27 @@ export function CrearAsignacionModal({
       handleClose();
     } catch (err: unknown) {
       console.error("Error al crear la asignación:", err);
-      if (typeof err === "object" && err !== null && "response" in err) {
+      if (typeof err === "object" && err !== null) {
         const apiErr = err as {
-          response?: { status?: number; data?: { message?: string } };
+          code?: string;
           message?: string;
+          response?: { status?: number; data?: { message?: string } };
         };
-        const serverMsg = apiErr.response?.data?.message;
-        setError(serverMsg || "Ocurrió un error al crear la asignación en el servidor.");
+
+        if (
+          apiErr.code === "ECONNABORTED" ||
+          (typeof apiErr.message === "string" &&
+            apiErr.message.toLowerCase().includes("timeout"))
+        ) {
+          setError(
+            "La creación de los repositorios en GitHub está demorando más de lo habitual debido a la cantidad de repositorios. El servidor puede seguir procesándolos en segundo plano. Podés cerrar esta ventana y recargar la lista en unos momentos."
+          );
+        } else {
+          const serverMsg = apiErr.response?.data?.message;
+          setError(
+            serverMsg || "Ocurrió un error al crear la asignación en el servidor."
+          );
+        }
       } else {
         setError("Ocurrió un error inesperado al conectar con el servidor.");
       }
@@ -209,13 +225,13 @@ export function CrearAsignacionModal({
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-                Nueva Asignación
+              Nueva Asignación
             </p>
             <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-foreground">
               Crear asignación
             </h2>
             <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-              El servidor creará un repositorio en GitHub para cada alumno o grupo con la plantilla de GitHub seleccionada.
+              El servidor creará un repositorio en GitHub para cada alumno o grupo con la plantilla seleccionada.
             </p>
           </div>
           <button
@@ -229,7 +245,10 @@ export function CrearAsignacionModal({
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="py-4 space-y-4 overflow-y-auto flex-1 pr-1">
+        <form
+          onSubmit={handleSubmit}
+          className="py-4 space-y-4 overflow-y-auto flex-1 pr-1"
+        >
           {/* Título */}
           <div>
             <label
@@ -321,7 +340,8 @@ export function CrearAsignacionModal({
                   className="accent-primary"
                 />
                 <div>
-                  <p className="font-mono text-xs font-semibold text-foreground">Grupal
+                  <p className="font-mono text-xs font-semibold text-foreground">
+                    Grupal
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
                     Un repositorio por grupo
@@ -363,7 +383,11 @@ export function CrearAsignacionModal({
                   id="asignacion-template"
                   type="text"
                   required
-                  placeholder={isLoadingTemplates ? "Cargando templates..." : "Ej: tp-base-template"}
+                  placeholder={
+                    isLoadingTemplates
+                      ? "Cargando templates..."
+                      : "Ej: tp-base-template"
+                  }
                   value={templateRepoName}
                   onChange={(e) => setTemplateRepoName(e.target.value)}
                   disabled={isLoading}
@@ -426,7 +450,7 @@ export function CrearAsignacionModal({
 
               {alumnos.length === 0 ? (
                 <div className="rounded-xl border border-line bg-panel p-4 text-center">
-                  <p className="font-mono text-xs text-amber-600">
+                  <p className="font-mono text-xs text-amber-600 dark:text-amber-400">
                     No hay alumnos en este curso todavía. Invitá alumnos antes de crear asignaciones grupales.
                   </p>
                 </div>
@@ -491,6 +515,21 @@ export function CrearAsignacionModal({
             </div>
           )}
 
+          {/* Feedback de progreso cuando está creando repos */}
+          {isLoading && (
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-center gap-3 animate-pulse">
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+              <div className="font-mono text-xs space-y-0.5">
+                <p className="font-semibold text-foreground">
+                  Creando repositorios en GitHub...
+                </p>
+                <p className="text-muted-foreground text-[11px]">
+                  Generando repositorios a partir de la plantilla y asignando colaboradores. Esto puede demorar varios segundos. Por favor no cierres la ventana.
+                </p>
+              </div>
+            </div>
+          )}
+
           {error && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
               <p className="font-mono text-xs text-destructive">{error}</p>
@@ -519,7 +558,7 @@ export function CrearAsignacionModal({
                 disabled={isLoading}
                 className="rounded-lg bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm disabled:opacity-50"
               >
-                {isLoading ? "Creando asignación en GitHub..." : "Crear Asignación"}
+                {isLoading ? "Creando en GitHub..." : "Crear Asignación"}
               </button>
             </div>
           </div>
