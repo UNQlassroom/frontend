@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "@/hooks";
 import { authService } from "@/services";
+import { STORAGE_KEYS } from "@/constants";
 
 export const OAuthCallbackPage = () => {
   const [searchParams] = useSearchParams();
@@ -29,7 +30,7 @@ export const OAuthCallbackPage = () => {
     procesadoRef.current = true;
 
     // Leemos el rol seleccionado previamente antes de la redirección
-    const storedEsDocente = sessionStorage.getItem("oauth_es_docente");
+    const storedEsDocente = sessionStorage.getItem(STORAGE_KEYS.OAUTH_ES_DOCENTE);
     const esDocente = storedEsDocente ? JSON.parse(storedEsDocente) : false;
 
     // Enviamos el código al backend para autenticar y obtener el token JWT
@@ -46,7 +47,7 @@ export const OAuthCallbackPage = () => {
         const { token, user } = response.data;
         if (token && user) {
           login(token, user);
-          sessionStorage.removeItem("oauth_es_docente");
+          sessionStorage.removeItem(STORAGE_KEYS.OAUTH_ES_DOCENTE);
           sessionStorage.removeItem("oauth_pendiente_org");
           sessionStorage.removeItem("oauth_invitacion_url");
           navigate("/home", { replace: true });

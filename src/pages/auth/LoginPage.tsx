@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks";
+import { STORAGE_KEYS } from "@/constants";
 import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
 import githubLogo from "@/assets/github_favicon.svg";
 
@@ -15,7 +16,7 @@ export const LoginPage = () => {
   }
 
   const iniciarLoginGitHub = (esDocente: boolean) => {
-    sessionStorage.setItem("oauth_es_docente", JSON.stringify(esDocente));
+    sessionStorage.setItem(STORAGE_KEYS.OAUTH_ES_DOCENTE, JSON.stringify(esDocente));
     sessionStorage.removeItem("oauth_pendiente_org");
     sessionStorage.removeItem("oauth_invitacion_url");
 

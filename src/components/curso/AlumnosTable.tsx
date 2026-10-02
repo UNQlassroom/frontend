@@ -1,9 +1,8 @@
 import { useState, useMemo } from "react";
 import type { AlumnoMiembroDeUnCursoDTO, CursoResponseDTO } from "@/types";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
-import { PanelHeader } from "./PanelHeader";
-import { PanelFilterBar } from "./PanelFilterBar";
-import { EmptyState } from "./EmptyState";
+import { PanelHeader, PanelFilterBar } from "../panel";
+import { EmptyState } from "../common";
 
 interface AlumnosTableProps {
   curso: CursoResponseDTO;
@@ -282,3 +281,4 @@ export function AlumnosTable({
     </div>
   );
 }
+

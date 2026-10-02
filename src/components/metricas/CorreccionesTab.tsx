@@ -6,13 +6,10 @@ import type {
   IssueResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
-import { IssueEstadoBadge } from "./IssueEstadoBadge";
-import { PanelHeader } from "./PanelHeader";
-import { KpiCard } from "./KpiCard";
-import { PanelFilterBar } from "./PanelFilterBar";
-import { EmptyState } from "./EmptyState";
+import { IssueEstadoBadge, KpiCard, EmptyState } from "../common";
+import { PanelHeader, PanelFilterBar } from "../panel";
 import githubIcon from "@/assets/github_favicon.svg";
-import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/lib";
+import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/utils";
 
 interface CorreccionesTabProps {
   curso: CursoResponseDTO;
