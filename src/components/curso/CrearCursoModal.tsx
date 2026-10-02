@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { COMISIONES, SEMESTRES } from "@/lib";
+import { COMISIONES, SEMESTRES } from "@/constants";
 import type { CrearCursoFormData } from "@/types";
 import * as React from "react";
 

@@ -1,4 +1,4 @@
-import { getEstadoCIInfo } from "@/lib";
+import { getEstadoCIInfo } from "@/utils";
 
 interface CIStatusBadgeProps {
   estado?: string | null;

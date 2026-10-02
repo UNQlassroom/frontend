@@ -1,22 +1,20 @@
 import { useState, type ReactNode } from "react";
 import { AuthContext } from "./auth.context";
+import { STORAGE_KEYS } from "@/constants";
 import type { Usuario } from "@/types";
-
-const TOKEN_KEY = "auth_token";
-const USER_KEY = "auth_user";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem(STORAGE_KEYS.TOKEN);
   });
 
   const [user, setUser] = useState<Usuario | null>(() => {
-    const savedUser = localStorage.getItem(USER_KEY);
+    const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (!savedUser) return null;
     try {
       return JSON.parse(savedUser) as Usuario;
     } catch {
-      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(STORAGE_KEYS.USER);
       return null;
     }
   });
@@ -24,16 +22,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = (newToken: string, newUser: Usuario) => {
     setToken(newToken);
     setUser(newUser);
-    localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(newUser));
+    localStorage.setItem(STORAGE_KEYS.TOKEN, newToken);
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(newUser));
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    sessionStorage.removeItem("oauth_es_docente");
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    sessionStorage.removeItem(STORAGE_KEYS.OAUTH_ES_DOCENTE);
   };
 
   const isAuthenticated = Boolean(token && user);

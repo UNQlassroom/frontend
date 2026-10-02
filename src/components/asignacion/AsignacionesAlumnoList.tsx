@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { AsignacionAlumnoDTO, EstadoEntrega, CorreccionGrupoResponseDTO } from "@/types";
 import { obtenerCorrecciones } from "@/services";
-import { CIStatusBadge } from "./CIStatusBadge";
+import { CIStatusBadge, IssueEstadoBadge } from "../common";
 import { ConfirmarReentregaModal } from "./ConfirmarReentregaModal";
-import { IssueEstadoBadge } from "./IssueEstadoBadge";
 import githubIcon from "@/assets/github_favicon.svg";
 
 interface AsignacionesAlumnoListProps {
@@ -785,3 +784,4 @@ export function AsignacionesAlumnoList({
     </div>
   );
 }
+

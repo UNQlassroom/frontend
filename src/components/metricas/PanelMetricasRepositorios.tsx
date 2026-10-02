@@ -5,15 +5,12 @@ import type {
   CursoResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones } from "@/services";
-import { CIStatusBadge } from "./CIStatusBadge";
-import { PanelHeader } from "./PanelHeader";
-import { KpiCard } from "./KpiCard";
-import { PanelFilterBar } from "./PanelFilterBar";
-import { EmptyState } from "./EmptyState";
+import { CIStatusBadge, KpiCard, EmptyState } from "../common";
+import { PanelHeader, PanelFilterBar } from "../panel";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
-} from "@/lib";
+} from "@/utils";
 import githubIcon from "@/assets/github_favicon.svg";
 
 interface PanelMetricasRepositoriosProps {
@@ -485,3 +482,4 @@ export function PanelMetricasRepositorios({
     </div>
   );
 }
+

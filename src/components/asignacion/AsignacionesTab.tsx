@@ -9,14 +9,12 @@ import type {
 import { obtenerAsignaciones, listarTemplates } from "@/services";
 import { CrearAsignacionModal } from "./CrearAsignacionModal";
 import { CalificarAsignacionModal } from "./CalificarAsignacionModal";
-import { CIStatusBadge } from "./CIStatusBadge";
-import { PanelHeader } from "./PanelHeader";
-import { PanelFilterBar } from "./PanelFilterBar";
-import { EmptyState } from "./EmptyState";
+import { CIStatusBadge, EmptyState } from "../common";
+import { PanelHeader, PanelFilterBar } from "../panel";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
-} from "@/lib";
+} from "@/utils";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import githubIcon from "@/assets/github_favicon.svg";
 
