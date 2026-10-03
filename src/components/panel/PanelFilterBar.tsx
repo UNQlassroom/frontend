@@ -27,9 +27,9 @@ export function PanelFilterBar({
     >
       <div className="flex flex-wrap items-center gap-2.5 flex-1">
         {/* Input de búsqueda */}
-        <div className="relative min-w-[220px] flex-1 max-w-sm">
+        <div className="relative min-w-[240px] flex-1 max-w-sm">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -46,7 +46,7 @@ export function PanelFilterBar({
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full rounded-lg border border-line bg-background pl-9 pr-3 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-xl border border-line bg-background pl-10 pr-3.5 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -56,7 +56,7 @@ export function PanelFilterBar({
 
       <div className="flex items-center gap-3">
         {count !== undefined && (
-          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+          <span className="font-mono text-sm text-muted-foreground whitespace-nowrap font-medium">
             {count} {countLabel}
           </span>
         )}

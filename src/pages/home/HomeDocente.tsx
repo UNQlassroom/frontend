@@ -23,13 +23,13 @@ export const HomeDocente = () => {
     <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
       <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b border-line">
         <div className="text-left">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
             Archivador General
           </p>
-          <h1 className="mt-2 font-suez text-4xl tracking-tight">
+          <h1 className="mt-2 font-suez text-4xl sm:text-5xl tracking-tight">
             Cursos
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-base text-muted-foreground">
             Gestioná tus cursos en un solo lugar.
           </p>
         </div>
@@ -37,7 +37,7 @@ export const HomeDocente = () => {
         <button
           type="button"
           onClick={handleOpenDialog}
-          className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm shrink-0 self-start sm:self-auto"
+          className="rounded-xl bg-primary px-6 py-3 text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm shrink-0 self-start sm:self-auto"
         >
           + Crear curso
         </button>

@@ -268,11 +268,11 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
               type="button"
               onClick={() => cargarCorrecciones(selectedAsignacionId)}
               disabled={isLoadingCorrecciones}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
               title="Recargar el estado de las correcciones"
             >
               <svg
-                className={`w-3.5 h-3.5 ${
+                className={`w-4 h-4 ${
                   isLoadingCorrecciones
                     ? "animate-spin text-primary"
                     : "text-muted-foreground"
@@ -300,7 +300,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
       {isLoadingAsignaciones && (
         <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="font-mono text-sm text-muted-foreground">
             Cargando asignaciones del curso...
           </p>
         </div>
@@ -320,7 +320,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
         <>
           {/* Selector de Asignación */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-line">
-            <span className="font-mono text-xs font-semibold text-muted-foreground shrink-0 mr-1">
+            <span className="font-mono text-sm font-semibold text-muted-foreground shrink-0 mr-1">
               Asignación:
             </span>
             {asignaciones.map((asig) => {
@@ -330,7 +330,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                   key={asig.id}
                   type="button"
                   onClick={() => handleSelectAsignacion(asig.id)}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-sm font-semibold transition-colors cursor-pointer shrink-0 ${
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-xs"
                       : "bg-panel2 border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
@@ -338,7 +338,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                 >
                   <span>{asig.titulo}</span>
                   <span
-                    className={`rounded-full px-1.5 py-0.2 text-[10px] ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       isSelected
                         ? "bg-primary-foreground/20 text-primary-foreground"
                         : "bg-line/60 text-muted-foreground"
@@ -430,7 +430,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
+              className="rounded-lg border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
             >
               <option value="todos">
                 Todos los repositorios ({correcciones.length})
@@ -446,7 +446,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
           {/* Mensaje de Error si falla la consulta de correcciones */}
           {error && (
             <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">
-              <p className="text-xs font-mono text-destructive">{error}</p>
+              <p className="text-sm font-mono text-destructive">{error}</p>
             </div>
           )}
 
@@ -454,7 +454,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
           {isLoadingCorrecciones && (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="font-mono text-xs text-muted-foreground">
+              <p className="font-mono text-sm text-muted-foreground">
                 Consultando correcciones desde GitHub...
               </p>
             </div>
@@ -484,14 +484,14 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                     return (
                       <div
                         key={grupo.grupoId}
-                        className="rounded-2xl border border-line bg-panel p-5 shadow-xs space-y-4 transition-all hover:border-foreground/20 animate-rise"
+                        className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-4.5 transition-all hover:border-foreground/20 animate-rise"
                       >
                         {/* Cabecera del Grupo/Repo */}
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-line/60">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3.5 border-b border-line/60">
                           <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                               {/* Nombre de Grupo o Alumno */}
-                              <h4 className="font-display text-base font-bold text-foreground">
+                              <h4 className="font-display text-lg sm:text-xl font-bold text-foreground">
                                 {grupo.nombre ||
                                   (grupo.integrantes.length === 1
                                     ? `@${grupo.integrantes[0]}`
@@ -499,7 +499,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               </h4>
 
                               {/* Badge con cantidad de correcciones */}
-                              <span className="font-mono text-[11px] px-2 py-0.5 rounded-full border border-line bg-panel2 text-muted-foreground">
+                              <span className="font-mono text-xs px-2.5 py-0.5 rounded-full border border-line bg-panel2 text-muted-foreground font-semibold">
                                 {totalGrupoCorrecciones}{" "}
                                 {totalGrupoCorrecciones === 1
                                   ? "corrección"
@@ -508,7 +508,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                             </div>
 
                             {/* Integrantes y Repositorio */}
-                            <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-muted-foreground">
                               {grupo.integrantes.length > 0 && (
                                 <span>
                                   Integrantes:{" "}
@@ -527,21 +527,21 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                           </div>
 
                           {/* Botones de acción directos a GitHub */}
-                          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+                          <div className="flex items-center gap-2.5 self-start md:self-auto shrink-0">
                             <a
                               href={allIssuesUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors shadow-2xs"
+                              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors shadow-2xs"
                               title="Ver correcciones en GitHub"
                             >
                               <img
                                 src={githubIcon}
                                 alt="GitHub"
-                                className="w-3.5 h-3.5 opacity-80"
+                                className="w-4 h-4 opacity-80"
                               />
                               <span>Ver todos en GitHub ({totalGrupoCorrecciones})</span>
-                              <span className="text-[10px] text-muted-foreground">
+                              <span className="text-xs text-muted-foreground">
                                 ↗
                               </span>
                             </a>
@@ -550,18 +550,18 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               href={newIssueUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
                               title="Crear una nueva corrección en el repositorio de GitHub"
                             >
                               <span>+ Crear corrección</span>
-                              <span className="text-[10px]">↗</span>
+                              <span className="text-xs">↗</span>
                             </a>
                           </div>
                         </div>
 
                         {/* Lista de Correcciones dentro del grupo */}
                         {grupo.issues.length === 0 ? (
-                          <div className="p-4 rounded-xl border border-line/60 bg-panel2/40 text-center font-mono text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-3">
+                          <div className="p-4 sm:p-5 rounded-xl border border-line/60 bg-panel2/40 text-center font-mono text-sm text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-3">
                             <span>
                               Aún no se crearon correcciones en este repositorio.
                             </span>
@@ -569,17 +569,17 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               href={newIssueUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary hover:underline font-semibold font-mono text-xs inline-flex items-center gap-1"
+                              className="text-primary hover:underline font-semibold font-mono text-sm inline-flex items-center gap-1"
                             >
                               Crear la primera corrección ↗
                             </a>
                           </div>
                         ) : (
-                          <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden font-mono text-xs">
+                          <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden font-mono text-sm">
                             {grupo.issues.map((issue: IssueResponseDTO) => (
                               <div
                                 key={issue.numero}
-                                className="p-3.5 hover:bg-line/20 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                                className="p-3.5 sm:p-4 hover:bg-line/20 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                               >
                                 <div className="space-y-1.5 min-w-0 flex-1">
                                   <div className="flex flex-wrap items-center gap-2">
@@ -598,7 +598,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     <IssueEstadoBadge estado={issue.estado} />
                                     {issue.tieneCommitsPosteriores && (
                                       <span
-                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                                         title="El alumno hizo commits posteriores a la creación de esta corrección"
                                       >
                                         <span>⚡ Commits posteriores detectados</span>
@@ -606,7 +606,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     )}
                                   </div>
 
-                                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                                     <span>Por @{issue.autor}</span>
                                     <span>•</span>
                                     <span>
@@ -639,15 +639,15 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     href={issue.htmlUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors shadow-2xs"
+                                    className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-line/50 transition-colors shadow-2xs"
                                   >
                                     <img
                                         src={githubIcon}
                                         alt="GitHub"
-                                        className="w-3.5 h-3.5 opacity-80"
+                                        className="w-4 h-4 opacity-80"
                                     />
                                     <span>Ver en GitHub</span>
-                                    <span className="text-[10px]">↗</span>
+                                    <span className="text-xs">↗</span>
                                   </a>
                                 </div>
                               </div>
