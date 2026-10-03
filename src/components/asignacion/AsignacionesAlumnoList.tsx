@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { AsignacionAlumnoDTO, EstadoEntrega, CorreccionGrupoResponseDTO } from "@/types";
 import { obtenerCorrecciones } from "@/services";
-import { CIStatusBadge, IssueEstadoBadge } from "../common";
+import { CIStatusBadge, IssueEstadoBadge, KpiCard, EmptyState } from "@/components/common";
+import { PanelFilterBar } from "@/components/panel";
 import { ConfirmarReentregaModal } from "./ConfirmarReentregaModal";
 import githubIcon from "@/assets/github_favicon.svg";
 
@@ -25,6 +26,7 @@ export function AsignacionesAlumnoList({
   entregandoId,
 }: AsignacionesAlumnoListProps) {
   const [filtro, setFiltro] = useState<EstadoEntrega | "todas">("todas");
+  const [searchTerm, setSearchTerm] = useState("");
   const [copiedId, setCopiedId] = useState<string | number | null>(null);
   const [entregaError, setEntregaError] = useState<{ id: string | number; message: string } | null>(null);
   const [asignacionParaReentregar, setAsignacionParaReentregar] = useState<AsignacionAlumnoDTO | null>(null);
@@ -42,17 +44,28 @@ export function AsignacionesAlumnoList({
     >
   >({});
 
-  const asignacionesFiltradas =
-    filtro === "todas"
-      ? asignaciones
-      : asignaciones.filter((a) => a.estadoEntrega === filtro);
-
-  const conteo = {
+  const conteo = useMemo(() => ({
     todas: asignaciones.length,
     pendiente: asignaciones.filter((a) => a.estadoEntrega === "pendiente").length,
     entregado: asignaciones.filter((a) => a.estadoEntrega === "entregado").length,
     corregido: asignaciones.filter((a) => a.estadoEntrega === "corregido").length,
-  };
+  }), [asignaciones]);
+
+  const asignacionesFiltradas = useMemo(() => {
+    return asignaciones.filter((asig) => {
+      const matchTexto =
+        asig.titulo.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+        (asig.descripcion &&
+          asig.descripcion.toLowerCase().includes(searchTerm.toLowerCase().trim())) ||
+        (asig.repoNombre &&
+          asig.repoNombre.toLowerCase().includes(searchTerm.toLowerCase().trim()));
+
+      if (!matchTexto) return false;
+
+      if (filtro === "todas") return true;
+      return asig.estadoEntrega === filtro;
+    });
+  }, [asignaciones, searchTerm, filtro]);
 
   const handleCopyClone = (asigId: string | number, repoUrl: string) => {
     const cloneCmd = `git clone ${repoUrl}.git`;
@@ -163,9 +176,9 @@ export function AsignacionesAlumnoList({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3">
+      <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="font-mono text-sm text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           Cargando tus asignaciones y notas...
         </p>
       </div>
@@ -174,13 +187,13 @@ export function AsignacionesAlumnoList({
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-7 text-center animate-rise">
-        <p className="font-mono text-sm text-destructive mb-3.5">{error}</p>
+      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center animate-rise">
+        <p className="font-mono text-xs text-destructive mb-3">{error}</p>
         {onRetry && (
           <button
             type="button"
             onClick={onRetry}
-            className="rounded-lg bg-destructive px-4.5 py-2 font-mono text-sm font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
           >
             Reintentar
           </button>
@@ -189,77 +202,102 @@ export function AsignacionesAlumnoList({
     );
   }
 
+  if (asignaciones.length === 0) {
+    return (
+      <EmptyState
+        icon="📚"
+        title="No tenés asignaciones asignadas"
+        description="Aún no se han publicado asignaciones en este curso. Las nuevas asignaciones aparecerán aquí junto con sus fechas de entrega y repositorio asignado."
+      />
+    );
+  }
+
+  const pct = (val: number) =>
+    conteo.todas > 0 ? Math.round((val / conteo.todas) * 100) : 0;
+
   return (
-    <div className="space-y-4">
-      {/* Barra de Filtros por Estado */}
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
-        <div className="flex items-center gap-2 font-mono text-sm">
-          <button
-            type="button"
-            onClick={() => setFiltro("todas")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
-              filtro === "todas"
-                ? "bg-foreground text-background font-semibold shadow-xs"
-                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
-            }`}
-          >
-            Todas ({conteo.todas})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFiltro("pendiente")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
-              filtro === "pendiente"
-                ? "bg-amber-600 text-white font-semibold shadow-xs"
-                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
-            }`}
-          >
-            Pendientes ({conteo.pendiente})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFiltro("entregado")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
-              filtro === "entregado"
-                ? "bg-sky-600 text-white font-semibold shadow-xs"
-                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
-            }`}
-          >
-            Entregadas ({conteo.entregado})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFiltro("corregido")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
-              filtro === "corregido"
-                ? "bg-emerald-600 text-white font-semibold shadow-xs"
-                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
-            }`}
-          >
-            Corregidas ({conteo.corregido})
-          </button>
-        </div>
+    <div className="space-y-6">
+      {/* Tarjetas KPI de Estado de Entregas */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <KpiCard
+          label="Total Asignaciones"
+          value={conteo.todas}
+          subtext="En este curso"
+          variant="default"
+          isSelected={filtro === "todas"}
+          onClick={() => setFiltro("todas")}
+          title="Click para ver todas las asignaciones"
+        />
+        <KpiCard
+          label="Pendientes"
+          value={conteo.pendiente}
+          subtext={`${pct(conteo.pendiente)}% por entregar`}
+          variant="amber"
+          isSelected={filtro === "pendiente"}
+          onClick={() => setFiltro("pendiente")}
+          title="Click para filtrar asignaciones pendientes"
+        />
+        <KpiCard
+          label="Entregadas"
+          value={conteo.entregado}
+          subtext={`${pct(conteo.entregado)}% entregadas`}
+          variant="sky"
+          isSelected={filtro === "entregado"}
+          onClick={() => setFiltro("entregado")}
+          title="Click para filtrar asignaciones entregadas"
+        />
+        <KpiCard
+          label="Corregidas"
+          value={conteo.corregido}
+          subtext={`${pct(conteo.corregido)}% corregidas`}
+          variant="emerald"
+          isSelected={filtro === "corregido"}
+          onClick={() => setFiltro("corregido")}
+          title="Click para filtrar asignaciones corregidas"
+        />
       </div>
 
-      {/* Lista de Asignaciones */}
-      {asignaciones.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-panel p-10 text-center animate-rise">
-          <div className="mx-auto w-14 h-14 rounded-xl bg-line/40 flex items-center justify-center text-2xl mb-3 text-muted-foreground">
-            📚
-          </div>
-          <h3 className="font-display text-xl font-bold text-foreground">
-            No tenés asignaciones asignadas
-          </h3>
-          <p className="mt-2 font-mono text-sm text-muted-foreground leading-relaxed max-w-lg mx-auto">
-            Aún no se han publicado asignaciones en este curso. Las nuevas asignaciones aparecerán aquí junto con sus fechas de entrega y repositorio asignado.
-          </p>
-        </div>
-      ) : asignacionesFiltradas.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-panel p-8 text-center animate-rise">
-          <p className="font-mono text-sm text-muted-foreground">
-            No hay asignaciones con el estado seleccionado ({filtro}).
-          </p>
-        </div>
+      {/* Barra de Filtros y Búsqueda */}
+      <PanelFilterBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar asignación por título, descripción o repo..."
+        count={asignacionesFiltradas.length}
+        countLabel={
+          asignacionesFiltradas.length === 1 ? "asignación" : "asignaciones"
+        }
+      >
+        <select
+          value={filtro}
+          onChange={(e) => setFiltro(e.target.value as EstadoEntrega | "todas")}
+          className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+        >
+          <option value="todas">Todas las entregas ({conteo.todas})</option>
+          <option value="pendiente">Solo pendientes ({conteo.pendiente})</option>
+          <option value="entregado">Solo entregadas ({conteo.entregado})</option>
+          <option value="corregido">Solo corregidas ({conteo.corregido})</option>
+        </select>
+      </PanelFilterBar>
+
+      {/* Lista de Asignaciones o EmptyState de búsqueda */}
+      {asignacionesFiltradas.length === 0 ? (
+        <EmptyState
+          icon="🔍"
+          title="No se encontraron asignaciones"
+          description="No hay asignaciones que coincidan con el término de búsqueda o el filtro de estado seleccionado."
+          action={
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm("");
+                setFiltro("todas");
+              }}
+              className="rounded-xl border border-line bg-panel2 px-5 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+            >
+              Restablecer filtros
+            </button>
+          }
+        />
       ) : (
         <div className="space-y-4">
           {asignacionesFiltradas.map((asig) => {

@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useCursoDetalle, useAsignacionesAlumno } from "@/hooks";
-import { AsignacionesAlumnoList } from "@/components";
+import { AsignacionesAlumnoList, PanelHeader } from "@/components";
 
 export const CursoDetalleAlumno = () => {
   const { id } = useParams<{ id: string }>();
@@ -118,39 +118,34 @@ export const CursoDetalleAlumno = () => {
         </div>
       </section>
 
-      {/* Lista Principal de Asignaciones y Trabajos Prácticos */}
-      <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3">
-          <div>
-            <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
-              Asignaciones
-            </h2>
-            <p className="font-mono text-sm text-muted-foreground mt-0.5">
-              Aquí podrás ver tus asignaciones, su fecha de entrega, calificación, correcciones y feedback docente.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={cargarAsignaciones}
-            disabled={isLoadingAsignaciones}
-            className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
-            title="Recargar asignaciones y verificar estado actualizado"
-          >
-            <svg
-              className={`w-3.5 h-3.5 ${isLoadingAsignaciones ? "animate-spin text-primary" : "text-muted-foreground"}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+      {/* Panel Principal de Asignaciones y Trabajos Prácticos */}
+      <section className="space-y-6">
+        <PanelHeader
+          title="Panel de Asignaciones"
+          description="Aquí podrás ver tus asignaciones, su fecha de entrega, calificación, correcciones y feedback docente."
+          actions={
+            <button
+              type="button"
+              onClick={cargarAsignaciones}
+              disabled={isLoadingAsignaciones}
+              className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
+              title="Recargar asignaciones y verificar estado actualizado"
             >
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-            <span>{isLoadingAsignaciones ? "Actualizando..." : "Actualizar"}</span>
-          </button>
-        </div>
+              <svg
+                className={`w-4 h-4 ${isLoadingAsignaciones ? "animate-spin text-primary" : "text-muted-foreground"}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
+              <span>{isLoadingAsignaciones ? "Actualizando..." : "Actualizar asignaciones"}</span>
+            </button>
+          }
+        />
 
         <AsignacionesAlumnoList
           asignaciones={asignaciones}
