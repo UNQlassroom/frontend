@@ -98,7 +98,7 @@ export function AsignacionesAlumnoList({
         ...prev,
         [asigId]: {
           loading: false,
-          error: "No se pudieron obtener las correcciones e issues.",
+          error: "No se pudieron obtener las correcciones.",
           grupo: null,
         },
       }));
@@ -432,7 +432,7 @@ export function AsignacionesAlumnoList({
                         {isCorreccionesOpen ? "▾" : "▸"}
                       </span>
                       <span className="font-semibold underline decoration-line group-hover:decoration-foreground">
-                        {isCorreccionesOpen ? "Ocultar correcciones e issues en GitHub" : "Ver correcciones e issues en GitHub"}
+                        {isCorreccionesOpen ? "Ocultar correcciones en GitHub" : "Ver correcciones en GitHub"}
                       </span>
                       {asigCorreccion?.grupo?.issues && (
                         <span className="rounded-full bg-line/60 px-2 py-0.2 text-[10px] text-muted-foreground font-semibold">
@@ -454,7 +454,7 @@ export function AsignacionesAlumnoList({
                             onClick={() => cargarCorreccionParaAsig(asigIdNum)}
                             disabled={asigCorreccion?.loading}
                             className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
-                            title="Recargar issues desde GitHub"
+                            title="Recargar correcciones desde GitHub"
                           >
                             <svg
                               className={`w-3 h-3 ${asigCorreccion?.loading ? "animate-spin text-primary" : ""}`}
@@ -475,7 +475,7 @@ export function AsignacionesAlumnoList({
                           <div className="flex items-center justify-center py-6 gap-2">
                             <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                             <span className="font-mono text-xs text-muted-foreground">
-                              Consultando issues en GitHub...
+                              Consultando correcciones en GitHub...
                             </span>
                           </div>
                         ) : asigCorreccion?.error ? (
@@ -484,7 +484,7 @@ export function AsignacionesAlumnoList({
                           </div>
                         ) : !asigCorreccion?.grupo || asigCorreccion.grupo.issues.length === 0 ? (
                           <div className="p-3.5 rounded-lg border border-line/60 bg-panel text-center font-mono text-xs text-muted-foreground">
-                            <span>No tenés correcciones ni issues asignados para este trabajo en GitHub.</span>
+                            <span>No tenés correcciones asignadas para esta asignación en GitHub.</span>
                           </div>
                         ) : (
                           <div className="divide-y divide-line/60 rounded-lg border border-line bg-panel overflow-hidden font-mono text-xs">

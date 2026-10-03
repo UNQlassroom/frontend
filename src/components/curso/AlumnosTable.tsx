@@ -55,8 +55,8 @@ export function AlumnosTable({
     <div className="space-y-6 animate-rise">
       {/* Encabezado del Panel de Alumnos */}
       <PanelHeader
-        title="Panel de Alumnos Matriculados"
-        description="Nómina de estudiantes, estado de membresía en GitHub y sincronización con la organización."
+        title="Panel de Alumnos"
+        description="Listado de alumnos, estado de membresía en GitHub y sincronización con la organización."
         actions={
           <>
             {onSync && (

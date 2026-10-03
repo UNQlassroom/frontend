@@ -24,7 +24,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     CorreccionGrupoResponseDTO[]
   >([]);
   const [isLoadingAsignaciones, setIsLoadingAsignaciones] = useState(true);
-  const [isLoadingCorrecciones, setIsLoadingCorrecciones] = useState(false);
+  const [isLoadingCorrecciones, setIsLoadingCorrecciones] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Filtros
@@ -41,6 +41,10 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
           setAsignaciones(res.data);
           if (res.data.length > 0) {
             setSelectedAsignacionId(res.data[0].id);
+            setIsLoadingCorrecciones(true);
+          } else {
+            setSelectedAsignacionId(null);
+            setIsLoadingCorrecciones(false);
           }
         }
       })
@@ -48,6 +52,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
         if (!ignore) {
           console.error("Error al cargar asignaciones:", err);
           setError("No se pudieron cargar las asignaciones del curso.");
+          setIsLoadingCorrecciones(false);
         }
       })
       .finally(() => {
@@ -89,6 +94,14 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     },
     [curso.id]
   );
+
+  const handleSelectAsignacion = (asignacionId: number) => {
+    if (asignacionId === selectedAsignacionId) return;
+    setSelectedAsignacionId(asignacionId);
+    setIsLoadingCorrecciones(true);
+    setError(null);
+    setCorrecciones([]);
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -316,7 +329,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                 <button
                   key={asig.id}
                   type="button"
-                  onClick={() => setSelectedAsignacionId(asig.id)}
+                  onClick={() => handleSelectAsignacion(asig.id)}
                   className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-xs"
@@ -442,7 +455,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="font-mono text-xs text-muted-foreground">
-                Consultando correcciones desde GitHub y base de datos...
+                Consultando correcciones desde GitHub...
               </p>
             </div>
           )}
@@ -527,7 +540,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                 alt="GitHub"
                                 className="w-3.5 h-3.5 opacity-80"
                               />
-                              <span>Ver en GitHub ({totalGrupoCorrecciones})</span>
+                              <span>Ver todos en GitHub ({totalGrupoCorrecciones})</span>
                               <span className="text-[10px] text-muted-foreground">
                                 ↗
                               </span>
@@ -628,6 +641,11 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1 rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors shadow-2xs"
                                   >
+                                    <img
+                                        src={githubIcon}
+                                        alt="GitHub"
+                                        className="w-3.5 h-3.5 opacity-80"
+                                    />
                                     <span>Ver en GitHub</span>
                                     <span className="text-[10px]">↗</span>
                                   </a>
