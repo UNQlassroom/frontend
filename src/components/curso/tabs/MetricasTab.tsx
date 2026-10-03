@@ -5,15 +5,15 @@ import type {
   CursoResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones } from "@/services";
-import { CIStatusBadge, KpiCard, EmptyState } from "../common";
-import { PanelHeader, PanelFilterBar } from "../panel";
+import { CIStatusBadge, KpiCard, EmptyState } from "@/components/common";
+import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
 } from "@/utils";
 import githubIcon from "@/assets/github_favicon.svg";
 
-interface PanelMetricasRepositoriosProps {
+export interface MetricasTabProps {
   curso: CursoResponseDTO;
   alumnos?: AlumnoMiembroDeUnCursoDTO[];
   asignaciones?: AsignacionResponseDTO[];
@@ -31,9 +31,9 @@ interface ItemMetrica {
   branch: string;
 }
 
-export function PanelMetricasRepositorios({
+export function MetricasTab({
   curso,
-}: PanelMetricasRepositoriosProps) {
+}: MetricasTabProps) {
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
   const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(
     null

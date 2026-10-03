@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useCursoDetalle, useAlumnos } from "@/hooks";
 import {
-  AlumnosTable,
+  AlumnosTab,
   AsignacionesTab,
-  PanelMetricasRepositorios,
   CorreccionesTab,
+  MetricasTab,
   InvitarAlumnosModal,
 } from "@/components";
 
@@ -221,7 +221,7 @@ export const CursoDetalleDocente = () => {
         {/* Contenido de la pestaña activa */}
         <div className="pt-2">
           {activeTab === "alumnos" && (
-            <AlumnosTable
+            <AlumnosTab
               curso={curso}
               alumnos={alumnos}
               isLoading={isLoadingAlumnos}
@@ -242,7 +242,7 @@ export const CursoDetalleDocente = () => {
           )}
 
           {activeTab === "metricas" && (
-            <PanelMetricasRepositorios curso={curso} alumnos={alumnos} />
+            <MetricasTab curso={curso} alumnos={alumnos} />
           )}
         </div>
       </section>

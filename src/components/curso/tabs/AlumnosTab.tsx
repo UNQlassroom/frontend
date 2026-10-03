@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import type { AlumnoMiembroDeUnCursoDTO, CursoResponseDTO } from "@/types";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
-import { PanelHeader, PanelFilterBar } from "../panel";
-import { EmptyState } from "../common";
+import { PanelHeader, PanelFilterBar } from "@/components/panel";
+import { EmptyState } from "@/components/common";
 
-interface AlumnosTableProps {
+export interface AlumnosTabProps {
   curso: CursoResponseDTO;
   alumnos: AlumnoMiembroDeUnCursoDTO[];
   isLoading: boolean;
@@ -15,7 +15,7 @@ interface AlumnosTableProps {
   onOpenInvitarModal: () => void;
 }
 
-export function AlumnosTable({
+export function AlumnosTab({
   alumnos,
   isLoading,
   isSyncing = false,
@@ -23,7 +23,7 @@ export function AlumnosTable({
   onRetry,
   onSync,
   onOpenInvitarModal,
-}: AlumnosTableProps) {
+}: AlumnosTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
 
@@ -281,4 +281,3 @@ export function AlumnosTable({
     </div>
   );
 }
-

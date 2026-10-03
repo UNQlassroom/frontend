@@ -6,12 +6,12 @@ import type {
   IssueResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
-import { IssueEstadoBadge, KpiCard, EmptyState } from "../common";
-import { PanelHeader, PanelFilterBar } from "../panel";
+import { IssueEstadoBadge, KpiCard, EmptyState } from "@/components/common";
+import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import githubIcon from "@/assets/github_favicon.svg";
 import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/utils";
 
-interface CorreccionesTabProps {
+export interface CorreccionesTabProps {
   curso: CursoResponseDTO;
 }
 

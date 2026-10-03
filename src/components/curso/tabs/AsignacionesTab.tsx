@@ -7,10 +7,12 @@ import type {
   TemplateRepoResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones, listarTemplates } from "@/services";
-import { CrearAsignacionModal } from "./CrearAsignacionModal";
-import { CalificarAsignacionModal } from "./CalificarAsignacionModal";
-import { CIStatusBadge, EmptyState } from "../common";
-import { PanelHeader, PanelFilterBar } from "../panel";
+import {
+  CrearAsignacionModal,
+  CalificarAsignacionModal,
+} from "@/components/asignacion";
+import { CIStatusBadge, EmptyState } from "@/components/common";
+import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
@@ -18,7 +20,7 @@ import {
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import githubIcon from "@/assets/github_favicon.svg";
 
-interface AsignacionesTabProps {
+export interface AsignacionesTabProps {
   curso: CursoResponseDTO;
   alumnos: AlumnoMiembroDeUnCursoDTO[];
 }
