@@ -11,7 +11,7 @@ export const HomeAlumno = () => {
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
             Espacio del Alumno
           </p>
-          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+          <h1 className="mt-2 font-suez text-4xl tracking-tight">
             Cursos
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
