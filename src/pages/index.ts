@@ -1,2 +1,3 @@
-export * from "./HomeProfesor";
-export * from "./HomeAlumno";
+export * from "./auth";
+export * from "./home";
+export * from "./curso";

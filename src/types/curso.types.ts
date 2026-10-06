@@ -17,9 +17,8 @@ export interface CursoResponseDTO {
   anio: number;
   semestre: number;
   comision: number;
-  descripcion: string;
-  githubTeamId?: number | null;
-  githubTeamSlug?: string | null;
+  descripcion?: string | null;
+  ownerUsername?: string | null;
 }
 
 /**
@@ -32,33 +31,15 @@ export interface CrearCursoFormData {
 }
 
 /**
- * Datos del repositorio de GitHub asociado al alumno
+ * Datos del repositorio de GitHub asociado a una asignación o grupo
  */
 export interface RepositorioDTO {
+  id?: number | null;
   nombre: string;
   htmlUrl: string;
   ultimoCommit?: string | null;
   fechaUltimoCommit?: string | null;
   estadoCI?: "sin_ci" | "success" | "failure" | "pending" | string | null;
-}
-
-/**
- * Alumno miembro de un equipo en GitHub
- */
-export interface AlumnoTeamMemberDTO {
-  username: string;
-  role: string;
-  state: string;
-  repositorio?: RepositorioDTO | null;
-}
-
-/**
- * Respuesta que devuelve el backend con los alumnos de un curso
- */
-export interface ObtenerAlumnosResponseDTO {
-  cursoId: number;
-  teamSlug: string;
-  alumnos: AlumnoTeamMemberDTO[];
 }
 
 /**
@@ -69,20 +50,18 @@ export interface AgregarAlumnosRequestDTO {
 }
 
 /**
- * Membresía de un alumno en el equipo de GitHub
+ * Alumno perteneciente al curso (sin repositorio directo)
  */
-export interface AlumnoTeamMembershipDTO {
+export interface AlumnoMiembroDeUnCursoDTO {
   username: string;
   role: string;
-  state: string;
-  repositorio?: RepositorioDTO | null;
+  state: "active" | "pending" | string;
 }
 
 /**
- * Respuesta del backend al agregar alumnos
+ * Respuesta del backend al consultar/sincronizar alumnos
  */
-export interface AgregarAlumnosResponseDTO {
+export interface AlumnosDeUnCursoResponseDTO {
   cursoId: number;
-  teamSlug: string;
-  alumnos: AlumnoTeamMembershipDTO[];
+  alumnos: AlumnoMiembroDeUnCursoDTO[];
 }
