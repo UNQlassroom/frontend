@@ -129,9 +129,7 @@ export function MetricasTab({
             alumnoUsername:
               grupo.nombre ||
               (grupo.integrantes.length > 0
-                ? grupo.integrantes
-                    .map((u) => (typeof u === "string" ? u : u.username))
-                    .join(", ")
+                ? grupo.integrantes.map((u) => u.username).join(", ")
                 : "Sin asignar"),
             estadoCI: ["success", "failure", "pending", "sin_ci"].includes(
               estadoValido

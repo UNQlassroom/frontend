@@ -95,7 +95,7 @@ function CalificarAsignacionContent({
               <span className="font-mono text-sm sm:text-base font-semibold text-primary">
                 {grupo.nombre ||
                   (grupo.integrantes.length === 1
-                    ? `@${typeof grupo.integrantes[0] === "string" ? grupo.integrantes[0] : grupo.integrantes[0]?.username}`
+                    ? `@${grupo.integrantes[0]?.username}`
                     : "Grupo")}
               </span>
             </div>
