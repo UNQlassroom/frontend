@@ -1,14 +1,14 @@
 import { useState, useCallback } from "react";
 import { obtenerAlumnos, sincronizarAlumnos as sincronizarAlumnosService } from "@/services";
-import type { AlumnosDeUnCursoResponseDTO } from "@/types";
+import type { CursoAlumnosResponseDTO } from "@/types";
 
 export const useAlumnos = () => {
-  const [alumnosData, setAlumnosData] = useState<AlumnosDeUnCursoResponseDTO | null>(null);
+  const [alumnosData, setAlumnosData] = useState<CursoAlumnosResponseDTO | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const cargarAlumnos = useCallback(async (cursoId: number): Promise<AlumnosDeUnCursoResponseDTO | null> => {
+  const cargarAlumnos = useCallback(async (cursoId: number): Promise<CursoAlumnosResponseDTO | null> => {
     setIsLoading(true);
     setError(null);
     try {
@@ -33,7 +33,7 @@ export const useAlumnos = () => {
     }
   }, []);
 
-  const sincronizarAlumnos = useCallback(async (cursoId: number): Promise<AlumnosDeUnCursoResponseDTO | null> => {
+  const sincronizarAlumnos = useCallback(async (cursoId: number): Promise<CursoAlumnosResponseDTO | null> => {
     setIsSyncing(true);
     setError(null);
     try {

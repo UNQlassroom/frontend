@@ -1,4 +1,5 @@
 import type { RepositorioDTO } from "./curso.types";
+import type { UsuarioResponseDTO } from "./auth.types";
 
 export type TipoAsignacion = "INDIVIDUAL" | "GRUPAL";
 
@@ -19,7 +20,7 @@ export interface CrearAsignacionRequestDTO {
 export interface GrupoAsignacionResponseDTO {
   id: number;
   nombre: string | null;
-  integrantes: string[];
+  integrantes: UsuarioResponseDTO[];
   repositorio?: RepositorioDTO | null;
   entregada: boolean;
   fechaEntregada?: string | null;
@@ -41,8 +42,7 @@ export interface AsignacionResponseDTO {
 }
 
 export interface CalificarAsignacionRequestDTO {
-  grupoId?: number;
-  alumnoUsername?: string;
+  grupoId: number;
   calificacion: number;
   observaciones?: string | null;
 }

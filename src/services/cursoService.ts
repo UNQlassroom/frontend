@@ -3,16 +3,16 @@ import type {
   ApiResponse,
   CursoRequestDTO,
   CursoResponseDTO,
-  AlumnosDeUnCursoResponseDTO,
+  CursoAlumnosResponseDTO,
   AgregarAlumnosRequestDTO,
 } from "@/types";
 
 export const cursoService = {
   /**
-   * Envía la petición POST http://localhost:8080/cursos/crear
+   * Envía la petición POST http://localhost:8080/cursos
    */
   crearCurso: (data: CursoRequestDTO): Promise<ApiResponse<CursoResponseDTO>> => {
-    return post<CursoResponseDTO, CursoRequestDTO>("/cursos/crear", data);
+    return post<CursoResponseDTO, CursoRequestDTO>("/cursos", data);
   },
 
   /**
@@ -51,8 +51,8 @@ export const cursoService = {
   /**
    * Envía la petición GET http://localhost:8080/cursos/{id}/alumnos
    */
-  obtenerAlumnos: (id: number): Promise<ApiResponse<AlumnosDeUnCursoResponseDTO>> => {
-    return get<AlumnosDeUnCursoResponseDTO>(`/cursos/${id}/alumnos`);
+  obtenerAlumnos: (id: number): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
+    return get<CursoAlumnosResponseDTO>(`/cursos/${id}/alumnos`);
   },
 
   /**
@@ -61,8 +61,8 @@ export const cursoService = {
   agregarAlumnos: (
     id: number,
     data: AgregarAlumnosRequestDTO
-  ): Promise<ApiResponse<AlumnosDeUnCursoResponseDTO>> => {
-    return post<AlumnosDeUnCursoResponseDTO, AgregarAlumnosRequestDTO>(
+  ): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
+    return post<CursoAlumnosResponseDTO, AgregarAlumnosRequestDTO>(
       `/cursos/${id}/alumnos`,
       data
     );
@@ -72,8 +72,8 @@ export const cursoService = {
    * Envía la petición POST http://localhost:8080/cursos/{id}/alumnos/sync
    * Sincroniza con GitHub el estado de las invitaciones pendientes
    */
-  sincronizarAlumnos: (id: number): Promise<ApiResponse<AlumnosDeUnCursoResponseDTO>> => {
-    return post<AlumnosDeUnCursoResponseDTO, Record<string, never>>(
+  sincronizarAlumnos: (id: number): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
+    return post<CursoAlumnosResponseDTO, Record<string, never>>(
       `/cursos/${id}/alumnos/sync`,
       {}
     );

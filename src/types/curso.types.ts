@@ -52,7 +52,7 @@ export interface AgregarAlumnosRequestDTO {
 /**
  * Alumno perteneciente al curso (sin repositorio directo)
  */
-export interface AlumnoMiembroDeUnCursoDTO {
+export interface AlumnoResponseDTO {
   username: string;
   role: string;
   state: "active" | "pending" | string;
@@ -61,7 +61,7 @@ export interface AlumnoMiembroDeUnCursoDTO {
 /**
  * Respuesta del backend al consultar/sincronizar alumnos
  */
-export interface AlumnosDeUnCursoResponseDTO {
+export interface CursoAlumnosResponseDTO {
   cursoId: number;
-  alumnos: AlumnoMiembroDeUnCursoDTO[];
+  alumnos: AlumnoResponseDTO[];
 }

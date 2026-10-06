@@ -1,12 +1,12 @@
 import { useState, useMemo } from "react";
-import type { AlumnoMiembroDeUnCursoDTO, CursoResponseDTO } from "@/types";
+import type { AlumnoResponseDTO, CursoResponseDTO } from "@/types";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import { EmptyState } from "@/components/common";
 
 export interface AlumnosTabProps {
   curso: CursoResponseDTO;
-  alumnos: AlumnoMiembroDeUnCursoDTO[];
+  alumnos: AlumnoResponseDTO[];
   isLoading: boolean;
   isSyncing?: boolean;
   error: string | null;

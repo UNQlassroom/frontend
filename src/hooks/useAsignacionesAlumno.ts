@@ -20,7 +20,9 @@ function mapAsignacionesDTO(
     // Buscar el grupo donde participa el alumno logueado, o fallback al primer grupo
     const miGrupo =
       asig.grupos?.find((g) =>
-        currentUsername ? g.integrantes?.includes(currentUsername) : false
+        currentUsername
+          ? g.integrantes?.some((u) => u.username === currentUsername)
+          : false
       ) ?? asig.grupos?.[0];
     const repo = miGrupo?.repositorio;
 
@@ -57,7 +59,7 @@ function mapAsignacionesDTO(
       fechaCalificacion: miGrupo?.fechaCalificacion ?? null,
       grupoId: miGrupo?.id,
       grupoNombre: miGrupo?.nombre,
-      integrantes: miGrupo?.integrantes,
+      integrantes: miGrupo?.integrantes?.map((u) => u.username),
       repoNombre: repo?.nombre,
       repoUrl: repo?.htmlUrl,
       releaseUrl: miGrupo?.releaseUrl ?? null,
