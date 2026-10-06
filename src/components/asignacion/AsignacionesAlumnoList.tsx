@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { AsignacionAlumnoDTO, EstadoEntrega, CorreccionGrupoResponseDTO } from "@/types";
 import { obtenerCorrecciones } from "@/services";
-import { CIStatusBadge, IssueEstadoBadge } from "../common";
+import { CIStatusBadge, IssueEstadoBadge, KpiCard, EmptyState } from "@/components/common";
+import { PanelFilterBar } from "@/components/panel";
 import { ConfirmarReentregaModal } from "./ConfirmarReentregaModal";
 import githubIcon from "@/assets/github_favicon.svg";
 
@@ -25,6 +26,7 @@ export function AsignacionesAlumnoList({
   entregandoId,
 }: AsignacionesAlumnoListProps) {
   const [filtro, setFiltro] = useState<EstadoEntrega | "todas">("todas");
+  const [searchTerm, setSearchTerm] = useState("");
   const [copiedId, setCopiedId] = useState<string | number | null>(null);
   const [entregaError, setEntregaError] = useState<{ id: string | number; message: string } | null>(null);
   const [asignacionParaReentregar, setAsignacionParaReentregar] = useState<AsignacionAlumnoDTO | null>(null);
@@ -42,17 +44,28 @@ export function AsignacionesAlumnoList({
     >
   >({});
 
-  const asignacionesFiltradas =
-    filtro === "todas"
-      ? asignaciones
-      : asignaciones.filter((a) => a.estadoEntrega === filtro);
-
-  const conteo = {
+  const conteo = useMemo(() => ({
     todas: asignaciones.length,
     pendiente: asignaciones.filter((a) => a.estadoEntrega === "pendiente").length,
     entregado: asignaciones.filter((a) => a.estadoEntrega === "entregado").length,
     corregido: asignaciones.filter((a) => a.estadoEntrega === "corregido").length,
-  };
+  }), [asignaciones]);
+
+  const asignacionesFiltradas = useMemo(() => {
+    return asignaciones.filter((asig) => {
+      const matchTexto =
+        asig.titulo.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+        (asig.descripcion &&
+          asig.descripcion.toLowerCase().includes(searchTerm.toLowerCase().trim())) ||
+        (asig.repoNombre &&
+          asig.repoNombre.toLowerCase().includes(searchTerm.toLowerCase().trim()));
+
+      if (!matchTexto) return false;
+
+      if (filtro === "todas") return true;
+      return asig.estadoEntrega === filtro;
+    });
+  }, [asignaciones, searchTerm, filtro]);
 
   const handleCopyClone = (asigId: string | number, repoUrl: string) => {
     const cloneCmd = `git clone ${repoUrl}.git`;
@@ -98,7 +111,7 @@ export function AsignacionesAlumnoList({
         ...prev,
         [asigId]: {
           loading: false,
-          error: "No se pudieron obtener las correcciones e issues.",
+          error: "No se pudieron obtener las correcciones.",
           grupo: null,
         },
       }));
@@ -163,7 +176,7 @@ export function AsignacionesAlumnoList({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3">
+      <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="font-mono text-xs text-muted-foreground">
           Cargando tus asignaciones y notas...
@@ -189,77 +202,102 @@ export function AsignacionesAlumnoList({
     );
   }
 
+  if (asignaciones.length === 0) {
+    return (
+      <EmptyState
+        icon="📚"
+        title="No tenés asignaciones asignadas"
+        description="Aún no se han publicado asignaciones en este curso. Las nuevas asignaciones aparecerán aquí junto con sus fechas de entrega y repositorio asignado."
+      />
+    );
+  }
+
+  const pct = (val: number) =>
+    conteo.todas > 0 ? Math.round((val / conteo.todas) * 100) : 0;
+
   return (
-    <div className="space-y-4">
-      {/* Barra de Filtros por Estado */}
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
-        <div className="flex items-center gap-1.5 font-mono text-xs">
-          <button
-            type="button"
-            onClick={() => setFiltro("todas")}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
-              filtro === "todas"
-                ? "bg-foreground text-background font-semibold shadow-xs"
-                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
-            }`}
-          >
-            Todas ({conteo.todas})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFiltro("pendiente")}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
-              filtro === "pendiente"
-                ? "bg-amber-600 text-white font-semibold shadow-xs"
-                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
-            }`}
-          >
-            Pendientes ({conteo.pendiente})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFiltro("entregado")}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
-              filtro === "entregado"
-                ? "bg-sky-600 text-white font-semibold shadow-xs"
-                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
-            }`}
-          >
-            Entregadas ({conteo.entregado})
-          </button>
-          <button
-            type="button"
-            onClick={() => setFiltro("corregido")}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
-              filtro === "corregido"
-                ? "bg-emerald-600 text-white font-semibold shadow-xs"
-                : "bg-panel border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
-            }`}
-          >
-            Corregidas ({conteo.corregido})
-          </button>
-        </div>
+    <div className="space-y-6">
+      {/* Tarjetas KPI de Estado de Entregas */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <KpiCard
+          label="Total Asignaciones"
+          value={conteo.todas}
+          subtext="En este curso"
+          variant="default"
+          isSelected={filtro === "todas"}
+          onClick={() => setFiltro("todas")}
+          title="Click para ver todas las asignaciones"
+        />
+        <KpiCard
+          label="Pendientes"
+          value={conteo.pendiente}
+          subtext={`${pct(conteo.pendiente)}% por entregar`}
+          variant="amber"
+          isSelected={filtro === "pendiente"}
+          onClick={() => setFiltro("pendiente")}
+          title="Click para filtrar asignaciones pendientes"
+        />
+        <KpiCard
+          label="Entregadas"
+          value={conteo.entregado}
+          subtext={`${pct(conteo.entregado)}% entregadas`}
+          variant="sky"
+          isSelected={filtro === "entregado"}
+          onClick={() => setFiltro("entregado")}
+          title="Click para filtrar asignaciones entregadas"
+        />
+        <KpiCard
+          label="Corregidas"
+          value={conteo.corregido}
+          subtext={`${pct(conteo.corregido)}% corregidas`}
+          variant="emerald"
+          isSelected={filtro === "corregido"}
+          onClick={() => setFiltro("corregido")}
+          title="Click para filtrar asignaciones corregidas"
+        />
       </div>
 
-      {/* Lista de Asignaciones */}
-      {asignaciones.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-panel p-10 text-center animate-rise">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-line/40 flex items-center justify-center text-xl mb-3 text-muted-foreground">
-            📚
-          </div>
-          <h3 className="font-display text-lg font-bold text-foreground">
-            No tenés asignaciones asignadas
-          </h3>
-          <p className="mt-2 font-mono text-xs text-muted-foreground leading-relaxed">
-            Aún no se han publicado asignaciones en este curso. Las nuevas asignaciones aparecerán aquí junto con sus fechas de entrega y repositorio asignado.
-          </p>
-        </div>
-      ) : asignacionesFiltradas.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-panel p-8 text-center animate-rise">
-          <p className="font-mono text-xs text-muted-foreground">
-            No hay asignaciones con el estado seleccionado ({filtro}).
-          </p>
-        </div>
+      {/* Barra de Filtros y Búsqueda */}
+      <PanelFilterBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Buscar asignación por título, descripción o repo..."
+        count={asignacionesFiltradas.length}
+        countLabel={
+          asignacionesFiltradas.length === 1 ? "asignación" : "asignaciones"
+        }
+      >
+        <select
+          value={filtro}
+          onChange={(e) => setFiltro(e.target.value as EstadoEntrega | "todas")}
+          className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+        >
+          <option value="todas">Todas las entregas ({conteo.todas})</option>
+          <option value="pendiente">Solo pendientes ({conteo.pendiente})</option>
+          <option value="entregado">Solo entregadas ({conteo.entregado})</option>
+          <option value="corregido">Solo corregidas ({conteo.corregido})</option>
+        </select>
+      </PanelFilterBar>
+
+      {/* Lista de Asignaciones o EmptyState de búsqueda */}
+      {asignacionesFiltradas.length === 0 ? (
+        <EmptyState
+          icon="🔍"
+          title="No se encontraron asignaciones"
+          description="No hay asignaciones que coincidan con el término de búsqueda o el filtro de estado seleccionado."
+          action={
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm("");
+                setFiltro("todas");
+              }}
+              className="rounded-xl border border-line bg-panel2 px-5 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+            >
+              Restablecer filtros
+            </button>
+          }
+        />
       ) : (
         <div className="space-y-4">
           {asignacionesFiltradas.map((asig) => {
@@ -274,20 +312,20 @@ export function AsignacionesAlumnoList({
             return (
               <div
                 key={asig.id}
-                className="rounded-2xl border border-line bg-panel p-5 shadow-xs space-y-4 transition-all animate-rise"
+                className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-5 transition-all animate-rise"
               >
                 {/* Cabecera de la Asignación: Tipo, Fechas, Estado y Calificación */}
                 <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                  <div className="space-y-2 flex-1">
+                  <div className="space-y-2.5 flex-1">
                     {/* Metadatos y Badges */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] font-medium text-foreground">
+                      <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-3 py-1 font-mono text-xs font-semibold text-foreground">
                         {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                       </span>
 
                       {/* Badge de Estado de Entrega */}
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-mono text-[11px] font-semibold ${badge.classes}`}
+                        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 font-mono text-xs font-semibold ${badge.classes}`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${badge.dotColor}`} />
                         <span>{badge.label}</span>
@@ -300,7 +338,7 @@ export function AsignacionesAlumnoList({
 
                       {/* Integrantes si es grupal */}
                       {asig.tipo === "GRUPAL" && asig.integrantes && asig.integrantes.length > 0 && (
-                        <div className="flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
+                        <div className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
                           <span>Grupo:</span>
                           <span className="font-semibold text-foreground">
                             {asig.grupoNombre || asig.integrantes.map((i) => `@${i}`).join(", ")}
@@ -310,19 +348,19 @@ export function AsignacionesAlumnoList({
                     </div>
 
                     {/* Título de la Asignación */}
-                    <h3 className="font-display text-xl font-bold tracking-tight text-foreground">
+                    <h3 className="font-display text-2xl font-bold tracking-tight text-foreground">
                       {asig.titulo}
                     </h3>
 
                     {/* Descripción */}
                     {asig.descripcion && (
-                      <p className="font-mono text-xs text-muted-foreground leading-relaxed max-w-3xl">
+                      <p className="font-mono text-sm text-muted-foreground leading-relaxed max-w-3xl">
                         {asig.descripcion}
                       </p>
                     )}
 
                     {/* Fechas de Entrega y Límite */}
-                    <div className="flex flex-wrap items-center gap-4 pt-1 font-mono text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-4 pt-1 font-mono text-sm text-muted-foreground">
                       {asig.fechaLimite && (
                         <div className="flex items-center gap-1.5">
                           <span className="text-muted-foreground/80">Fecha límite:</span>
@@ -350,51 +388,51 @@ export function AsignacionesAlumnoList({
                   </div>
 
                   {/* Panel Lateral: Calificación y Estado de la Nota */}
-                  <div className="flex flex-col items-start lg:items-end justify-between self-start shrink-0 rounded-xl border border-line bg-panel2 p-3.5 min-w-[140px] text-left lg:text-right">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <div className="flex flex-col items-start lg:items-end justify-between self-start shrink-0 rounded-xl border border-line bg-panel2 p-4 min-w-[150px] text-left lg:text-right">
+                    <span className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                       Calificación
                     </span>
                     {asig.estadoEntrega === "corregido" && tieneNota ? (
                       <>
-                        <div className="flex items-baseline gap-1 mt-0.5">
+                        <div className="flex items-baseline gap-1 mt-1">
                           <span
-                            className={`font-suez text-2xl font-bold text-black`}
+                            className={`font-suez text-3xl sm:text-4xl font-bold text-foreground`}
                           >
                             {asig.calificacion}
                           </span>
-                          <span className="font-mono text-xs text-muted-foreground">
+                          <span className="font-mono text-sm font-semibold text-muted-foreground">
                             /{notaMaxima}
                           </span>
                         </div>
                         {asig.observaciones ? (
-                          <span className="mt-1 font-mono text-[10px] text-primary font-medium inline-flex items-center gap-1">
+                          <span className="mt-1.5 font-mono text-xs text-primary font-medium inline-flex items-center gap-1">
                             <span>💬 Con devolución</span>
                           </span>
                         ) : (
-                          <span className="mt-1 font-mono text-[10px] text-muted-foreground">
+                          <span className="mt-1.5 font-mono text-xs text-muted-foreground">
                             Sin observaciones
                           </span>
                         )}
                       </>
                     ) : asig.estadoEntrega === "entregado" ? (
                       <div className="flex flex-col items-start lg:items-end mt-1">
-                        <span className="font-mono text-xs font-semibold text-sky-600 inline-flex items-center gap-1">
+                        <span className="font-mono text-sm font-semibold text-sky-600 inline-flex items-center gap-1">
                           <span>En corrección</span>
                         </span>
                         {asig.fechaEntregadaFormatted && (
-                          <span className="mt-1 font-mono text-[10px] text-muted-foreground">
+                          <span className="mt-1 font-mono text-xs text-muted-foreground">
                             Entregado: {asig.fechaEntregadaFormatted}
                           </span>
                         )}
                       </div>
                     ) : (
-                      <span className="mt-1 font-mono text-xs text-muted-foreground">
+                      <span className="mt-1 font-mono text-sm text-muted-foreground">
                         Sin entregar
                       </span>
                     )}
 
                     {asig.fechaUltimoCommit && (
-                      <span className="mt-1 font-mono text-[10px] text-muted-foreground">
+                      <span className="mt-1.5 font-mono text-xs text-muted-foreground">
                         Último commit: {formatFechaLegible(asig.fechaUltimoCommit)}
                       </span>
                     )}
@@ -405,16 +443,16 @@ export function AsignacionesAlumnoList({
                 {asig.observaciones && (
                   <div className="p-4 rounded-xl border border-primary/25 bg-primary/5 space-y-2 animate-rise">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary">
+                      <div className="flex items-center gap-1.5 font-mono text-sm font-bold text-primary">
                         <span>Devolución y observaciones del docente</span>
                       </div>
                       {asig.fechaCalificacion && (
-                        <span className="font-mono text-[10px] text-muted-foreground">
+                        <span className="font-mono text-xs text-muted-foreground">
                           Calificado el: {formatFechaLegible(asig.fechaCalificacion)}
                         </span>
                       )}
                     </div>
-                    <div className="p-3 rounded-lg border border-primary/10 bg-panel font-mono text-xs text-foreground whitespace-pre-wrap leading-relaxed shadow-2xs">
+                    <div className="p-3.5 rounded-lg border border-primary/10 bg-panel font-mono text-sm text-foreground whitespace-pre-wrap leading-relaxed shadow-2xs">
                       {asig.observaciones}
                     </div>
                   </div>
@@ -426,16 +464,16 @@ export function AsignacionesAlumnoList({
                     <button
                       type="button"
                       onClick={() => toggleCorrecciones(asigIdNum)}
-                      className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
+                      className="inline-flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
                     >
                       <span className="text-primary font-bold transition-transform duration-150">
                         {isCorreccionesOpen ? "▾" : "▸"}
                       </span>
                       <span className="font-semibold underline decoration-line group-hover:decoration-foreground">
-                        {isCorreccionesOpen ? "Ocultar correcciones e issues en GitHub" : "Ver correcciones e issues en GitHub"}
+                        {isCorreccionesOpen ? "Ocultar correcciones en GitHub" : "Ver correcciones en GitHub"}
                       </span>
                       {asigCorreccion?.grupo?.issues && (
-                        <span className="rounded-full bg-line/60 px-2 py-0.2 text-[10px] text-muted-foreground font-semibold">
+                        <span className="rounded-full bg-line/60 px-2.5 py-0.5 text-xs text-muted-foreground font-semibold">
                           {asigCorreccion.grupo.issues.length}
                         </span>
                       )}
@@ -443,21 +481,21 @@ export function AsignacionesAlumnoList({
 
                     {/* Panel desplegable */}
                     {isCorreccionesOpen && (
-                      <div className="mt-3 p-4 rounded-xl border border-line bg-panel2/60 space-y-3 animate-rise">
-                        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-line">
-                          <div className="flex items-center gap-2 font-mono text-xs font-bold text-foreground">
-                            <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
+                      <div className="mt-3 p-4 sm:p-5 rounded-xl border border-line bg-panel2/60 space-y-3.5 animate-rise">
+                        <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-line">
+                          <div className="flex items-center gap-2 font-mono text-sm font-bold text-foreground">
+                            <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80" />
                             <span>Correcciones del docente en GitHub</span>
                           </div>
                           <button
                             type="button"
                             onClick={() => cargarCorreccionParaAsig(asigIdNum)}
                             disabled={asigCorreccion?.loading}
-                            className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
-                            title="Recargar issues desde GitHub"
+                            className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
+                            title="Recargar correcciones desde GitHub"
                           >
                             <svg
-                              className={`w-3 h-3 ${asigCorreccion?.loading ? "animate-spin text-primary" : ""}`}
+                              className={`w-3.5 h-3.5 ${asigCorreccion?.loading ? "animate-spin text-primary" : ""}`}
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
@@ -474,26 +512,26 @@ export function AsignacionesAlumnoList({
                         {asigCorreccion?.loading ? (
                           <div className="flex items-center justify-center py-6 gap-2">
                             <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                            <span className="font-mono text-xs text-muted-foreground">
-                              Consultando issues en GitHub...
+                            <span className="font-mono text-sm text-muted-foreground">
+                              Consultando correcciones en GitHub...
                             </span>
                           </div>
                         ) : asigCorreccion?.error ? (
-                          <div className="p-3 rounded-lg border border-destructive/20 bg-destructive/5 text-center font-mono text-xs text-destructive">
+                          <div className="p-3.5 rounded-lg border border-destructive/20 bg-destructive/5 text-center font-mono text-sm text-destructive">
                             <span>{asigCorreccion.error}</span>
                           </div>
                         ) : !asigCorreccion?.grupo || asigCorreccion.grupo.issues.length === 0 ? (
-                          <div className="p-3.5 rounded-lg border border-line/60 bg-panel text-center font-mono text-xs text-muted-foreground">
-                            <span>No tenés correcciones ni issues asignados para este trabajo en GitHub.</span>
+                          <div className="p-4 rounded-lg border border-line/60 bg-panel text-center font-mono text-sm text-muted-foreground">
+                            <span>No tenés correcciones asignadas para esta asignación en GitHub.</span>
                           </div>
                         ) : (
-                          <div className="divide-y divide-line/60 rounded-lg border border-line bg-panel overflow-hidden font-mono text-xs">
+                          <div className="divide-y divide-line/60 rounded-lg border border-line bg-panel overflow-hidden font-mono text-sm">
                             {asigCorreccion.grupo.issues.map((issue) => (
                               <div
                                 key={issue.numero}
-                                className="p-3 hover:bg-line/10 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                                className="p-3.5 hover:bg-line/10 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                               >
-                                <div className="space-y-1 min-w-0 flex-1">
+                                <div className="space-y-1.5 min-w-0 flex-1">
                                   <div className="flex flex-wrap items-center gap-2">
                                     <span className="font-semibold text-muted-foreground">
                                       #{issue.numero}
@@ -509,7 +547,7 @@ export function AsignacionesAlumnoList({
                                     <IssueEstadoBadge estado={issue.estado} />
                                     {issue.tieneCommitsPosteriores && (
                                       <span
-                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                                         title="Tus commits en el repositorio son posteriores a la apertura de este issue"
                                       >
                                         <span>⚡ Commits posteriores detectados</span>
@@ -517,7 +555,7 @@ export function AsignacionesAlumnoList({
                                     )}
                                   </div>
 
-                                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                                     <span>Por @{issue.autor}</span>
                                     <span>•</span>
                                     <span>Creado: {formatFechaLegible(issue.fechaCreacion)}</span>
@@ -537,10 +575,10 @@ export function AsignacionesAlumnoList({
                                     href={issue.htmlUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+                                    className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
                                   >
                                     <span>Ver en GitHub</span>
-                                    <span className="text-[10px]">↗</span>
+                                    <span className="text-xs">↗</span>
                                   </a>
                                 </div>
                               </div>
@@ -553,8 +591,8 @@ export function AsignacionesAlumnoList({
                 )}
 
                 {/* Acciones y Enlaces de GitHub: Repositorio, Clonar y Entrega */}
-                <div className="pt-3 border-t border-line/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="pt-3.5 border-t border-line/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     {/* Botón de acceso directo al Repositorio */}
                     {asig.repoUrl ? (
                       <>
@@ -562,19 +600,19 @@ export function AsignacionesAlumnoList({
                           href={asig.repoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-2xs"
+                          className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-2xs"
                           title="Abrir el repositorio asignado en GitHub"
                         >
-                          <img src={githubIcon} alt="GitHub" className="w-3.5 h-3.5 opacity-80" />
+                          <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80" />
                           <span>Ver en GitHub</span>
-                          <span className="text-muted-foreground text-[10px]">↗</span>
+                          <span className="text-muted-foreground text-xs">↗</span>
                         </a>
 
                         {/* Botón para copiar git clone al portapapeles */}
                         <button
                           type="button"
                           onClick={() => handleCopyClone(asig.id, asig.repoUrl!)}
-                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-xs font-medium transition-colors cursor-pointer shadow-2xs ${
+                          className={`inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 font-mono text-sm font-medium transition-colors cursor-pointer shadow-2xs ${
                             copiedId === asig.id
                               ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 font-semibold"
                               : "border-line bg-panel2 text-foreground hover:bg-line/40"
@@ -583,14 +621,14 @@ export function AsignacionesAlumnoList({
                         >
                           {copiedId === asig.id ? (
                             <>
-                              <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                               </svg>
                               <span>¡Copiado!</span>
                             </>
                           ) : (
                             <>
-                              <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
@@ -608,26 +646,26 @@ export function AsignacionesAlumnoList({
                           <button
                             type="button"
                             aria-label="¿Cómo clonar este repositorio?"
-                            className="inline-flex items-center justify-center w-7 h-7 rounded-lg border border-line bg-panel2 text-muted-foreground hover:text-foreground hover:bg-line/40 font-mono text-xs font-bold transition-colors cursor-help shadow-2xs"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-line bg-panel2 text-muted-foreground hover:text-foreground hover:bg-line/40 font-mono text-sm font-bold transition-colors cursor-help shadow-2xs"
                           >
                             ?
                           </button>
 
                           {/* Tooltip con guía paso a paso para principiantes */}
-                          <div className="pointer-events-none group-hover/help:pointer-events-auto opacity-0 group-hover/help:opacity-100 group-hover/help:translate-y-0 translate-y-1 transition-all duration-150 absolute bottom-full mb-2 left-0 sm:left-1/2 sm:-translate-x-1/2 w-72 sm:w-84 rounded-xl border border-line bg-panel p-4 shadow-xl z-30 text-left font-mono text-xs text-foreground">
+                          <div className="pointer-events-none group-hover/help:pointer-events-auto opacity-0 group-hover/help:opacity-100 group-hover/help:translate-y-0 translate-y-1 transition-all duration-150 absolute bottom-full mb-2 left-0 sm:left-1/2 sm:-translate-x-1/2 w-80 sm:w-92 rounded-xl border border-line bg-panel p-4.5 shadow-xl z-30 text-left font-mono text-xs text-foreground">
                             <div className="flex items-center gap-2 mb-2 pb-2 border-b border-line text-primary font-bold">
-                              <span className="text-sm">💡</span>
-                              <span>¿Cómo clonar el repositorio?</span>
+                              <span className="text-base">💡</span>
+                              <span className="text-sm">¿Cómo clonar el repositorio?</span>
                             </div>
 
-                            <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">
+                            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
                               Clonar descarga una copia completa del trabajo práctico a tu computadora para que puedas empezar a programar.
                             </p>
 
-                            <ol className="space-y-2 text-[11px] text-muted-foreground list-decimal list-inside leading-relaxed">
+                            <ol className="space-y-2 text-xs text-muted-foreground list-decimal list-inside leading-relaxed">
                               <li>
                                 <span className="text-foreground font-semibold">Copiá el comando</span> haciendo clic en{" "}
-                                <span className="text-foreground bg-panel2 px-1 py-0.5 rounded border border-line font-medium">
+                                <span className="text-foreground bg-panel2 px-1.5 py-0.5 rounded border border-line font-medium">
                                   git clone
                                 </span>.
                               </li>
@@ -635,8 +673,8 @@ export function AsignacionesAlumnoList({
                                 <span className="text-foreground font-semibold">Abrí una terminal</span> (Git Bash, PowerShell o terminal de VS Code) en la carpeta donde guardás tus proyectos.
                               </li>
                               <li>
-                                <span className="text-foreground font-semibold">Pegá y ejecutá</span> el comando con <kbd className="px-1 py-0.5 rounded bg-panel2 border border-line text-foreground font-mono text-[10px]">Enter</kbd>:
-                                <div className="mt-1 p-2 rounded-md bg-background border border-line font-mono text-[10px] text-primary truncate select-all">
+                                <span className="text-foreground font-semibold">Pegá y ejecutá</span> el comando con <kbd className="px-1.5 py-0.5 rounded bg-panel2 border border-line text-foreground font-mono text-[11px]">Enter</kbd>:
+                                <div className="mt-1.5 p-2.5 rounded-md bg-background border border-line font-mono text-xs text-primary truncate select-all">
                                   git clone {asig.repoUrl}.git
                                 </div>
                               </li>
@@ -651,7 +689,7 @@ export function AsignacionesAlumnoList({
                         </div>
                       </>
                     ) : (
-                      <span className="rounded-lg border border-line bg-panel2 px-3 py-1 font-mono text-[11px] text-muted-foreground">
+                      <span className="rounded-lg border border-line bg-panel2 px-3 py-1 font-mono text-xs text-muted-foreground">
                         Repositorio en proceso de creación...
                       </span>
                     )}
@@ -670,7 +708,7 @@ export function AsignacionesAlumnoList({
                             type="button"
                             onClick={() => handleEntregar(Number(asig.id))}
                             disabled={entregandoId === asig.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 font-mono text-sm font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50"
                             title="Marcar esta asignación como entregada"
                           >
                             {entregandoId === asig.id ? (
@@ -687,13 +725,13 @@ export function AsignacionesAlumnoList({
                         )}
                       </div>
                     ) : asig.estadoEntrega === "entregado" ? (
-                      <div className="flex flex-wrap items-center sm:justify-end gap-2 font-mono text-xs">
+                      <div className="flex flex-wrap items-center sm:justify-end gap-2 font-mono text-sm">
                         <div className="flex items-center gap-1.5">
-                          <span className="inline-flex items-center gap-1.5 text-sky-600 dark:text-sky-400 font-semibold text-xs">
+                          <span className="inline-flex items-center gap-1.5 text-sky-600 dark:text-sky-400 font-semibold text-sm">
                             <span>Entregado</span>
                           </span>
                           {asig.fechaEntregadaFormatted && (
-                            <span className="text-[11px] text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               ({asig.fechaEntregadaFormatted})
                             </span>
                           )}
@@ -704,18 +742,18 @@ export function AsignacionesAlumnoList({
                             type="button"
                             onClick={() => setAsignacionParaReentregar(asig)}
                             disabled={entregandoId === asig.id}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 px-3 py-1 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 px-3.5 py-1.5 font-mono text-xs font-semibold transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
                             title="Volver a entregar con el último commit del repositorio"
                           >
                             {entregandoId === asig.id ? (
                               <>
-                                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                                 <span>Reentregando...</span>
                               </>
                             ) : (
                               <>
                                 <svg
-                                  className="w-3 h-3"
+                                  className="w-3.5 h-3.5"
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
@@ -730,18 +768,18 @@ export function AsignacionesAlumnoList({
                             )}
                           </button>
                         ) : (
-                          <span className="text-[10px] text-muted-foreground bg-panel2 px-2 py-0.5 rounded border border-line">
+                          <span className="text-xs text-muted-foreground bg-panel2 px-2.5 py-1 rounded border border-line">
                             Plazo cerrado
                           </span>
                         )}
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 font-mono text-xs">
-                        <span className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold text-xs">
+                      <div className="flex items-center gap-2 font-mono text-sm">
+                        <span className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold text-sm">
                           <span>Corregido</span>
                         </span>
                         {asig.fechaEntregadaFormatted && (
-                          <span className="text-[11px] text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             ({asig.fechaEntregadaFormatted})
                           </span>
                         )}
@@ -749,7 +787,7 @@ export function AsignacionesAlumnoList({
                     )}
 
                     {entregaError && entregaError.id === asig.id && (
-                      <p className="font-mono text-[11px] text-destructive">
+                      <p className="font-mono text-xs text-destructive">
                         {entregaError.message}
                       </p>
                     )}

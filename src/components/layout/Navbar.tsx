@@ -11,9 +11,9 @@ export const Navbar = () => {
         <img
           src={unqlassroomLogo}
           alt="UNQlassroom Logo"
-          className="w-7 h-7 object-contain"
+          className="w-8 h-8 object-contain"
         />
-        <span className="font-suez text-lg tracking-tight">UNQlassroom</span>
+        <span className="font-suez text-xl tracking-tight">UNQlassroom</span>
       </div>
 
       {/* Controles de Usuario Autenticado */}
@@ -21,7 +21,7 @@ export const Navbar = () => {
         <div className="flex items-center gap-4">
           {/* Badge del rol real */}
           <span
-            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide border ${
+            className={`px-3 py-1 rounded-full text-xs sm:text-sm font-semibold tracking-wide border ${
               isDocente
                 ? "bg-neutral-800 text-neutral-200 border-neutral-700"
                 : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
@@ -31,7 +31,7 @@ export const Navbar = () => {
           </span>
 
           {/* Información del usuario de GitHub */}
-          <span className="text-sm font-medium text-foreground hidden sm:inline">
+          <span className="text-base font-semibold text-foreground hidden sm:inline">
             @{user.username}
           </span>
 
@@ -39,7 +39,7 @@ export const Navbar = () => {
           <button
             type="button"
             onClick={logout}
-            className="text-xs font-medium text-muted-foreground hover:text-rose-500 border border-line hover:border-rose-500/30 rounded-md px-2.5 py-1 transition-colors cursor-pointer"
+            className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-rose-500 border border-line hover:border-rose-500/30 rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
             title="Cerrar sesión"
           >
             Cerrar sesión

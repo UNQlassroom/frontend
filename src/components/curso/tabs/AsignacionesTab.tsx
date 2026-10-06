@@ -7,10 +7,12 @@ import type {
   TemplateRepoResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones, listarTemplates } from "@/services";
-import { CrearAsignacionModal } from "./CrearAsignacionModal";
-import { CalificarAsignacionModal } from "./CalificarAsignacionModal";
-import { CIStatusBadge, EmptyState } from "../common";
-import { PanelHeader, PanelFilterBar } from "../panel";
+import {
+  CrearAsignacionModal,
+  CalificarAsignacionModal,
+} from "@/components/asignacion";
+import { CIStatusBadge, EmptyState } from "@/components/common";
+import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
@@ -18,7 +20,7 @@ import {
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import githubIcon from "@/assets/github_favicon.svg";
 
-interface AsignacionesTabProps {
+export interface AsignacionesTabProps {
   curso: CursoResponseDTO;
   alumnos: AlumnoMiembroDeUnCursoDTO[];
 }
@@ -164,7 +166,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
               type="button"
               onClick={cargarAsignaciones}
               disabled={isLoading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
               title="Recargar asignaciones del curso"
             >
               <svg
@@ -186,7 +188,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
               title="Crear una nueva asignación"
             >
               <img
@@ -300,14 +302,14 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                 return (
                   <div
                     key={asig.id}
-                    className="rounded-2xl border border-line bg-panel p-5 shadow-xs transition-colors space-y-4 hover:border-foreground/20"
+                    className="rounded-2xl border border-line bg-panel p-6 shadow-xs transition-colors space-y-5 hover:border-foreground/20"
                   >
                     {/* Header de la Asignación */}
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                      <div className="space-y-1.5 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex flex-wrap items-center gap-2.5">
                           <span
-                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 font-mono text-[11px] font-semibold ${
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 font-mono text-xs font-semibold ${
                               asig.tipo === "GRUPAL"
                                 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                                 : "bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20"
@@ -321,25 +323,25 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                             href={templateUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors group cursor-pointer"
+                            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3 py-1 font-mono text-xs text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors group cursor-pointer"
                             title={`Ver repositorio plantilla ${asig.templateRepoName} en GitHub`}
                           >
                             <img
                               src={githubIcon}
                               alt="Repo"
-                              className="w-3.5 h-3.5 opacity-80"
+                              className="w-4 h-4 opacity-80"
                             />
                             <span>Plantilla:</span>
                             <span className="font-semibold text-foreground underline decoration-muted-foreground/40 group-hover:decoration-foreground">
                               {asig.templateRepoName}
                             </span>
-                            <span className="text-[10px] text-muted-foreground group-hover:text-foreground">
+                            <span className="text-xs text-muted-foreground group-hover:text-foreground">
                               ↗
                             </span>
                           </a>
 
                           {asig.fechaLimite && (
-                            <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-mono text-[11px] text-muted-foreground">
+                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1 font-mono text-xs text-muted-foreground">
                               <span>Fecha límite:</span>
                               <span className="font-semibold text-foreground">
                                 {new Date(asig.fechaLimite).toLocaleDateString(
@@ -355,25 +357,25 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                           )}
                         </div>
 
-                        <h4 className="font-display text-xl font-bold text-foreground">
+                        <h4 className="font-display text-2xl font-bold text-foreground">
                           {asig.titulo}
                         </h4>
                         {asig.descripcion && (
-                          <p className="font-mono text-xs text-muted-foreground leading-relaxed">
+                          <p className="font-mono text-sm text-muted-foreground leading-relaxed">
                             {asig.descripcion}
                           </p>
                         )}
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="font-mono text-sm text-muted-foreground">
                           {totalGrupos}{" "}
                           {asig.tipo === "GRUPAL" ? "grupo(s)" : "repositorio(s)"}
                         </span>
                         <button
                           type="button"
                           onClick={() => toggleExpand(asig.id)}
-                          className="rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                          className="rounded-xl border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
                         >
                           {isExpanded
                             ? "Ocultar repositorios ▲"
@@ -384,30 +386,30 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
 
                     {/* Detalle desplegable de los repositorios y grupos */}
                     {isExpanded && (
-                      <div className="pt-4 border-t border-line space-y-3">
-                        <h5 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                      <div className="pt-4 border-t border-line space-y-3.5">
+                        <h5 className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                           Repositorios generados ({totalGrupos})
                         </h5>
 
                         {totalGrupos === 0 ? (
-                          <p className="font-mono text-xs text-muted-foreground italic">
+                          <p className="font-mono text-sm text-muted-foreground italic">
                             No hay repositorios asociados a esta asignación todavía.
                           </p>
                         ) : (
-                          <div className="overflow-x-auto rounded-xl border border-line bg-panel2/60">
-                            <table className="w-full text-left border-collapse font-mono text-xs">
+                          <div className="overflow-x-auto rounded-2xl border border-line bg-panel2/60">
+                            <table className="w-full text-left border-collapse font-mono text-sm">
                               <thead>
-                                <tr className="border-b border-line bg-panel2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                                  <th className="py-2.5 px-3">
+                                <tr className="border-b border-line bg-panel2 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                                  <th className="py-3 px-3.5">
                                     {asig.tipo === "GRUPAL"
                                       ? "Grupo / Integrantes"
                                       : "Alumno"}
                                   </th>
-                                  <th className="py-2.5 px-3">Repositorio GitHub</th>
-                                  <th className="py-2.5 px-3">Pipeline CI/CD</th>
-                                  <th className="py-2.5 px-3">Estado / Entrega</th>
-                                  <th className="py-2.5 px-3">Último Commit</th>
-                                  <th className="py-2.5 px-3 text-right">Acción</th>
+                                  <th className="py-3 px-3.5">Repositorio GitHub</th>
+                                  <th className="py-3 px-3.5">Pipeline CI/CD</th>
+                                  <th className="py-3 px-3.5">Estado / Entrega</th>
+                                  <th className="py-3 px-3.5">Último Commit</th>
+                                  <th className="py-3 px-3.5 text-right">Acción</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-line/60">
@@ -417,21 +419,21 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                     className="hover:bg-line/20 transition-colors"
                                   >
                                     {/* Nombre o Integrantes */}
-                                    <td className="py-3 px-3">
+                                    <td className="py-3.5 px-3.5">
                                       <div className="space-y-1">
                                         {grupo.nombre && (
-                                          <p className="font-semibold text-foreground">
+                                          <p className="font-semibold text-foreground text-sm">
                                             {grupo.nombre}
                                           </p>
                                         )}
-                                        <div className="flex flex-wrap gap-1">
+                                        <div className="flex flex-wrap gap-1.5">
                                           {grupo.integrantes.map((u) => (
                                             <a
                                               key={u}
                                               href={`https://github.com/${u}`}
                                               target="_blank"
                                               rel="noopener noreferrer"
-                                              className="text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+                                              className="text-xs text-muted-foreground hover:text-foreground hover:underline"
                                             >
                                               @{u}
                                             </a>
@@ -441,25 +443,25 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                     </td>
 
                                     {/* Repositorio */}
-                                    <td className="py-3 px-3">
+                                    <td className="py-3.5 px-3.5">
                                       {grupo.repositorio ? (
                                         <div className="flex items-center gap-1.5">
                                           <a
                                             href={grupo.repositorio.htmlUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+                                            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
                                             title={grupo.repositorio.htmlUrl}
                                           >
                                             <img
                                               src={githubIcon}
                                               alt="GitHub"
-                                              className="w-3.5 h-3.5 opacity-80"
+                                              className="w-4 h-4 opacity-80"
                                             />
                                             <span className="truncate max-w-[170px]">
                                               {grupo.repositorio.nombre}
                                             </span>
-                                            <span className="text-[10px] text-muted-foreground">
+                                            <span className="text-xs text-muted-foreground">
                                               ↗
                                             </span>
                                           </a>
@@ -468,7 +470,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                               href={grupo.releaseUrl}
                                               target="_blank"
                                               rel="noopener noreferrer"
-                                              className="inline-flex items-center rounded-md border border-line bg-panel px-1.5 py-1 text-[11px] font-semibold text-foreground hover:bg-line/40 transition-colors"
+                                              className="inline-flex items-center rounded-lg border border-line bg-panel px-2 py-1 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
                                               title="Ver entrega / release en GitHub"
                                             >
                                               🏷️
@@ -476,31 +478,31 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                           )}
                                         </div>
                                       ) : (
-                                        <span className="text-muted-foreground/60 italic text-[11px]">
+                                        <span className="text-muted-foreground/60 italic text-xs">
                                           En proceso...
                                         </span>
                                       )}
                                     </td>
 
                                     {/* CI/CD */}
-                                    <td className="py-3 px-3">
+                                    <td className="py-3.5 px-3.5">
                                       {grupo.repositorio ? (
                                         <CIStatusBadge
                                           estado={grupo.repositorio.estadoCI}
                                         />
                                       ) : (
-                                        <span className="text-muted-foreground/50 text-[11px]">
+                                        <span className="text-muted-foreground/50 text-xs">
                                           —
                                         </span>
                                       )}
                                     </td>
 
                                     {/* Estado / Entrega */}
-                                    <td className="py-3 px-3">
+                                    <td className="py-3.5 px-3.5">
                                       {grupo.calificacion !== null &&
                                       grupo.calificacion !== undefined ? (
                                         <div className="space-y-0.5">
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                             <span>
                                               Calificado: {grupo.calificacion}/10
                                             </span>
@@ -509,11 +511,11 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                       ) : grupo.entregada ||
                                         grupo.fechaEntregada ? (
                                         <div className="space-y-0.5">
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
                                             Entregado
                                           </span>
                                           {grupo.fechaEntregada && (
-                                            <p className="text-[10px] text-muted-foreground">
+                                            <p className="text-xs text-muted-foreground mt-0.5">
                                               {new Date(
                                                 grupo.fechaEntregada
                                               ).toLocaleDateString("es-AR", {
@@ -526,23 +528,23 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                           )}
                                         </div>
                                       ) : (
-                                        <span className="inline-flex items-center text-amber-600 dark:text-amber-400 text-[11px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                                        <span className="inline-flex items-center text-amber-600 dark:text-amber-400 text-xs font-semibold bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">
                                           Pendiente
                                         </span>
                                       )}
                                     </td>
 
                                     {/* Último commit */}
-                                    <td className="py-3 px-3">
+                                    <td className="py-3.5 px-3.5">
                                       {grupo.repositorio?.ultimoCommit ? (
                                         <div className="min-w-[160px] max-w-[220px]">
-                                          <p className="truncate text-foreground text-[11px] font-medium">
+                                          <p className="truncate text-foreground text-xs font-medium">
                                             {obtenerPrimerLineaCommit(
                                               grupo.repositorio.ultimoCommit
                                             )}
                                           </p>
                                           {grupo.repositorio.fechaUltimoCommit && (
-                                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                                            <p className="text-xs text-muted-foreground mt-0.5">
                                               {formatearFechaCommit(
                                                 grupo.repositorio
                                                   .fechaUltimoCommit
@@ -551,7 +553,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                           )}
                                         </div>
                                       ) : (
-                                        <span className="text-muted-foreground/60 italic text-[11px]">
+                                        <span className="text-muted-foreground/60 italic text-xs">
                                           {grupo.repositorio
                                             ? "Sin commits"
                                             : "—"}
@@ -560,7 +562,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                     </td>
 
                                     {/* Acción / Calificar */}
-                                    <td className="py-3 px-3 text-right">
+                                    <td className="py-3.5 px-3.5 text-right">
                                       <button
                                         type="button"
                                         onClick={() =>
@@ -571,7 +573,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                             grupo,
                                           })
                                         }
-                                        className="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer shadow-2xs"
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs sm:text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer shadow-2xs"
                                         title={
                                           grupo.calificacion !== null &&
                                           grupo.calificacion !== undefined

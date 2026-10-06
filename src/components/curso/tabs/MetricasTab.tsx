@@ -5,15 +5,15 @@ import type {
   CursoResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones } from "@/services";
-import { CIStatusBadge, KpiCard, EmptyState } from "../common";
-import { PanelHeader, PanelFilterBar } from "../panel";
+import { CIStatusBadge, KpiCard, EmptyState } from "@/components/common";
+import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
 } from "@/utils";
 import githubIcon from "@/assets/github_favicon.svg";
 
-interface PanelMetricasRepositoriosProps {
+export interface MetricasTabProps {
   curso: CursoResponseDTO;
   alumnos?: AlumnoMiembroDeUnCursoDTO[];
   asignaciones?: AsignacionResponseDTO[];
@@ -31,9 +31,9 @@ interface ItemMetrica {
   branch: string;
 }
 
-export function PanelMetricasRepositorios({
+export function MetricasTab({
   curso,
-}: PanelMetricasRepositoriosProps) {
+}: MetricasTabProps) {
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
   const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(
     null
@@ -191,11 +191,11 @@ export function PanelMetricasRepositorios({
             type="button"
             onClick={cargarDatos}
             disabled={isLoading}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
+            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
             title="Consultar datos actualizados de la base de datos y GitHub"
           >
             <svg
-              className={`w-3.5 h-3.5 ${
+              className={`w-4 h-4 ${
                 isLoading ? "animate-spin text-primary" : "text-muted-foreground"
               }`}
               viewBox="0 0 24 24"
@@ -216,7 +216,7 @@ export function PanelMetricasRepositorios({
       {isLoading && (
         <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="font-mono text-sm text-muted-foreground">
             Cargando repositorios y métricas desde el servidor...
           </p>
         </div>
@@ -224,12 +224,12 @@ export function PanelMetricasRepositorios({
 
       {/* Estado: Error */}
       {!isLoading && error && (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-          <p className="font-mono text-xs text-destructive mb-3">{error}</p>
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-7 text-center">
+          <p className="font-mono text-sm text-destructive mb-3.5">{error}</p>
           <button
             type="button"
             onClick={cargarDatos}
-            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
+            className="rounded-lg bg-destructive px-4 py-2 font-mono text-sm font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
           >
             Reintentar
           </button>
@@ -250,7 +250,7 @@ export function PanelMetricasRepositorios({
         <>
           {/* Selector de Asignación idéntico al de Correcciones */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-line">
-            <span className="font-mono text-xs font-semibold text-muted-foreground shrink-0 mr-1">
+            <span className="font-mono text-sm font-semibold text-muted-foreground shrink-0 mr-1">
               Asignación:
             </span>
             {asignaciones.map((asig) => {
@@ -260,7 +260,7 @@ export function PanelMetricasRepositorios({
                   key={asig.id}
                   type="button"
                   onClick={() => setSelectedAsignacionId(asig.id)}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-sm font-semibold transition-colors cursor-pointer shrink-0 ${
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-xs"
                       : "bg-panel2 border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
@@ -268,7 +268,7 @@ export function PanelMetricasRepositorios({
                 >
                   <span>{asig.titulo}</span>
                   <span
-                    className={`rounded-full px-1.5 py-0.2 text-[10px] ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       isSelected
                         ? "bg-primary-foreground/20 text-primary-foreground"
                         : "bg-line/60 text-muted-foreground"
@@ -367,7 +367,7 @@ export function PanelMetricasRepositorios({
                 <select
                   value={filtroEstado}
                   onChange={(e) => setFiltroEstado(e.target.value)}
-                  className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
+                  className="rounded-lg border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
                 >
                   <option value="todos">Todos los pipelines</option>
                   <option value="success">Solo exitosos</option>
@@ -381,62 +381,62 @@ export function PanelMetricasRepositorios({
               <div className="overflow-x-auto rounded-xl border border-line bg-panel shadow-sm">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-line bg-panel2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                      <th className="py-3 px-4">Repositorio</th>
-                      <th className="py-3 px-4">Alumno / Grupo</th>
-                      <th className="py-3 px-4">Pipeline CI/CD</th>
-                      <th className="py-3 px-4">Último Commit</th>
-                      <th className="py-3 px-4">Rama</th>
-                      <th className="py-3 px-4">Fecha Commit</th>
+                    <tr className="border-b border-line bg-panel2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                      <th className="py-3.5 px-4.5">Repositorio</th>
+                      <th className="py-3.5 px-4.5">Alumno / Grupo</th>
+                      <th className="py-3.5 px-4.5">Pipeline CI/CD</th>
+                      <th className="py-3.5 px-4.5">Último Commit</th>
+                      <th className="py-3.5 px-4.5">Rama</th>
+                      <th className="py-3.5 px-4.5">Fecha Commit</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-line/70 font-mono text-xs">
+                  <tbody className="divide-y divide-line/70 font-mono text-sm">
                     {itemsFiltrados.map((item) => (
                       <tr
                         key={item.id}
                         className="hover:bg-line/20 transition-colors group"
                       >
                         {/* Repositorio */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-4 px-4.5">
                           <a
                             href={item.repoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors max-w-[240px]"
+                            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-line/50 transition-colors max-w-[240px]"
                             title={item.repoUrl}
                           >
                             <img
                               src={githubIcon}
                               alt="GitHub"
-                              className="w-3.5 h-3.5 opacity-80 shrink-0"
+                              className="w-4 h-4 opacity-80 shrink-0"
                             />
                             <span className="truncate">{item.repoNombre}</span>
-                            <span className="text-[10px] text-muted-foreground shrink-0">
+                            <span className="text-xs text-muted-foreground shrink-0">
                               ↗
                             </span>
                           </a>
                         </td>
 
                         {/* Alumno o Grupo */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-4 px-4.5 whitespace-nowrap">
                           <span className="font-medium text-foreground">
                             {item.alumnoUsername}
                           </span>
                         </td>
 
                         {/* Pipeline CI/CD */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-4 px-4.5 whitespace-nowrap">
                           <CIStatusBadge estado={item.estadoCI} />
                         </td>
 
                         {/* Último commit */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-1.5 min-w-[200px] max-w-[320px]">
-                            <span className="rounded bg-panel2 border border-line px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground shrink-0">
+                        <td className="py-4 px-4.5">
+                          <div className="flex items-center gap-2 min-w-[200px] max-w-[320px]">
+                            <span className="rounded bg-panel2 border border-line px-2 py-0.5 text-xs font-mono text-muted-foreground shrink-0">
                               {item.commitHash}
                             </span>
                             <span
-                              className="truncate text-foreground text-[11px]"
+                              className="truncate text-foreground text-xs sm:text-sm"
                               title={item.ultimoCommit}
                             >
                               {obtenerPrimerLineaCommit(item.ultimoCommit)}
@@ -445,16 +445,16 @@ export function PanelMetricasRepositorios({
                         </td>
 
                         {/* Rama */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-[11px] text-muted-foreground">
+                        <td className="py-4 px-4.5 whitespace-nowrap">
+                          <span className="rounded-md border border-line bg-panel2 px-2.5 py-0.5 text-xs text-muted-foreground">
                             {item.branch}
                           </span>
                         </td>
 
                         {/* Fecha commit */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-4 px-4.5 whitespace-nowrap">
                           <div
-                            className="text-[11px] text-muted-foreground"
+                            className="text-xs sm:text-sm text-muted-foreground"
                             title={
                               item.fechaUltimoCommit
                                 ? new Date(

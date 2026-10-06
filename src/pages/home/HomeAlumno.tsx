@@ -8,13 +8,13 @@ export const HomeAlumno = () => {
     <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
       <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b border-line">
         <div className="text-left">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
             Espacio del Alumno
           </p>
-          <h1 className="mt-2 font-suez text-4xl tracking-tight">
+          <h1 className="mt-2 font-suez text-4xl sm:text-5xl tracking-tight">
             Cursos
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-base text-muted-foreground">
             Accedé a tus cursos.
           </p>
         </div>
