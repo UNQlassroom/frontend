@@ -4,7 +4,7 @@ import {
   listarTemplates,
 } from "@/services";
 import type {
-  AlumnoMiembroDeUnCursoDTO,
+  AlumnoResponseDTO,
   CrearAsignacionRequestDTO,
   CrearGrupoRequestDTO,
   TemplateRepoResponseDTO,
@@ -15,7 +15,7 @@ interface CrearAsignacionModalProps {
   open: boolean;
   onClose: () => void;
   cursoId: number;
-  alumnos: AlumnoMiembroDeUnCursoDTO[];
+  alumnos: AlumnoResponseDTO[];
   onSuccess: () => void;
 }
 

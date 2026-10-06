@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type {
-  AlumnoMiembroDeUnCursoDTO,
+  AlumnoResponseDTO,
   AsignacionResponseDTO,
   CursoResponseDTO,
 } from "@/types";
@@ -15,7 +15,7 @@ import githubIcon from "@/assets/github_favicon.svg";
 
 export interface MetricasTabProps {
   curso: CursoResponseDTO;
-  alumnos?: AlumnoMiembroDeUnCursoDTO[];
+  alumnos?: AlumnoResponseDTO[];
   asignaciones?: AsignacionResponseDTO[];
 }
 
@@ -129,7 +129,9 @@ export function MetricasTab({
             alumnoUsername:
               grupo.nombre ||
               (grupo.integrantes.length > 0
-                ? grupo.integrantes.join(", ")
+                ? grupo.integrantes
+                    .map((u) => (typeof u === "string" ? u : u.username))
+                    .join(", ")
                 : "Sin asignar"),
             estadoCI: ["success", "failure", "pending", "sin_ci"].includes(
               estadoValido

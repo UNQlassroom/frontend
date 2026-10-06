@@ -55,22 +55,25 @@ export const asignacionService = {
 
   /**
    * Envía la petición POST /cursos/{cursoId}/asignaciones/{asignacionId}/entregar
-   * Marca la asignación como entregada por el alumno o docente
+   * Marca la asignación como entregada por el alumno o docente.
+   * El parámetro de query ?grupo={grupoId} es opcional en el backend (grupo: Long?).
    */
   entregarAsignacion: (
     cursoId: number,
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<AsignacionResponseDTO>> => {
-    return post<AsignacionResponseDTO, { grupoId?: number } | undefined>(
-      `/cursos/${cursoId}/asignaciones/${asignacionId}/entregar`,
-      grupoId ? { grupoId } : undefined
+    const query =
+      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    return post<AsignacionResponseDTO, undefined>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/entregar${query}`,
+      undefined
     );
   },
 
   /**
-   * Envía la petición POST /cursos/{cursoId}/asignaciones/{asignacionId}/grupos/calificar
-   * Docente: Califica la asignación de un grupo o alumno con nota y observaciones
+   * Envía la petición POST /cursos/{cursoId}/asignaciones/{asignacionId}/calificar
+   * Docente: Califica la asignación de un grupo con nota y observaciones
    */
   calificarAsignacion: (
     cursoId: number,
@@ -78,7 +81,7 @@ export const asignacionService = {
     data: CalificarAsignacionRequestDTO
   ): Promise<ApiResponse<AsignacionResponseDTO>> => {
     return post<AsignacionResponseDTO, CalificarAsignacionRequestDTO>(
-      `/cursos/${cursoId}/asignaciones/${asignacionId}/grupos/calificar`,
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/calificar`,
       data
     );
   },
