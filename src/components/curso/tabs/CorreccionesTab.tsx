@@ -24,34 +24,48 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     CorreccionGrupoResponseDTO[]
   >([]);
   const [isLoadingAsignaciones, setIsLoadingAsignaciones] = useState(true);
-  const [isLoadingCorrecciones, setIsLoadingCorrecciones] = useState(true);
+  const [isLoadingCorrecciones, setIsLoadingCorrecciones] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Filtros
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
 
-  // Cargar asignaciones del curso al montar
+  // Cargar asignaciones del curso al montar o ante reintento manual
+  const cargarAsignaciones = useCallback(async () => {
+    setIsLoadingAsignaciones(true);
+    setError(null);
+    try {
+      const res = await obtenerAsignaciones(curso.id);
+      setAsignaciones(res.data);
+      if (res.data.length > 0) {
+        setSelectedAsignacionId(res.data[0].id);
+      } else {
+        setSelectedAsignacionId(null);
+      }
+    } catch {
+      setError("No se pudieron cargar las asignaciones del curso.");
+    } finally {
+      setIsLoadingAsignaciones(false);
+    }
+  }, [curso.id]);
+
   useEffect(() => {
     let ignore = false;
-
     obtenerAsignaciones(curso.id)
       .then((res) => {
         if (!ignore) {
           setAsignaciones(res.data);
           if (res.data.length > 0) {
             setSelectedAsignacionId(res.data[0].id);
-            setIsLoadingCorrecciones(true);
           } else {
             setSelectedAsignacionId(null);
-            setIsLoadingCorrecciones(false);
           }
         }
       })
       .catch(() => {
         if (!ignore) {
           setError("No se pudieron cargar las asignaciones del curso.");
-          setIsLoadingCorrecciones(false);
         }
       })
       .finally(() => {
@@ -91,11 +105,8 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   };
 
   useEffect(() => {
+    if (!selectedAsignacionId) return;
     let ignore = false;
-
-    if (!selectedAsignacionId) {
-      return;
-    }
 
     obtenerCorrecciones(curso.id, selectedAsignacionId)
       .then((res) => {
@@ -180,7 +191,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   // Filtrado de grupos
   const gruposFiltrados = useMemo(() => {
     return correcciones.filter((g) => {
-      // Búsqueda por nombre de alumno, grupo o repositorio
       const searchLower = busqueda.trim().toLowerCase();
       const coincideBusqueda =
         !searchLower ||
@@ -190,7 +200,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
       if (!coincideBusqueda) return false;
 
-      // Filtro por estado de correcciones
       if (filtroEstado === "todos") return true;
       if (filtroEstado === "con_correcciones") return g.issues.length > 0;
       if (filtroEstado === "sin_correcciones") return g.issues.length === 0;
@@ -281,8 +290,22 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
         </div>
       )}
 
+      {/* Error al cargar asignaciones */}
+      {!isLoadingAsignaciones && error && asignaciones.length === 0 && (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+          <p className="text-sm font-mono text-destructive mb-3">{error}</p>
+          <button
+            type="button"
+            onClick={cargarAsignaciones}
+            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
       {/* Si no hay asignaciones creadas */}
-      {!isLoadingAsignaciones && asignaciones.length === 0 && (
+      {!isLoadingAsignaciones && !error && asignaciones.length === 0 && (
         <EmptyState
           icon="📋"
           title="No hay asignaciones en este curso"
@@ -418,10 +441,19 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             </select>
           </PanelFilterBar>
 
-          {/* Mensaje de Error si falla la consulta de correcciones */}
+          {/* Mensaje de Error si falla la consulta de correcciones de la asignación */}
           {error && (
             <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">
-              <p className="text-sm font-mono text-destructive">{error}</p>
+              <p className="text-sm font-mono text-destructive mb-2">{error}</p>
+              {selectedAsignacionId && (
+                <button
+                  type="button"
+                  onClick={() => cargarCorrecciones(selectedAsignacionId)}
+                  className="rounded-lg bg-destructive px-3 py-1.5 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  Reintentar correcciones
+                </button>
+              )}
             </div>
           )}
 

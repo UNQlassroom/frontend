@@ -7,7 +7,7 @@ import type {
 
 export const useCursos = () => {
   const [cursos, setCursos] = useState<CursoResponseDTO[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [successCurso, setSuccessCurso] = useState<CursoResponseDTO | null>(null);
 
@@ -75,7 +75,6 @@ export const useCursos = () => {
       return nuevoCurso;
     } catch {
       // El interceptor global de Axios notifica el error mediante Toast
-      setError("Ocurrió un error al crear el curso.")
       return null;
     } finally {
       setIsLoading(false);

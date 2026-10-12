@@ -5,7 +5,7 @@ import type { CrearCursoFormData } from "@/types";
 
 export const HomeDocente = () => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const { isLoading, error, crearNuevoCurso, limpiarEstado, cursos } = useCursos();
+  const { isLoading, error, crearNuevoCurso, limpiarEstado, cursos, cargarCursos } = useCursos();
 
   const handleCreate = async (formData: CrearCursoFormData) => {
     const cursoCreado = await crearNuevoCurso(formData);
@@ -43,18 +43,40 @@ export const HomeDocente = () => {
         </button>
       </section>
 
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="font-mono text-xs text-muted-foreground">
+            Cargando tus cursos...
+          </p>
+        </div>
+      )}
+
+      {!isLoading && error && (
+        <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+          <p className="text-sm text-destructive font-medium mb-3">{error}</p>
+          <button
+            type="button"
+            onClick={cargarCursos}
+            className="rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
       {!isLoading && !error && cursos.length === 0 && (
-          <div className="mt-12 rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto">
-            <div className="mx-auto w-12 h-12 rounded-full bg-line/40 flex items-center justify-center text-xl mb-4">
-              📚
-            </div>
-            <h3 className="font-display text-lg font-bold text-foreground">
-              No gestionás ningún curso
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Crealo desde el botón "Crear curso" para empezar a organizar tus clases.
-            </p>
+        <div className="mt-12 rounded-2xl border border-dashed border-line bg-panel p-12 text-center max-w-lg mx-auto">
+          <div className="mx-auto w-12 h-12 rounded-full bg-line/40 flex items-center justify-center text-xl mb-4">
+            📚
           </div>
+          <h3 className="font-display text-lg font-bold text-foreground">
+            No gestionás ningún curso
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Crealo desde el botón "Crear curso" para empezar a organizar tus clases.
+          </p>
+        </div>
       )}
 
       {/* Modal de creación */}
@@ -65,11 +87,13 @@ export const HomeDocente = () => {
         isLoading={isLoading}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-8">
-        {cursos.map((c) => (
-          <CursoCardDocente key={c.id} curso={c} />
-        ))}
-      </div>
+      {!isLoading && !error && cursos.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+          {cursos.map((c) => (
+            <CursoCardDocente key={c.id} curso={c} />
+          ))}
+        </div>
+      )}
     </main>
   );
 };

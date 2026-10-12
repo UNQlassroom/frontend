@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 import type { ErrorSeverity } from "@/types";
 import { ERROR_MESSAGES, BACKEND_ERROR_CODES } from "@/constants";
 
@@ -15,9 +15,23 @@ export interface ResolvedApiError {
 export const resolveApiError = (error: unknown): ResolvedApiError | null => {
   if (axios.isCancel(error)) return null;
 
+  const isAxios = axios.isAxiosError(error);
+  const isObject = error !== null && typeof error === "object";
+
+  const response: AxiosResponse | undefined = isAxios
+    ? error.response
+    : isObject && "response" in error
+    ? (error as { response?: AxiosResponse }).response
+    : undefined;
+
   // 1. Falla de conexión o servidor caído (sin respuesta HTTP)
-  if (!axios.isAxiosError(error) || !error.response) {
-    const isTimeout = axios.isAxiosError(error) && error.code === "ECONNABORTED";
+  if (!response) {
+    const isTimeout =
+      (isAxios && error.code === "ECONNABORTED") ||
+      (isObject &&
+        "code" in error &&
+        (error as { code?: string }).code === "ECONNABORTED");
+
     return {
       message: isTimeout
         ? "La solicitud tardó demasiado tiempo en responder (timeout)."
@@ -28,7 +42,7 @@ export const resolveApiError = (error: unknown): ResolvedApiError | null => {
   }
 
   // 2. Respuesta del backend (con status y ApiError)
-  const { status, data, config } = error.response;
+  const { status, data, config } = response;
   const errorCode = data?.errorCode || undefined;
   const dict = errorCode ? ERROR_MESSAGES[errorCode] : undefined;
 
@@ -42,6 +56,7 @@ export const resolveApiError = (error: unknown): ResolvedApiError | null => {
     status,
     url: config?.url,
     method: config?.method?.toUpperCase(),
-    isUnauthorizedSession: errorCode === BACKEND_ERROR_CODES.UNAUTHORIZED,
+    isUnauthorizedSession:
+      errorCode === BACKEND_ERROR_CODES.UNAUTHORIZED || status === 401,
   };
 };
