@@ -15,18 +15,8 @@ export const useAlumnos = () => {
       const response = await obtenerAlumnos(cursoId);
       setAlumnosData(response.data);
       return response.data;
-    } catch (err: unknown) {
-      console.error("Error al obtener alumnos:", err);
-      if (typeof err === "object" && err !== null && "message" in err) {
-        const apiErr = err as { message: string; code?: string };
-        if (apiErr.message === "Network Error" || apiErr.code === "ERR_NETWORK") {
-          setError("Error de conexión.");
-        } else {
-          setError(`Error al obtener alumnos: ${apiErr.message}`);
-        }
-      } else {
-        setError("Ocurrió un error inesperado al conectar con el servidor.");
-      }
+    } catch {
+      setError("No se pudo cargar el listado de alumnos.");
       return null;
     } finally {
       setIsLoading(false);
@@ -35,23 +25,13 @@ export const useAlumnos = () => {
 
   const sincronizarAlumnos = useCallback(async (cursoId: number): Promise<CursoAlumnosResponseDTO | null> => {
     setIsSyncing(true);
-    setError(null);
     try {
       const response = await sincronizarAlumnosService(cursoId);
       setAlumnosData(response.data);
       return response.data;
-    } catch (err: unknown) {
-      console.error("Error al sincronizar alumnos con GitHub:", err);
-      if (typeof err === "object" && err !== null && "message" in err) {
-        const apiErr = err as { message: string; code?: string };
-        if (apiErr.message === "Network Error" || apiErr.code === "ERR_NETWORK") {
-          setError("Error de conexión al sincronizar con GitHub.");
-        } else {
-          setError(`Error al sincronizar: ${apiErr.message}`);
-        }
-      } else {
-        setError("Ocurrió un error inesperado al sincronizar con GitHub.");
-      }
+    } catch {
+      // El interceptor global de Axios muestra el toast con el error correspondiente (ej: rate limit)
+      setError("Error al sincronizar alumnos con GitHub");
       return null;
     } finally {
       setIsSyncing(false);

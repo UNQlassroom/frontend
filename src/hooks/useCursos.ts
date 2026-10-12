@@ -18,8 +18,7 @@ export const useCursos = () => {
       .then((response) => {
         setCursos(response.data);
       })
-      .catch((err: unknown) => {
-        console.error("Error al obtener cursos:", err);
+      .catch(() => {
         setError("No se pudieron cargar los cursos del servidor.");
       })
       .finally(() => {
@@ -36,9 +35,8 @@ export const useCursos = () => {
           setCursos(response.data);
         }
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (isMounted) {
-          console.error("Error al obtener cursos:", err);
           setError("No se pudieron cargar los cursos del servidor.");
         }
       })
@@ -75,20 +73,9 @@ export const useCursos = () => {
       setCursos((prev) => [nuevoCurso, ...prev]);
       setSuccessCurso(nuevoCurso);
       return nuevoCurso;
-    } catch (err: unknown) {
-      console.error("Error al crear curso:", err);
-      if (typeof err === "object" && err !== null && "message" in err) {
-        const apiErr = err as { message: string; code?: string };
-        if (apiErr.message === "Network Error" || apiErr.code === "ERR_NETWORK") {
-          setError(
-            "Error de conexión o CORS. Verifica que el backend esté en localhost:8080 con CORS habilitado."
-          );
-        } else {
-          setError(`Error al crear curso: ${apiErr.message}`);
-        }
-      } else {
-        setError("Ocurrió un error inesperado al conectar con el servidor.");
-      }
+    } catch {
+      // El interceptor global de Axios notifica el error mediante Toast
+      setError("Ocurrió un error al crear el curso.")
       return null;
     } finally {
       setIsLoading(false);

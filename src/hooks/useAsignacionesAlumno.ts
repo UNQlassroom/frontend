@@ -96,8 +96,8 @@ export function useAsignacionesAlumno(cursoId?: number) {
     try {
       const response = await obtenerAsignaciones(cursoId);
       setAsignaciones(mapAsignacionesDTO(response.data, username));
-    } catch (err: unknown) {
-      console.error("Error al cargar asignaciones del alumno:", err);
+    } catch {
+      // Error manejado por interceptor
       setError("No se pudieron cargar las asignaciones del curso.");
     } finally {
       setIsLoading(false);
@@ -114,9 +114,9 @@ export function useAsignacionesAlumno(cursoId?: number) {
           setAsignaciones(mapAsignacionesDTO(response.data, username));
         }
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar asignaciones del alumno:", err);
+          // Error manejado por interceptor
           setError("No se pudieron cargar las asignaciones del curso.");
         }
       })
@@ -147,9 +147,6 @@ export function useAsignacionesAlumno(cursoId?: number) {
           return prev.map((a) => (a.id === asignacionId ? { ...a, ...nueva } : a));
         });
         return true;
-      } catch (err: unknown) {
-        console.error("Error al entregar asignación:", err);
-        throw err;
       } finally {
         setEntregandoId(null);
       }
