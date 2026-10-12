@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import type { AsignacionAlumnoDTO, EstadoEntrega, CorreccionGrupoResponseDTO } from "@/types";
 import { obtenerCorrecciones } from "@/services";
-import { CIStatusBadge, IssueEstadoBadge, KpiCard, EmptyState } from "@/components/common";
+import { CIStatusBadge, IssueEstadoBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelFilterBar } from "@/components/panel";
 import { ConfirmarReentregaModal } from "./ConfirmarReentregaModal";
 import githubIcon from "@/assets/github_favicon.svg";
@@ -179,20 +179,7 @@ export function AsignacionesAlumnoList({
   }
 
   if (error) {
-    return (
-      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center animate-rise">
-        <p className="font-mono text-xs text-destructive mb-3">{error}</p>
-        {onRetry && (
-          <button
-            type="button"
-            onClick={onRetry}
-            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-          >
-            Reintentar
-          </button>
-        )}
-      </div>
-    );
+    return <ErrorBanner message={error} onRetry={onRetry} />;
   }
 
   if (asignaciones.length === 0) {

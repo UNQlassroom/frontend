@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCursos } from "@/hooks";
-import { CrearCursoModal, CursoCardDocente } from "@/components";
+import { CrearCursoModal, CursoCardDocente, ErrorBanner } from "@/components";
 import type { CrearCursoFormData } from "@/types";
 
 export const HomeDocente = () => {
@@ -53,16 +53,7 @@ export const HomeDocente = () => {
       )}
 
       {!isLoading && error && (
-        <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-          <p className="text-sm text-destructive font-medium mb-3">{error}</p>
-          <button
-            type="button"
-            onClick={cargarCursos}
-            className="rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorBanner message={error} onRetry={cargarCursos} className="mt-8" />
       )}
 
       {!isLoading && !error && cursos.length === 0 && (

@@ -5,7 +5,7 @@ import type {
   CursoResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones } from "@/services";
-import { CIStatusBadge, KpiCard, EmptyState } from "@/components/common";
+import { CIStatusBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import {
   formatearFechaCommit,
@@ -222,16 +222,7 @@ export function MetricasTab({
 
       {/* Estado: Error */}
       {!isLoading && error && (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-7 text-center">
-          <p className="font-mono text-sm text-destructive mb-3.5">{error}</p>
-          <button
-            type="button"
-            onClick={cargarDatos}
-            className="rounded-lg bg-destructive px-4 py-2 font-mono text-sm font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorBanner message={error} onRetry={cargarDatos} />
       )}
 
       {/* Estado sin asignaciones creadas */}
@@ -480,4 +471,3 @@ export function MetricasTab({
     </div>
   );
 }
-

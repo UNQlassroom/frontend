@@ -6,7 +6,7 @@ import type {
   IssueResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
-import { IssueEstadoBadge, KpiCard, EmptyState } from "@/components/common";
+import { IssueEstadoBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import githubIcon from "@/assets/github_favicon.svg";
 import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/utils";
@@ -292,16 +292,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
       {/* Error al cargar asignaciones */}
       {!isLoadingAsignaciones && error && asignaciones.length === 0 && (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-          <p className="text-sm font-mono text-destructive mb-3">{error}</p>
-          <button
-            type="button"
-            onClick={cargarAsignaciones}
-            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorBanner message={error} onRetry={cargarAsignaciones} />
       )}
 
       {/* Si no hay asignaciones creadas */}
@@ -443,18 +434,11 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
           {/* Mensaje de Error si falla la consulta de correcciones de la asignación */}
           {error && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">
-              <p className="text-sm font-mono text-destructive mb-2">{error}</p>
-              {selectedAsignacionId && (
-                <button
-                  type="button"
-                  onClick={() => cargarCorrecciones(selectedAsignacionId)}
-                  className="rounded-lg bg-destructive px-3 py-1.5 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-                >
-                  Reintentar correcciones
-                </button>
-              )}
-            </div>
+            <ErrorBanner
+              message={error}
+              onRetry={selectedAsignacionId ? () => cargarCorrecciones(selectedAsignacionId) : undefined}
+              retryText="Reintentar correcciones"
+            />
           )}
 
           {/* Spinner de carga de correcciones */}

@@ -13,7 +13,7 @@ export const useCursoDetalle = (cursoId: number | undefined) => {
         const response = await obtenerCursoPorId(id);
         setCurso(response.data);
       } catch {
-        setError("No se pudo cargar el curso.");
+        setError("El curso solicitado no existe o no se encuentra disponible.");
       } finally {
         setIsLoading(false);
       }
@@ -46,7 +46,7 @@ export const useCursoDetalle = (cursoId: number | undefined) => {
       })
       .catch(() => {
         if (isMounted) {
-          setError("No se pudo cargar el curso.");
+          setError("El curso solicitado no existe o no se encuentra disponible.");
         }
       })
       .finally(() => {
