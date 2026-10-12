@@ -187,30 +187,7 @@ export function CrearAsignacionModal({
       handleClose();
     } catch (err: unknown) {
       console.error("Error al crear la asignación:", err);
-      if (typeof err === "object" && err !== null) {
-        const apiErr = err as {
-          code?: string;
-          message?: string;
-          response?: { status?: number; data?: { message?: string } };
-        };
-
-        if (
-          apiErr.code === "ECONNABORTED" ||
-          (typeof apiErr.message === "string" &&
-            apiErr.message.toLowerCase().includes("timeout"))
-        ) {
-          setError(
-            "La creación de los repositorios en GitHub está demorando más de lo habitual debido a la cantidad de repositorios. El servidor puede seguir procesándolos en segundo plano. Podés cerrar esta ventana y recargar la lista en unos momentos."
-          );
-        } else {
-          const serverMsg = apiErr.response?.data?.message;
-          setError(
-            serverMsg || "Ocurrió un error al crear la asignación en el servidor."
-          );
-        }
-      } else {
-        setError("Ocurrió un error inesperado al conectar con el servidor.");
-      }
+      // Los errores del backend y de red son notificados mediante Toast por el interceptor global
     } finally {
       setIsLoading(false);
     }

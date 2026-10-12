@@ -76,36 +76,8 @@ export function InvitarAlumnosModal({
         onSuccess();
       }
     } catch (err: unknown) {
-      if (typeof err === "object" && err !== null) {
-        const apiErr = err as {
-          response?: {
-            status?: number;
-            data?: { message?: string };
-          };
-          message?: string;
-        };
-
-        const status = apiErr.response?.status;
-        const serverMessage = apiErr.response?.data?.message || "";
-
-        if (status === 404 || serverMessage.includes("404")) {
-          setError(
-            "Uno o más usuarios no fueron encontrados en GitHub. Verificá que estén bien escritos."
-          );
-        } else if (status === 422 || serverMessage.includes("422")) {
-          setError(
-            "Uno o más usuarios están bloqueados o no pueden ser invitados. Verificá que estén bien escritos y que no tengan restricciones."
-          );
-        } else {
-          setError(
-            apiErr.message === "Network Error"
-              ? "Error de conexión."
-              : "Ocurrió un error inesperado."
-          );
-        }
-      } else {
-        setError("Ocurrió un error inesperado al invitar a los alumnos.");
-      }
+      console.error("Error al invitar a los alumnos:", err);
+      // El interceptor global de Axios muestra el toast amigable correspondiente (ej: GITHUB_USERS_NOT_FOUND)
     } finally {
       setIsLoading(false);
     }

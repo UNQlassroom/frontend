@@ -64,14 +64,7 @@ function CalificarAsignacionContent({
       onClose();
     } catch (err: unknown) {
       console.error("Error al calificar la asignación:", err);
-      if (typeof err === "object" && err !== null && "response" in err) {
-        const apiErr = err as {
-          response?: { data?: { message?: string } };
-        };
-        setError(apiErr.response?.data?.message || "Error al registrar la calificación.");
-      } else {
-        setError("Error de conexión al calificar la asignación.");
-      }
+      // El interceptor global de Axios notifica el error mediante toast amigable
     } finally {
       setIsLoading(false);
     }
@@ -202,7 +195,7 @@ function CalificarAsignacionContent({
             />
           </div>
 
-          {/* Error */}
+          {/* Error de validación local */}
           {error && (
             <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5">
               <p className="font-mono text-sm text-destructive">{error}</p>
