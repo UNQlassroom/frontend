@@ -62,9 +62,9 @@ function CalificarAsignacionContent({
 
       onSuccess(response.data);
       onClose();
-    } catch (err: unknown) {
-      console.error("Error al calificar la asignación:", err);
+    } catch {
       // El interceptor global de Axios notifica el error mediante toast amigable
+      setError("Error al calificar la asignación.")
     } finally {
       setIsLoading(false);
     }

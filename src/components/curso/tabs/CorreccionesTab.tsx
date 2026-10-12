@@ -48,9 +48,8 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
           }
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar asignaciones:", err);
           setError("No se pudieron cargar las asignaciones del curso.");
           setIsLoadingCorrecciones(false);
         }
@@ -74,20 +73,8 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
       try {
         const res = await obtenerCorrecciones(curso.id, asignacionId);
         setCorrecciones(res.data);
-      } catch (err: unknown) {
-        console.error("Error al cargar correcciones:", err);
-        if (
-          typeof err === "object" &&
-          err !== null &&
-          "code" in err &&
-          (err as { code?: string }).code === "ECONNABORTED"
-        ) {
-          setError(
-            "La consulta de correcciones a GitHub tardó más de lo esperado. Por favor reintentá en unos instantes."
-          );
-        } else {
-          setError("No se pudieron obtener las correcciones de esta asignación.");
-        }
+      } catch {
+        setError("No se pudieron obtener las correcciones de esta asignación.");
       } finally {
         setIsLoadingCorrecciones(false);
       }
@@ -116,21 +103,9 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
           setCorrecciones(res.data);
         }
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar correcciones:", err);
-          if (
-            typeof err === "object" &&
-            err !== null &&
-            "code" in err &&
-            (err as { code?: string }).code === "ECONNABORTED"
-          ) {
-            setError(
-              "La consulta de correcciones a GitHub tardó más de lo esperado. Por favor reintentá en unos instantes."
-            );
-          } else {
-            setError("No se pudieron obtener las correcciones de esta asignación.");
-          }
+          setError("No se pudieron obtener las correcciones de esta asignación.");
         }
       })
       .finally(() => {

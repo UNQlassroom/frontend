@@ -59,8 +59,7 @@ export function MetricasTab({
       } else {
         setSelectedAsignacionId(null);
       }
-    } catch (err: unknown) {
-      console.error("Error al cargar métricas de repositorios desde la BD:", err);
+    } catch {
       setError("No se pudieron cargar las asignaciones y repositorios del curso.");
     } finally {
       setIsLoading(false);
@@ -86,9 +85,8 @@ export function MetricasTab({
           }
         }
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar métricas desde la BD:", err);
           setError("No se pudieron cargar las asignaciones y repositorios del curso.");
         }
       })

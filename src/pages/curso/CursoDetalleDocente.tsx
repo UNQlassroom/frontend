@@ -81,10 +81,10 @@ export const CursoDetalleDocente = () => {
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
         <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center max-w-lg mx-auto">
           <h2 className="font-display text-xl font-bold text-foreground">
-            No se pudo cargar el curso
+            {errorCurso}
           </h2>
           <p className="mt-2 font-mono text-xs text-destructive">
-            {errorCurso || "El curso solicitado no existe o no se encuentra disponible."}
+            {"El curso solicitado no existe o no se encuentra disponible."}
           </p>
           <div className="mt-6 flex justify-center gap-3">
             <Link

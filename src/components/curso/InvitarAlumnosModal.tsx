@@ -75,9 +75,9 @@ export function InvitarAlumnosModal({
       if (onSuccess) {
         onSuccess();
       }
-    } catch (err: unknown) {
-      console.error("Error al invitar a los alumnos:", err);
+    } catch {
       // El interceptor global de Axios muestra el toast amigable correspondiente (ej: GITHUB_USERS_NOT_FOUND)
+      setError("Ocurrió un error al invitar alumnos.")
     } finally {
       setIsLoading(false);
     }

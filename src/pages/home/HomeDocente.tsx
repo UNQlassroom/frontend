@@ -63,7 +63,6 @@ export const HomeDocente = () => {
         onClose={() => setOpenDialog(false)}
         onCreate={handleCreate}
         isLoading={isLoading}
-        serverError={error}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-8">

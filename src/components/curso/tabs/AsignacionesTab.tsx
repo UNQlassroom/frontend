@@ -3,10 +3,9 @@ import type {
   AlumnoResponseDTO,
   AsignacionResponseDTO,
   GrupoAsignacionResponseDTO,
-  CursoResponseDTO,
-  TemplateRepoResponseDTO,
+  CursoResponseDTO
 } from "@/types";
-import { obtenerAsignaciones, listarTemplates } from "@/services";
+import { obtenerAsignaciones } from "@/services";
 import {
   CrearAsignacionModal,
   CalificarAsignacionModal,
@@ -27,7 +26,6 @@ export interface AsignacionesTabProps {
 
 export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
-  const [templates, setTemplates] = useState<TemplateRepoResponseDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,8 +56,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
       if (response.data.length > 0) {
         setExpandedAsigId((prev) => (prev === null ? response.data[0].id : prev));
       }
-    } catch (err: unknown) {
-      console.error("Error al cargar asignaciones:", err);
+    } catch {
       setError("No se pudieron cargar las asignaciones del curso.");
     } finally {
       setIsLoading(false);
@@ -77,27 +74,15 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
           }
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar asignaciones:", err);
+          
           setError("No se pudieron cargar las asignaciones del curso.");
         }
       })
       .finally(() => {
         if (!ignore) {
           setIsLoading(false);
-        }
-      });
-
-    listarTemplates()
-      .then((res) => {
-        if (!ignore) {
-          setTemplates(res.data);
-        }
-      })
-      .catch((err) => {
-        if (!ignore) {
-          console.warn("No se pudieron cargar repositorios plantillas:", err);
         }
       });
 
@@ -111,8 +96,6 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
   };
 
   const getTemplateUrl = (templateRepoName: string) => {
-    const found = templates.find((t) => t.name === templateRepoName);
-    if (found?.htmlUrl) return found.htmlUrl;
     return `https://github.com/UNQlassroom/${templateRepoName}`;
   };
 

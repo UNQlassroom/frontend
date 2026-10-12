@@ -63,10 +63,8 @@ export function CrearAsignacionModal({
           }
         }
       })
-      .catch((err) => {
-        if (!ignore) {
-          console.warn("No se pudieron cargar templates automáticos:", err);
-        }
+      .catch(() => {
+        // Fallback si falla la carga opcional de templates
       })
       .finally(() => {
         if (!ignore) {
@@ -185,8 +183,8 @@ export function CrearAsignacionModal({
       await crearAsignacion(cursoId, payload);
       onSuccess();
       handleClose();
-    } catch (err: unknown) {
-      console.error("Error al crear la asignación:", err);
+    } catch {
+      
       // Los errores del backend y de red son notificados mediante Toast por el interceptor global
     } finally {
       setIsLoading(false);
