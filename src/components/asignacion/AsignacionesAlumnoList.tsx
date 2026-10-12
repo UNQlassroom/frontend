@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import type { AsignacionAlumnoDTO, EstadoEntrega, CorreccionGrupoResponseDTO } from "@/types";
 import { obtenerCorrecciones } from "@/services";
-import { CIStatusBadge, IssueEstadoBadge, KpiCard, EmptyState } from "@/components/common";
+import { CIStatusBadge, IssueEstadoBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelFilterBar } from "@/components/panel";
 import { ConfirmarReentregaModal } from "./ConfirmarReentregaModal";
 import githubIcon from "@/assets/github_favicon.svg";
@@ -28,7 +28,6 @@ export function AsignacionesAlumnoList({
   const [filtro, setFiltro] = useState<EstadoEntrega | "todas">("todas");
   const [searchTerm, setSearchTerm] = useState("");
   const [copiedId, setCopiedId] = useState<string | number | null>(null);
-  const [entregaError, setEntregaError] = useState<{ id: string | number; message: string } | null>(null);
   const [asignacionParaReentregar, setAsignacionParaReentregar] = useState<AsignacionAlumnoDTO | null>(null);
 
   // Estado para la sección desplegable de correcciones e issues
@@ -77,18 +76,12 @@ export function AsignacionesAlumnoList({
     });
   };
 
-  const handleEntregar = async (asigId: number) => {
-    if (!onEntregar) return;
-    setEntregaError(null);
+  const handleEntregar = async (asigId: number): Promise<boolean> => {
+    if (!onEntregar) return false;
     try {
-      await onEntregar(asigId);
-    } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "message" in err
-          ? String(err.message)
-          : "Error al registrar la entrega. Intentalo nuevamente.";
-      setEntregaError({ id: asigId, message: msg });
-      throw err;
+      return await onEntregar(asigId);
+    } catch {
+      return false;
     }
   };
 
@@ -105,8 +98,8 @@ export function AsignacionesAlumnoList({
         ...prev,
         [asigId]: { loading: false, error: null, grupo: miGrupo },
       }));
-    } catch (err: unknown) {
-      console.error("Error al cargar correcciones de asignacion:", err);
+    } catch {
+      
       setCorreccionesPorAsig((prev) => ({
         ...prev,
         [asigId]: {
@@ -186,20 +179,7 @@ export function AsignacionesAlumnoList({
   }
 
   if (error) {
-    return (
-      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center animate-rise">
-        <p className="font-mono text-xs text-destructive mb-3">{error}</p>
-        {onRetry && (
-          <button
-            type="button"
-            onClick={onRetry}
-            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-          >
-            Reintentar
-          </button>
-        )}
-      </div>
-    );
+    return <ErrorBanner message={error} onRetry={onRetry} />;
   }
 
   if (asignaciones.length === 0) {
@@ -785,12 +765,6 @@ export function AsignacionesAlumnoList({
                         )}
                       </div>
                     )}
-
-                    {entregaError && entregaError.id === asig.id && (
-                      <p className="font-mono text-xs text-destructive">
-                        {entregaError.message}
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
@@ -811,11 +785,9 @@ export function AsignacionesAlumnoList({
         onConfirm={async () => {
           if (!asignacionParaReentregar) return;
           const asigId = Number(asignacionParaReentregar.id);
-          try {
-            await handleEntregar(asigId);
+          const ok = await handleEntregar(asigId);
+          if (ok) {
             setAsignacionParaReentregar(null);
-          } catch {
-            // El error se muestra a través de entregaError
           }
         }}
       />

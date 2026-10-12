@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "@/hooks";
 import { authService } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
+import { resolveApiError } from "@/utils";
 
 export const OAuthCallbackPage = () => {
   const [searchParams] = useSearchParams();
@@ -53,13 +54,12 @@ export const OAuthCallbackPage = () => {
           navigate("/home", { replace: true });
         }
       })
-      .catch((err) => {
-        console.error("Error al autenticar con GitHub:", err);
-        const mensaje =
-          err?.response?.data?.message ||
-          err?.message ||
-          "Ocurrió un error al comunicarse con el servidor. Intenta nuevamente.";
-        setErrorMsg(mensaje);
+      .catch((err: unknown) => {
+        const resolved = resolveApiError(err);
+        setErrorMsg(
+          resolved?.message ||
+            "Ocurrió un error al comunicarse con el servidor. Intenta nuevamente."
+        );
       });
   }, [code, errorInicial, login, navigate]);
 

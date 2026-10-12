@@ -1,5 +1,6 @@
 import axios from "axios";
 import { STORAGE_KEYS } from "@/constants";
+import { setupResponseInterceptor } from "./interceptors";
 
 export const API_BASE_URL: string =
   import.meta.env.VITE_API_URL || "http://localhost:8080";
@@ -22,3 +23,5 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
+setupResponseInterceptor(apiClient);

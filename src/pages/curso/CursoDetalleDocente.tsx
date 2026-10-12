@@ -7,6 +7,7 @@ import {
   CorreccionesTab,
   MetricasTab,
   InvitarAlumnosModal,
+  ErrorBanner,
 } from "@/components";
 
 type TabType = "alumnos" | "asignaciones" | "metricas" | "correcciones";
@@ -79,29 +80,19 @@ export const CursoDetalleDocente = () => {
   if (errorCurso || !curso) {
     return (
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center max-w-lg mx-auto">
-          <h2 className="font-display text-xl font-bold text-foreground">
-            No se pudo cargar el curso
-          </h2>
-          <p className="mt-2 font-mono text-xs text-destructive">
-            {errorCurso || "El curso solicitado no existe o no se encuentra disponible."}
-          </p>
-          <div className="mt-6 flex justify-center gap-3">
-            <Link
-              to="/home"
-              className="rounded-lg border border-line bg-panel px-4 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
-            >
-              ← Volver a Cursos
-            </Link>
-            <button
-              type="button"
-              onClick={cargarCurso}
-              className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
+        <ErrorBanner
+          className="max-w-lg mx-auto p-8"
+          title="No se pudo cargar el curso"
+          message={errorCurso || "El curso solicitado no existe o no se encuentra disponible."}
+          onRetry={cargarCurso}
+        >
+          <Link
+            to="/home"
+            className="rounded-lg border border-line bg-panel px-4 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+          >
+            ← Volver a Cursos
+          </Link>
+        </ErrorBanner>
       </main>
     );
   }

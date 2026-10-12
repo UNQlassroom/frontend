@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import type { AlumnoResponseDTO, CursoResponseDTO } from "@/types";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
-import { EmptyState } from "@/components/common";
+import { EmptyState, ErrorBanner } from "@/components/common";
 
 export interface AlumnosTabProps {
   curso: CursoResponseDTO;
@@ -113,16 +113,7 @@ export function AlumnosTab({
 
       {/* Estado: Error */}
       {!isLoading && error && (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-          <p className="font-mono text-xs text-destructive mb-3">{error}</p>
-          <button
-            type="button"
-            onClick={onRetry}
-            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorBanner message={error} onRetry={onRetry} />
       )}
 
       {/* Estado: Sin alumnos */}

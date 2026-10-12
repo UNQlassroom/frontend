@@ -6,7 +6,7 @@ import type {
   IssueResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
-import { IssueEstadoBadge, KpiCard, EmptyState } from "@/components/common";
+import { IssueEstadoBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import githubIcon from "@/assets/github_favicon.svg";
 import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/utils";
@@ -24,35 +24,48 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     CorreccionGrupoResponseDTO[]
   >([]);
   const [isLoadingAsignaciones, setIsLoadingAsignaciones] = useState(true);
-  const [isLoadingCorrecciones, setIsLoadingCorrecciones] = useState(true);
+  const [isLoadingCorrecciones, setIsLoadingCorrecciones] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Filtros
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
 
-  // Cargar asignaciones del curso al montar
+  // Cargar asignaciones del curso al montar o ante reintento manual
+  const cargarAsignaciones = useCallback(async () => {
+    setIsLoadingAsignaciones(true);
+    setError(null);
+    try {
+      const res = await obtenerAsignaciones(curso.id);
+      setAsignaciones(res.data);
+      if (res.data.length > 0) {
+        setSelectedAsignacionId(res.data[0].id);
+      } else {
+        setSelectedAsignacionId(null);
+      }
+    } catch {
+      setError("No se pudieron cargar las asignaciones del curso.");
+    } finally {
+      setIsLoadingAsignaciones(false);
+    }
+  }, [curso.id]);
+
   useEffect(() => {
     let ignore = false;
-
     obtenerAsignaciones(curso.id)
       .then((res) => {
         if (!ignore) {
           setAsignaciones(res.data);
           if (res.data.length > 0) {
             setSelectedAsignacionId(res.data[0].id);
-            setIsLoadingCorrecciones(true);
           } else {
             setSelectedAsignacionId(null);
-            setIsLoadingCorrecciones(false);
           }
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar asignaciones:", err);
           setError("No se pudieron cargar las asignaciones del curso.");
-          setIsLoadingCorrecciones(false);
         }
       })
       .finally(() => {
@@ -74,20 +87,8 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
       try {
         const res = await obtenerCorrecciones(curso.id, asignacionId);
         setCorrecciones(res.data);
-      } catch (err: unknown) {
-        console.error("Error al cargar correcciones:", err);
-        if (
-          typeof err === "object" &&
-          err !== null &&
-          "code" in err &&
-          (err as { code?: string }).code === "ECONNABORTED"
-        ) {
-          setError(
-            "La consulta de correcciones a GitHub tardó más de lo esperado. Por favor reintentá en unos instantes."
-          );
-        } else {
-          setError("No se pudieron obtener las correcciones de esta asignación.");
-        }
+      } catch {
+        setError("No se pudieron obtener las correcciones de esta asignación.");
       } finally {
         setIsLoadingCorrecciones(false);
       }
@@ -104,11 +105,8 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   };
 
   useEffect(() => {
+    if (!selectedAsignacionId) return;
     let ignore = false;
-
-    if (!selectedAsignacionId) {
-      return;
-    }
 
     obtenerCorrecciones(curso.id, selectedAsignacionId)
       .then((res) => {
@@ -116,21 +114,9 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
           setCorrecciones(res.data);
         }
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar correcciones:", err);
-          if (
-            typeof err === "object" &&
-            err !== null &&
-            "code" in err &&
-            (err as { code?: string }).code === "ECONNABORTED"
-          ) {
-            setError(
-              "La consulta de correcciones a GitHub tardó más de lo esperado. Por favor reintentá en unos instantes."
-            );
-          } else {
-            setError("No se pudieron obtener las correcciones de esta asignación.");
-          }
+          setError("No se pudieron obtener las correcciones de esta asignación.");
         }
       })
       .finally(() => {
@@ -205,7 +191,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   // Filtrado de grupos
   const gruposFiltrados = useMemo(() => {
     return correcciones.filter((g) => {
-      // Búsqueda por nombre de alumno, grupo o repositorio
       const searchLower = busqueda.trim().toLowerCase();
       const coincideBusqueda =
         !searchLower ||
@@ -215,7 +200,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
       if (!coincideBusqueda) return false;
 
-      // Filtro por estado de correcciones
       if (filtroEstado === "todos") return true;
       if (filtroEstado === "con_correcciones") return g.issues.length > 0;
       if (filtroEstado === "sin_correcciones") return g.issues.length === 0;
@@ -306,8 +290,13 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
         </div>
       )}
 
+      {/* Error al cargar asignaciones */}
+      {!isLoadingAsignaciones && error && asignaciones.length === 0 && (
+        <ErrorBanner message={error} onRetry={cargarAsignaciones} />
+      )}
+
       {/* Si no hay asignaciones creadas */}
-      {!isLoadingAsignaciones && asignaciones.length === 0 && (
+      {!isLoadingAsignaciones && !error && asignaciones.length === 0 && (
         <EmptyState
           icon="📋"
           title="No hay asignaciones en este curso"
@@ -443,11 +432,13 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             </select>
           </PanelFilterBar>
 
-          {/* Mensaje de Error si falla la consulta de correcciones */}
+          {/* Mensaje de Error si falla la consulta de correcciones de la asignación */}
           {error && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center">
-              <p className="text-sm font-mono text-destructive">{error}</p>
-            </div>
+            <ErrorBanner
+              message={error}
+              onRetry={selectedAsignacionId ? () => cargarCorrecciones(selectedAsignacionId) : undefined}
+              retryText="Reintentar correcciones"
+            />
           )}
 
           {/* Spinner de carga de correcciones */}

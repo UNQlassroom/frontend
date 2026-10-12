@@ -8,7 +8,6 @@ interface CrearCursoModalProps {
   onClose: () => void;
   onCreate: (data: CrearCursoFormData) => void;
   isLoading?: boolean;
-  serverError?: string | null;
 }
 
 export function CrearCursoModal({
@@ -16,7 +15,6 @@ export function CrearCursoModal({
   onClose,
   onCreate,
   isLoading = false,
-  serverError = null,
 }: CrearCursoModalProps) {
   const [materia, setMateria] = useState("");
   const [comision, setComision] = useState(COMISIONES[0]!);
@@ -39,8 +37,6 @@ export function CrearCursoModal({
     setError("");
     onClose();
   };
-
-  const displayError = error || serverError;
 
   return (
     <div
@@ -71,7 +67,7 @@ export function CrearCursoModal({
           </button>
         </div>
 
-        <div className="mt-6 space-y-5">
+        <div className="mt-6 space-y-4">
           <div>
             <label
               htmlFor="materia"
@@ -82,13 +78,14 @@ export function CrearCursoModal({
             <input
               id="materia"
               type="text"
-              value={materia}
+              required
               disabled={isLoading}
+              placeholder="Ej: Programación Funcional"
+              value={materia}
               onChange={(e) => {
                 setMateria(e.target.value);
-                setError("");
+                if (error) setError("");
               }}
-              placeholder="Ej. Programación Funcional"
               className="w-full rounded-xl border border-line bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
             />
           </div>
@@ -135,8 +132,8 @@ export function CrearCursoModal({
             </div>
           </div>
 
-          {displayError && (
-            <p className="text-sm text-destructive font-mono">{displayError}</p>
+          {error && (
+            <p className="text-sm text-destructive font-mono">{error}</p>
           )}
         </div>
 

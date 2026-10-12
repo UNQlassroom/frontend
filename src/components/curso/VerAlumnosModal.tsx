@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAlumnos } from "@/hooks";
+import { ErrorBanner } from "@/components/common";
 import type { CursoResponseDTO } from "@/types";
 
 interface VerAlumnosModalProps {
@@ -66,16 +67,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
           )}
 
           {!isLoading && error && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-5 text-center">
-              <p className="font-mono text-sm text-destructive mb-3">{error}</p>
-              <button
-                type="button"
-                onClick={() => cargarAlumnos(curso.id)}
-                className="rounded-xl bg-destructive px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                Reintentar
-              </button>
-            </div>
+            <ErrorBanner message={error} onRetry={() => cargarAlumnos(curso.id)} />
           )}
 
           {!isLoading && !error && alumnosData && (

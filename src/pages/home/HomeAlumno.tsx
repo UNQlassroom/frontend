@@ -1,5 +1,5 @@
 import { useCursos } from "@/hooks";
-import { CursoCardAlumno } from "@/components";
+import { CursoCardAlumno, ErrorBanner } from "@/components";
 
 export const HomeAlumno = () => {
   const { cursos, isLoading, error, cargarCursos } = useCursos();
@@ -31,16 +31,7 @@ export const HomeAlumno = () => {
       )}
 
       {!isLoading && error && (
-        <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-          <p className="text-sm text-destructive font-medium mb-3">{error}</p>
-          <button
-            type="button"
-            onClick={cargarCursos}
-            className="rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorBanner message={error} onRetry={cargarCursos} className="mt-8" />
       )}
 
       {!isLoading && !error && cursos.length === 0 && (

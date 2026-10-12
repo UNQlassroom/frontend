@@ -12,18 +12,8 @@ export const useCursoDetalle = (cursoId: number | undefined) => {
       try {
         const response = await obtenerCursoPorId(id);
         setCurso(response.data);
-      } catch (err: unknown) {
-        console.error("Error al cargar detalle del curso:", err);
-        if (typeof err === "object" && err !== null && "message" in err) {
-          const apiErr = err as { message: string; code?: string };
-          if (apiErr.message === "Network Error" || apiErr.code === "ERR_NETWORK") {
-            setError("Error de conexión con el servidor.");
-          } else {
-            setError(`No se pudo cargar el curso (${apiErr.message}).`);
-          }
-        } else {
-          setError("Ocurrió un error al cargar el curso.");
-        }
+      } catch {
+        setError("El curso solicitado no existe o no se encuentra disponible.");
       } finally {
         setIsLoading(false);
       }
@@ -54,19 +44,9 @@ export const useCursoDetalle = (cursoId: number | undefined) => {
           setCurso(response.data);
         }
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (isMounted) {
-          console.error("Error al cargar detalle del curso:", err);
-          if (typeof err === "object" && err !== null && "message" in err) {
-            const apiErr = err as { message: string; code?: string };
-            if (apiErr.message === "Network Error" || apiErr.code === "ERR_NETWORK") {
-              setError("Error de conexión con el servidor.");
-            } else {
-              setError(`No se pudo cargar el curso (${apiErr.message}).`);
-            }
-          } else {
-            setError("Ocurrió un error al cargar el curso.");
-          }
+          setError("El curso solicitado no existe o no se encuentra disponible.");
         }
       })
       .finally(() => {
