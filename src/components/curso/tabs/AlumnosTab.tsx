@@ -8,20 +8,20 @@ export interface AlumnosTabProps {
   curso: CursoResponseDTO;
   alumnos: AlumnoResponseDTO[];
   isLoading: boolean;
-  isSyncing?: boolean;
+  isRecargando?: boolean;
   error: string | null;
   onRetry: () => void;
-  onSync?: () => void;
+  onRecargar?: () => void;
   onOpenInvitarModal: () => void;
 }
 
 export function AlumnosTab({
   alumnos,
   isLoading,
-  isSyncing = false,
+  isRecargando = false,
   error,
   onRetry,
-  onSync,
+  onRecargar,
   onOpenInvitarModal,
 }: AlumnosTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,20 +56,20 @@ export function AlumnosTab({
       {/* Encabezado del Panel de Alumnos */}
       <PanelHeader
         title="Panel de Alumnos"
-        description="Listado de alumnos, estado de membresía en GitHub y sincronización con la organización."
+        description="Listado de alumnos y estado de membresía en la organización."
         actions={
           <>
-            {onSync && (
+            {onRecargar && (
               <button
                 type="button"
-                onClick={onSync}
-                disabled={isSyncing || isLoading}
+                onClick={onRecargar}
+                disabled={isRecargando || isLoading}
                 className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-                title="Consultar a GitHub si los alumnos ya aceptaron la invitación para actualizar su estado a activo"
+                title="Recargar la lista de alumnos"
               >
                 <svg
                   className={`w-4 h-4 ${
-                    isSyncing ? "animate-spin text-primary" : "text-muted-foreground"
+                    isRecargando ? "animate-spin text-primary" : "text-muted-foreground"
                   }`}
                   viewBox="0 0 24 24"
                   fill="none"
@@ -80,7 +80,7 @@ export function AlumnosTab({
                 >
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
                 </svg>
-                <span>{isSyncing ? "Sincronizando..." : "Sincronizar con GitHub"}</span>
+                <span>{isRecargando ? "Recargando..." : "Recargar alumnos"}</span>
               </button>
             )}
 
@@ -184,7 +184,11 @@ export function AlumnosTab({
             />
           ) : (
             /* Tabla detallada de alumnos */
-            <div className="overflow-x-auto rounded-2xl border border-line bg-panel shadow-sm">
+            <div
+              className={`overflow-x-auto rounded-2xl border border-line bg-panel shadow-sm transition-all duration-300 ${
+                isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
+              }`}
+            >
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-line bg-panel2 font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">

@@ -59,7 +59,7 @@ export interface AlumnoResponseDTO {
 }
 
 /**
- * Respuesta del backend al consultar/sincronizar alumnos
+ * Respuesta del backend al consultar alumnos
  */
 export interface CursoAlumnosResponseDTO {
   cursoId: number;

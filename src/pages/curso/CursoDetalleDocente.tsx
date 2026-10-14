@@ -39,10 +39,10 @@ export const CursoDetalleDocente = () => {
   const {
     alumnosData,
     isLoading: isLoadingAlumnos,
-    isSyncing: isSyncingAlumnos,
+    isRecargando: isRecargandoAlumnos,
     error: errorAlumnos,
     cargarAlumnos,
-    sincronizarAlumnos,
+    recargarAlumnos,
   } = useAlumnos();
 
   useEffect(() => {
@@ -216,10 +216,10 @@ export const CursoDetalleDocente = () => {
               curso={curso}
               alumnos={alumnos}
               isLoading={isLoadingAlumnos}
-              isSyncing={isSyncingAlumnos}
+              isRecargando={isRecargandoAlumnos}
               error={errorAlumnos}
               onRetry={() => cursoId && cargarAlumnos(cursoId)}
-              onSync={() => cursoId && sincronizarAlumnos(cursoId)}
+              onRecargar={() => cursoId && recargarAlumnos(cursoId)}
               onOpenInvitarModal={() => setOpenInvitarModal(true)}
             />
           )}

@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
-import { obtenerAlumnos, sincronizarAlumnos as sincronizarAlumnosService } from "@/services";
+import { obtenerAlumnos } from "@/services";
 import type { CursoAlumnosResponseDTO } from "@/types";
 
 export const useAlumnos = () => {
   const [alumnosData, setAlumnosData] = useState<CursoAlumnosResponseDTO | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const cargarAlumnos = useCallback(async (cursoId: number): Promise<CursoAlumnosResponseDTO | null> => {
@@ -23,18 +23,22 @@ export const useAlumnos = () => {
     }
   }, []);
 
-  const sincronizarAlumnos = useCallback(async (cursoId: number): Promise<CursoAlumnosResponseDTO | null> => {
-    setIsSyncing(true);
+  const recargarAlumnos = useCallback(async (cursoId: number): Promise<CursoAlumnosResponseDTO | null> => {
+    setIsRecargando(true);
+    setError(null);
     try {
-      const response = await sincronizarAlumnosService(cursoId);
+      // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
+      const [response] = await Promise.all([
+        obtenerAlumnos(cursoId),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
       setAlumnosData(response.data);
       return response.data;
     } catch {
-      // El interceptor global de Axios muestra el toast con el error correspondiente (ej: rate limit)
-      setError("Error al sincronizar alumnos con GitHub");
+      setError("No se pudo recargar el listado de alumnos.");
       return null;
     } finally {
-      setIsSyncing(false);
+      setIsRecargando(false);
     }
   }, []);
 
@@ -46,10 +50,10 @@ export const useAlumnos = () => {
   return {
     alumnosData,
     isLoading,
-    isSyncing,
+    isRecargando,
     error,
     cargarAlumnos,
-    sincronizarAlumnos,
+    recargarAlumnos,
     limpiar,
   };
 };
