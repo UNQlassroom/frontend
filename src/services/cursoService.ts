@@ -48,17 +48,6 @@ export const cursoService = {
       data
     );
   },
-
-  /**
-   * Envía la petición POST http://localhost:8080/cursos/{id}/alumnos/sync
-   * Sincroniza con GitHub el estado de las invitaciones pendientes
-   */
-  sincronizarAlumnos: (id: number): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
-    return post<CursoAlumnosResponseDTO, Record<string, never>>(
-      `/cursos/${id}/alumnos/sync`,
-      {}
-    );
-  },
 };
 
 export const {
@@ -67,5 +56,4 @@ export const {
   obtenerCursoPorId,
   obtenerAlumnos,
   agregarAlumnos,
-  sincronizarAlumnos,
 } = cursoService;

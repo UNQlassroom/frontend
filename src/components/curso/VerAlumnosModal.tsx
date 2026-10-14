@@ -13,10 +13,10 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
   const {
     alumnosData,
     isLoading,
-    isSyncing,
+    isRecargando,
     error,
     cargarAlumnos,
-    sincronizarAlumnos,
+    recargarAlumnos,
     limpiar,
   } = useAlumnos();
 
@@ -60,7 +60,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="font-mono text-sm text-muted-foreground">
+              <p className="font-mono text-xs text-muted-foreground">
                 Cargando alumnos del curso...
               </p>
             </div>
@@ -80,14 +80,14 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
 
                 <button
                   type="button"
-                  onClick={() => sincronizarAlumnos(curso.id)}
-                  disabled={isSyncing || isLoading}
+                  onClick={() => recargarAlumnos(curso.id)}
+                  disabled={isRecargando || isLoading}
                   className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-                  title="Consultar a GitHub si los alumnos ya aceptaron la invitación para actualizar su estado a activo"
+                  title="Recargar la lista de alumnos"
                 >
                   <svg
                     className={`w-4 h-4 ${
-                      isSyncing ? "animate-spin text-primary" : "text-muted-foreground"
+                      isRecargando ? "animate-spin text-primary" : "text-muted-foreground"
                     }`}
                     viewBox="0 0 24 24"
                     fill="none"
@@ -98,7 +98,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                   >
                     <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
                   </svg>
-                  <span>{isSyncing ? "Sincronizando..." : "Sincronizar con GitHub"}</span>
+                  <span>{isRecargando ? "Recargando..." : "Recargar alumnos"}</span>
                 </button>
               </div>
 
@@ -109,7 +109,11 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[55vh] overflow-y-auto pr-1">
+                <div
+                  className={`space-y-3 max-h-[55vh] overflow-y-auto pr-1 transition-all duration-300 ${
+                    isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
+                  }`}
+                >
                   {alumnosData.alumnos.map((alumno) => (
                     <div
                       key={alumno.username}
