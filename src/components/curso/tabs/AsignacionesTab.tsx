@@ -95,7 +95,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
   };
 
   const getTemplateUrl = (templateRepoName: string) => {
-    return `https://github.com/UNQlassroom/${templateRepoName}`;
+    return `https://github.com/UNQlassroom-cursos/${templateRepoName}`;
   };
 
   const handleCalificacionExitosa = (
