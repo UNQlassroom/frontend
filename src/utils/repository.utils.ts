@@ -7,21 +7,21 @@ export function getEstadoCIInfo(estado?: string | null): EstadoCIInfo {
   switch (estado?.toLowerCase()) {
     case "success":
       return {
-        label: "CI passing",
+        label: "CI exitoso",
         badgeClass: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
         dotClass: "bg-emerald-500",
         type: "success",
       };
     case "failure":
       return {
-        label: "CI failing",
+        label: "CI fallido",
         badgeClass: "bg-rose-500/10 text-rose-600 border border-rose-500/20",
         dotClass: "bg-rose-500",
         type: "failure",
       };
     case "pending":
       return {
-        label: "CI pending",
+        label: "CI en ejecución",
         badgeClass: "bg-amber-500/10 text-amber-600 border border-amber-500/20",
         dotClass: "bg-amber-500",
         type: "pending",
