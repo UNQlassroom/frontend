@@ -15,6 +15,11 @@ const RedirectCoursesToCursos = () => {
   return <Navigate to={`/cursos/${id}`} replace />;
 };
 
+const RedirectCursosToAsignacionesTab = () => {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/cursos/${id}?tab=asignaciones`} replace />;
+};
+
 export const AppRoutes = () => {
   const { isDocente, isAuthenticated } = useAuth();
 
@@ -39,6 +44,16 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute>
             {isDocente ? <CursoDetalleDocente /> : <CursoDetalleAlumno />}
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Redirección a la pestaña de asignaciones del curso */}
+      <Route
+        path="/cursos/:id/asignaciones"
+        element={
+          <ProtectedRoute>
+            <RedirectCursosToAsignacionesTab />
           </ProtectedRoute>
         }
       />

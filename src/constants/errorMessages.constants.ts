@@ -31,6 +31,7 @@ export const BACKEND_ERROR_CODES = {
   ALUMNO_EN_MULTIPLES_GRUPOS: "ALUMNO_EN_MULTIPLES_GRUPOS",
   ALUMNOS_NO_INSCRIPTOS: "ALUMNOS_NO_INSCRIPTOS",
   USUARIO_NO_PERTENECE_A_GRUPO: "USUARIO_NO_PERTENECE_A_GRUPO",
+  ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES: "ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES",
 
   // Permisos y Usuarios
   UNAUTHORIZED: "UNAUTHORIZED",
@@ -160,6 +161,10 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   [BACKEND_ERROR_CODES.USUARIO_NO_PERTENECE_A_GRUPO]: {
     message: "No pertenecés al grupo correspondiente para realizar esta acción.",
     severity: "warning",
+  },
+  [BACKEND_ERROR_CODES.ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES]: {
+    message: "No se puede eliminar la asignación porque ya cuenta con entregas o calificaciones registradas",
+    severity: "error",
   },
 
   // Permisos y Usuarios
