@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type SubmitEvent } from "react";
 import { crearTemplate } from "@/services";
 import type { TemplateRepoResponseDTO } from "@/types";
 import githubIcon from "@/assets/github_favicon.svg";
@@ -31,7 +31,7 @@ export function CrearTemplateModal({
     onClose();
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
