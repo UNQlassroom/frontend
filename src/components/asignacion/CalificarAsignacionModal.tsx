@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type SubmitEvent } from "react";
 import { calificarAsignacion } from "@/services";
 import type {
   AsignacionResponseDTO,
@@ -37,7 +37,7 @@ function CalificarAsignacionContent({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (nota === "" || isNaN(Number(nota))) {
       setError("La nota es obligatoria.");
