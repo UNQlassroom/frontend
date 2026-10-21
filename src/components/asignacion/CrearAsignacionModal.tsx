@@ -55,7 +55,6 @@ export function CrearAsignacionModal({
     if (!open) return;
 
     let ignore = false;
-    setIsLoadingTemplates(true);
     listarTemplates()
       .then((res) => {
         if (!ignore) {
