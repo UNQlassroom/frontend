@@ -1,4 +1,5 @@
 import { useState } from "react";
+import {ErrorBanner} from "@/components";
 
 export interface EliminarAsignacionModalProps {
   open: boolean;
@@ -30,23 +31,13 @@ export function EliminarAsignacionModal({
 
   const handleConfirm = async () => {
     setIsLoading(true);
-    setErrorMessage(null);
     try {
       await onConfirm();
-    } catch (err: unknown) {
+    } catch {
+      // El interceptor global de Axios ya notifica el error mediante toast
+      setErrorMessage("Ocurrió un error al eliminar la asignación");
+    } finally {
       setIsLoading(false);
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "message" in err &&
-        typeof (err as { message: unknown }).message === "string"
-      ) {
-        setErrorMessage((err as { message: string }).message);
-      } else {
-        setErrorMessage(
-          "No se pudo eliminar la asignación. Verificá que no cuente con entregas o calificaciones."
-        );
-      }
     }
   };
 
@@ -84,7 +75,7 @@ export function EliminarAsignacionModal({
             </div>
             <p className="text-muted-foreground leading-relaxed text-sm">
               Al confirmar el borrado, se eliminará la asignación del sistema y se disparará la
-              eliminación de todos los repositorios asociados en GitHub de forma asincrónica.
+              eliminación de todos los repositorios asociados en GitHub.
               Dejará de ser visible de inmediato tanto para el docente como para los alumnos.
             </p>
           </div>
@@ -108,10 +99,7 @@ export function EliminarAsignacionModal({
 
           {/* Banner de error si la petición fue rechazada */}
           {errorMessage && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs font-mono text-destructive font-semibold flex items-center gap-2">
-              <span>❌</span>
-              <p>{errorMessage}</p>
-            </div>
+              <ErrorBanner message={errorMessage} onRetry={() => {handleConfirm()}} />
           )}
         </div>
 
