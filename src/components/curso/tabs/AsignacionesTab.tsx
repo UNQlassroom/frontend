@@ -20,7 +20,6 @@ import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
-  resolveApiError,
 } from "@/utils";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import githubIcon from "@/assets/github_favicon.svg";
@@ -65,20 +64,11 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
     if (!asignacionAEliminar) return;
     const asigId = asignacionAEliminar.id;
 
-    try {
-      await eliminarAsignacion(curso.id, asigId);
-      setAsignacionAEliminar(null);
-      toast.success("La asignación fue eliminada correctamente");
-      setAsignaciones((prev) => prev.filter((a) => a.id !== asigId));
-      navigate(`/cursos/${curso.id}?tab=asignaciones`, { replace: true });
-    } catch (err: unknown) {
-      const resolved = resolveApiError(err);
-      const msg =
-        resolved?.message ||
-        "No se puede eliminar la asignación porque ya cuenta con entregas o calificaciones registradas";
-      toast.error(msg);
-      throw new Error(msg, { cause: err });
-    }
+    await eliminarAsignacion(curso.id, asigId);
+    setAsignacionAEliminar(null);
+    toast.success("La asignación fue eliminada correctamente");
+    setAsignaciones((prev) => prev.filter((a) => a.id !== asigId));
+    navigate(`/cursos/${curso.id}?tab=asignaciones`, { replace: true });
   };
 
   const [calificarModal, setCalificarModal] = useState<{
@@ -391,50 +381,6 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                           {totalGrupos}{" "}
                           {asig.tipo === "GRUPAL" ? "grupo(s)" : "repositorio(s)"}
                         </span>
-                        {isDocente && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => setAsignacionAEditar(asig)}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3.5 py-2 font-mono text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer shadow-2xs"
-                              title="Editar asignación"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                              </svg>
-                              <span>Editar</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => setAsignacionAEliminar(asig)}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2 font-mono text-sm font-semibold text-destructive hover:bg-destructive hover:text-white transition-colors cursor-pointer shadow-2xs"
-                              title="Eliminar asignación y repositorios asociados"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
-                              </svg>
-                              <span>Eliminar</span>
-                            </button>
-                          </>
-                        )}
                         <button
                           type="button"
                           onClick={() => toggleExpand(asig.id)}
@@ -445,6 +391,46 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                             : "Ver repositorios ▼"}
                         </button>
                       </div>
+                      {isDocente && (
+                          <button
+                              type="button"
+                              onClick={() => setAsignacionAEliminar(asig)}
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2 font-mono text-sm font-semibold text-destructive hover:bg-destructive hover:text-white transition-colors cursor-pointer shadow-2xs"
+                              title="Eliminar asignación y repositorios asociados"
+                          >
+                            <svg
+                                className="w-4 h-4"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+                            </svg>
+                          </button>
+                          <button
+                          type="button"
+                          onClick={() => setAsignacionAEditar(asig)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3.5 py-2 font-mono text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer shadow-2xs"
+                        title="Editar asignación"
+                    >
+                        <svg
+                            className="w-4 h-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        <span>Editar</span>
+                    </button>
+                      )}
                     </div>
 
                     {/* Detalle desplegable de los repositorios y grupos */}
@@ -687,16 +673,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
         totalGrupos={asignacionAEliminar?.grupos?.length || 0}
       />
 
-            {/* Modal para modificar asignación */}
-      <ModificarAsignacionModal
-        open={Boolean(asignacionAEditar)}
-        onClose={() => setAsignacionAEditar(null)}
-        cursoId={curso.id}
-        asignacion={asignacionAEditar}
-        onSuccess={handleModificacionExitosa}
-      />
-
-      {/* Modal para calificar asignación */}
+            {/* Modal para calificar asignación */}
       <CalificarAsignacionModal
         open={calificarModal.open}
         onClose={() =>

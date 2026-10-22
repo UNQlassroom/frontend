@@ -133,7 +133,7 @@ export const asignacionService = {
   ): Promise<ApiResponse<void>> => {
     return deleteRequest<void>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}`,
-      { timeout: 30000, skipErrorToast: true }
+      { timeout: 30000 }
     );
   },
 
