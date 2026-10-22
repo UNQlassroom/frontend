@@ -163,7 +163,7 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
     severity: "warning",
   },
   [BACKEND_ERROR_CODES.ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES]: {
-    message: "No se puede eliminar la asignación porque ya cuenta con entregas o calificaciones registradas",
+    message: "No se puede eliminar la asignación porque ya cuenta con entregas o calificaciones registradas.",
     severity: "error",
   },
 
