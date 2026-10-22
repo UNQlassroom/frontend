@@ -1,4 +1,4 @@
-import { get, post } from "@/api";
+import { get, post, deleteRequest } from "@/api";
 import type {
   ApiResponse,
   AsignacionResponseDTO,
@@ -122,6 +122,20 @@ export const asignacionService = {
       data
     );
   },
+  /**
+   * Envía la petición DELETE /cursos/{cursoId}/asignaciones/{asignacionId}
+   * Dispara la eliminación asincrónica de la asignación y de los repositorios en GitHub.
+   */
+  eliminarAsignacion: (
+    cursoId: number,
+    asignacionId: number
+  ): Promise<ApiResponse<void>> => {
+    return deleteRequest<void>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}`,
+      { timeout: 30000, skipErrorToast: true }
+    );
+  },
+
 };
 
 export const {
@@ -133,4 +147,5 @@ export const {
   obtenerCorrecciones,
   listarTemplates,
   crearTemplate,
+  eliminarAsignacion,
 } = asignacionService;
