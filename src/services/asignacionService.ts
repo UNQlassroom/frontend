@@ -1,8 +1,9 @@
-import { get, post, deleteRequest } from "@/api";
+import { get, post, put, deleteRequest } from "@/api";
 import type {
   ApiResponse,
   AsignacionResponseDTO,
   CrearAsignacionRequestDTO,
+  ModificarAsignacionRequestDTO,
   CalificarAsignacionRequestDTO,
   TemplateRepoResponseDTO,
   CrearTemplateRepoRequestDTO,
@@ -136,6 +137,21 @@ export const asignacionService = {
     );
   },
 
+  /**
+   * Envía la petición PUT /cursos/{cursoId}/asignaciones/{asignacionId}
+   * Modifica la descripción y/o fecha límite de una asignación.
+   */
+  modificarAsignacion: (
+    cursoId: number,
+    asignacionId: number,
+    data: ModificarAsignacionRequestDTO
+  ): Promise<ApiResponse<AsignacionResponseDTO>> => {
+    return put<AsignacionResponseDTO, ModificarAsignacionRequestDTO>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}`,
+      data
+    );
+  },
+
 };
 
 export const {
@@ -148,4 +164,5 @@ export const {
   listarTemplates,
   crearTemplate,
   eliminarAsignacion,
+  modificarAsignacion,
 } = asignacionService;

@@ -8,6 +8,11 @@ export interface CrearGrupoRequestDTO {
   integrantesUsernames: string[];
 }
 
+export interface ModificarAsignacionRequestDTO {
+  descripcion?: string | null;
+  fechaLimite?: string | null;
+}
+
 export interface CrearAsignacionRequestDTO {
   titulo: string;
   descripcion?: string;
