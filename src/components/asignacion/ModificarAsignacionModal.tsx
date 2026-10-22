@@ -104,7 +104,7 @@ function ModificarAsignacionContent({
               Modificar Asignación
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Editar Asignación
+              {asignacion.titulo}
             </h2>
           </div>
           <button
@@ -129,10 +129,6 @@ function ModificarAsignacionContent({
               >
                 Título
               </label>
-              <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-muted-foreground/80 bg-line/30 px-2 py-0.5 rounded-md">
-                <span>🔒</span>
-                <span>Solo lectura</span>
-              </span>
             </div>
             <input
               id="modificar-titulo"
@@ -154,10 +150,6 @@ function ModificarAsignacionContent({
                 >
                   Tipo de asignación
                 </label>
-                <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-muted-foreground/80 bg-line/30 px-2 py-0.5 rounded-md">
-                  <span>🔒</span>
-                  <span>Solo lectura</span>
-                </span>
               </div>
               <input
                 id="modificar-tipo"
@@ -175,12 +167,8 @@ function ModificarAsignacionContent({
                   htmlFor="modificar-template"
                   className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
-                  Repositorio Template
+                  Repositorio Plantilla
                 </label>
-                <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-muted-foreground/80 bg-line/30 px-2 py-0.5 rounded-md">
-                  <span>🔒</span>
-                  <span>Solo lectura</span>
-                </span>
               </div>
               <input
                 id="modificar-template"
