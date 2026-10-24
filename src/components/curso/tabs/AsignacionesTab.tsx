@@ -19,7 +19,6 @@ import {
   CIStatusBadge,
   EmptyState,
   ErrorBanner,
-  EstadoAsignacionBadge,
 } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import {
@@ -356,9 +355,6 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                           >
                             {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                           </span>
-
-                                  <EstadoAsignacionBadge estado={asig.estado} />
-
                                   {/* Enlace al repositorio plantilla */}
                                   <a
                                       href={templateUrl}
@@ -601,8 +597,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                                         </a>
                                                         {grupo.releaseUrl && (
                                                             <a
-                                                                href={grupo.releaseUrl}
-                                                                target="_blank"
+                                                                href={grupo.releaseUrl}target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="inline-flex items-center rounded-lg border border-line bg-panel px-2 py-1 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
                                                                 title="Ver entrega / release en GitHub"
