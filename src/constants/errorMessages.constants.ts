@@ -32,6 +32,8 @@ export const BACKEND_ERROR_CODES = {
   ALUMNOS_NO_INSCRIPTOS: "ALUMNOS_NO_INSCRIPTOS",
   USUARIO_NO_PERTENECE_A_GRUPO: "USUARIO_NO_PERTENECE_A_GRUPO",
   ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES: "ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES",
+  ASIGNACION_NO_LISTA: "ASIGNACION_NO_LISTA",
+  ASIGNACION_EN_CREACION: "ASIGNACION_EN_CREACION",
 
   // Permisos y Usuarios
   UNAUTHORIZED: "UNAUTHORIZED",
@@ -165,6 +167,14 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   [BACKEND_ERROR_CODES.ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES]: {
     message: "No se puede eliminar la asignación porque ya cuenta con entregas o calificaciones registradas.",
     severity: "error",
+  },
+  [BACKEND_ERROR_CODES.ASIGNACION_NO_LISTA]: {
+    message: "La asignación aún no se encuentra lista para operar.",
+    severity: "warning",
+  },
+  [BACKEND_ERROR_CODES.ASIGNACION_EN_CREACION]: {
+    message: "No se puede eliminar la asignación mientras sus repositorios se están creando.",
+    severity: "warning",
   },
 
   // Permisos y Usuarios
