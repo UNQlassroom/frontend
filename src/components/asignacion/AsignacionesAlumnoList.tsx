@@ -669,8 +669,9 @@ export function AsignacionesAlumnoList({
                         </div>
                       </>
                     ) : (
-                      <span className="rounded-lg border border-line bg-panel2 px-3 py-1 font-mono text-xs text-muted-foreground">
-                        Repositorio en proceso de creación...
+                      <span className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 font-mono text-xs text-amber-700 dark:text-amber-300">
+                        <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
+                        <span>Repositorio en proceso de creación en GitHub...</span>
                       </span>
                     )}
                   </div>
@@ -687,9 +688,13 @@ export function AsignacionesAlumnoList({
                           <button
                             type="button"
                             onClick={() => handleEntregar(Number(asig.id))}
-                            disabled={entregandoId === asig.id}
-                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 font-mono text-sm font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50"
-                            title="Marcar esta asignación como entregada"
+                            disabled={entregandoId === asig.id || !asig.repoUrl || asig.estado === "CREANDO"}
+                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 font-mono text-sm font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={
+                              !asig.repoUrl || asig.estado === "CREANDO"
+                                ? "Tu repositorio aún se está generando en GitHub"
+                                : "Marcar esta asignación como entregada"
+                            }
                           >
                             {entregandoId === asig.id ? (
                               <>

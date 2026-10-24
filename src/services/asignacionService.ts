@@ -13,8 +13,8 @@ import type {
 export const asignacionService = {
   /**
    * Envía la petición POST /cursos/{cursoId}/asignaciones
-   * Crea una asignación (individual o grupal) con sus repositorios derivados en GitHub.
-   * Se asigna un timeout extendido (3 minutos) ya que la creación masiva de repositorios en GitHub puede demorar.
+   * Registra la asignación en estado CREANDO (202 Accepted) y dispara en segundo plano
+   * la creación asíncrona de los repositorios derivados en GitHub.
    */
   crearAsignacion: (
     cursoId: number,
@@ -23,7 +23,7 @@ export const asignacionService = {
     return post<AsignacionResponseDTO, CrearAsignacionRequestDTO>(
       `/cursos/${cursoId}/asignaciones`,
       data,
-      { timeout: 180000 }
+      { timeout: 60000 }
     );
   },
 

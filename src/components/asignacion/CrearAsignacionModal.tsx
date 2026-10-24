@@ -1,4 +1,5 @@
 import { useState, useEffect, type SubmitEvent } from "react";
+import { toast } from "react-toastify";
 import {
   crearAsignacion,
   listarTemplates,
@@ -196,6 +197,9 @@ export function CrearAsignacionModal({
     setIsLoading(true);
     try {
       await crearAsignacion(cursoId, payload);
+      toast.info(
+        "La asignación fue creada. Los repositorios se están generando en GitHub en segundo plano y pueden demorar unos momentos en estar listos."
+      );
       onSuccess();
       handleClose();
     } catch {
@@ -516,10 +520,10 @@ export function CrearAsignacionModal({
                 <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
                 <div className="font-mono text-xs sm:text-sm space-y-0.5">
                   <p className="font-semibold text-foreground">
-                    Creando repositorios en GitHub...
+                    Registrando asignación...
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    Generando repositorios a partir de la plantilla y asignando colaboradores. Esto puede demorar varios segundos. Por favor no cierres la ventana.
+                    Validando plantilla y configurando grupos antes de iniciar la creación de repositorios en GitHub.
                   </p>
                 </div>
               </div>
@@ -553,7 +557,7 @@ export function CrearAsignacionModal({
                   disabled={isLoading || isLoadingTemplates}
                   className="rounded-xl bg-primary px-6 py-2.5 text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm disabled:opacity-50"
                 >
-                  {isLoading ? "Creando en GitHub..." : "Crear Asignación"}
+                  {isLoading ? "Creando asignación..." : "Crear Asignación"}
                 </button>
               </div>
             </div>

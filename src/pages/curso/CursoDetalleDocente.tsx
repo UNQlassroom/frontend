@@ -17,13 +17,12 @@ export const CursoDetalleDocente = () => {
   const cursoId = id ? parseInt(id, 10) : undefined;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Tab activo sincronizado con query param opcional
+  // Tab activo derivado directamente del query param (?tab=...)
   const tabParam = searchParams.get("tab") as TabType | null;
-  const [activeTab, setActiveTab] = useState<TabType>(
+  const activeTab: TabType =
     tabParam === "asignaciones" || tabParam === "metricas" || tabParam === "correcciones"
       ? tabParam
-      : "alumnos"
-  );
+      : "alumnos";
 
   const [openInvitarModal, setOpenInvitarModal] = useState(false);
 
@@ -52,7 +51,6 @@ export const CursoDetalleDocente = () => {
   }, [cursoId, cargarAlumnos]);
 
   const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab);
     setSearchParams({ tab });
   };
 

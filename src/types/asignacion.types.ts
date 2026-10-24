@@ -3,6 +3,8 @@ import type { UsuarioResponseDTO } from "./auth.types";
 
 export type TipoAsignacion = "INDIVIDUAL" | "GRUPAL";
 
+export type EstadoAsignacion = "CREANDO" | "LISTA" | "ERROR";
+
 export interface CrearGrupoRequestDTO {
   nombre: string;
   integrantesUsernames: string[];
@@ -43,6 +45,7 @@ export interface AsignacionResponseDTO {
   tipo: TipoAsignacion;
   templateRepoName: string;
   fechaLimite: string | null;
+  estado: EstadoAsignacion;
   grupos: GrupoAsignacionResponseDTO[];
 }
 
@@ -97,6 +100,7 @@ export interface AsignacionAlumnoDTO {
   titulo: string;
   descripcion: string | null;
   tipo: TipoAsignacion;
+  estado?: EstadoAsignacion;
   templateRepoName?: string;
   fechaLimite?: string | null;
   fechaLimiteFormatted?: string;
