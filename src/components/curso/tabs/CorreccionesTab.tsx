@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import type {
   CursoResponseDTO,
   CorreccionGrupoResponseDTO,
@@ -17,7 +17,7 @@ export interface CorreccionesTabProps {
 }
 
 export function CorreccionesTab({ curso }: CorreccionesTabProps) {
-  const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
   const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(
     null
@@ -414,7 +414,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <ErrorBanner
               title="Ocurrió un error al crear los repositorios en GitHub"
               message="Ocurrió un error al generar los repositorios en GitHub para esta asignación. Te recomendamos eliminarla desde la pestaña Asignaciones y volver a crearla."
-              onRetry={() => navigate(`/cursos/${curso.id}?tab=asignaciones`)}
+              onRetry={() => setSearchParams({ tab: "asignaciones" })}
               retryText="Ir a Asignaciones"
             />
           ) : (
