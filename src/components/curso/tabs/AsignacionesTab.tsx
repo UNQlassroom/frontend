@@ -15,7 +15,12 @@ import {
   EliminarAsignacionModal,
   ModificarAsignacionModal,
 } from "@/components/asignacion";
-import { CIStatusBadge, EmptyState, ErrorBanner } from "@/components/common";
+import {
+  CIStatusBadge,
+  EmptyState,
+  ErrorBanner,
+  EstadoAsignacionBadge,
+} from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import {
   formatearFechaCommit,
@@ -126,6 +131,30 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
       ignore = true;
     };
   }, [curso.id]);
+
+  const hayAsignacionesCreando = useMemo(
+    () => asignaciones.some((a) => a.estado === "CREANDO"),
+    [asignaciones]
+  );
+
+  // Polling silencioso mientras existan asignaciones creando sus repositorios en segundo plano
+  useEffect(() => {
+    if (!hayAsignacionesCreando) return;
+
+    const intervalId = window.setInterval(() => {
+      obtenerAsignaciones(curso.id)
+        .then((res) => {
+          setAsignaciones(res.data);
+        })
+        .catch(() => {
+          // Ignorar errores puntuales de polling silencioso
+        });
+    }, 8000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [curso.id, hayAsignacionesCreando]);
 
   const toggleExpand = (asigId: number) => {
     setExpandedAsigId((prev) => (prev === asigId ? null : asigId));
@@ -328,6 +357,8 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                             {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                           </span>
 
+                                  <EstadoAsignacionBadge estado={asig.estado} />
+
                                   {/* Enlace al repositorio plantilla */}
                                   <a
                                       href={templateUrl}
@@ -435,6 +466,58 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                               )}
                             </div>
 
+                            {/* Avisos de estado asíncrono (CREANDO o ERROR) */}
+                            {asig.estado === "CREANDO" && (
+                              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs sm:text-sm">
+                                <div className="flex items-start sm:items-center gap-3">
+                                  <div className="w-4 h-4 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin shrink-0 mt-0.5 sm:mt-0" />
+                                  <div className="space-y-0.5">
+                                    <p className="font-semibold text-amber-700 dark:text-amber-300">
+                                      La asignación fue creada y los repositorios se están generando en GitHub
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      La creación de repositorios y asignación de colaboradores se ejecuta en segundo plano y puede demorar unos momentos. El estado se actualizará automáticamente.
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={cargarAsignaciones}
+                                  disabled={isLoading}
+                                  className="shrink-0 self-start sm:self-auto rounded-lg border border-amber-500/30 bg-panel px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
+                                >
+                                  Actualizar estado
+                                </button>
+                              </div>
+                            )}
+
+                            {asig.estado === "ERROR" && (
+                              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs sm:text-sm">
+                                <div className="flex items-start sm:items-center gap-3">
+                                  <span className="text-destructive text-base leading-none shrink-0">
+                                    ⚠️
+                                  </span>
+                                  <div className="space-y-0.5">
+                                    <p className="font-semibold text-destructive">
+                                      Ocurrió un error al crear los repositorios en GitHub
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      No se pudieron generar todos los repositorios de esta asignación y se revirtieron los repositorios creados parcialmente. Te recomendamos eliminar esta asignación y volver a crearla.
+                                    </p>
+                                  </div>
+                                </div>
+                                {isDocente && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setAsignacionAEliminar(asig)}
+                                    className="shrink-0 self-start sm:self-auto rounded-lg bg-destructive px-3 py-1.5 font-mono text-xs font-semibold text-white hover:bg-destructive/90 transition-colors cursor-pointer"
+                                  >
+                                    Eliminar asignación
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
                             {/* Detalle desplegable de los repositorios y grupos */}
                             {isExpanded && (
                                 <div className="pt-4 border-t border-line space-y-3.5">
@@ -528,9 +611,14 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                                             </a>
                                                         )}
                                                       </div>
+                                                  ) : asig.estado === "ERROR" ? (
+                                                      <span className="text-destructive/80 italic text-xs font-medium">
+                                          No generado (error)
+                                        </span>
                                                   ) : (
-                                                      <span className="text-muted-foreground/60 italic text-xs">
-                                          En proceso...
+                                                      <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 italic text-xs">
+                                          <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
+                                          <span>Creando en GitHub...</span>
                                         </span>
                                                   )}
                                                 </td>
@@ -616,6 +704,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                                 <td className="py-3.5 px-3.5 text-right">
                                                   <button
                                                       type="button"
+                                                      disabled={asig.estado === "CREANDO" || asig.estado === "ERROR"}
                                                       onClick={() =>
                                                           setCalificarModal({
                                                             open: true,
@@ -624,12 +713,16 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                                             grupo,
                                                           })
                                                       }
-                                                      className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs sm:text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer shadow-2xs"
+                                                      className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs sm:text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
                                                       title={
-                                                        grupo.calificacion !== null &&
-                                                        grupo.calificacion !== undefined
-                                                            ? "Editar calificación de este grupo"
-                                                            : "Calificar este grupo"
+                                                        asig.estado === "CREANDO"
+                                                          ? "Esperá a que finalice la creación de repositorios para calificar"
+                                                          : asig.estado === "ERROR"
+                                                            ? "No se puede calificar una asignación con error de creación"
+                                                            : grupo.calificacion !== null &&
+                                                              grupo.calificacion !== undefined
+                                                              ? "Editar calificación de este grupo"
+                                                              : "Calificar este grupo"
                                                       }
                                                   >
                                         <span>

@@ -44,6 +44,7 @@ function mapAsignacionesDTO(
       titulo: asig.titulo,
       descripcion: asig.descripcion,
       tipo: asig.tipo,
+      estado: asig.estado,
       templateRepoName: asig.templateRepoName,
       fechaLimite: asig.fechaLimite,
       fechaLimiteFormatted: asig.fechaLimite
