@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import type {
   AlumnoResponseDTO,
   AsignacionResponseDTO,
@@ -34,6 +35,7 @@ interface ItemMetrica {
 export function MetricasTab({
   curso,
 }: MetricasTabProps) {
+  const navigate = useNavigate();
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
   const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(
     null
@@ -327,22 +329,12 @@ export function MetricasTab({
               />
             </>
           ) : asignacionActual?.estado === "ERROR" ? (
-            <>
-              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 flex items-center gap-3 font-mono text-xs sm:text-sm">
-                <span className="text-destructive text-base shrink-0">⚠️</span>
-                <p className="text-muted-foreground">
-                  <strong className="text-destructive">
-                    Error al crear repositorios:
-                  </strong>{" "}
-                  Ocurrió un error al generar los repositorios en GitHub para esta asignación. Te recomendamos eliminarla desde la pestaña Asignaciones y volver a crearla.
-                </p>
-              </div>
-              <EmptyState
-                icon="⚠️"
-                title="Error al generar repositorios"
-                description="Ocurrió un error en GitHub al crear los repositorios de esta asignación. Te recomendamos eliminarla desde el panel de Asignaciones y volver a crearla."
-              />
-            </>
+            <ErrorBanner
+              title="Ocurrió un error al crear los repositorios en GitHub"
+              message="Ocurrió un error al generar los repositorios en GitHub para esta asignación. Te recomendamos eliminarla desde la pestaña Asignaciones y volver a crearla."
+              onRetry={() => navigate(`/cursos/${curso.id}?tab=asignaciones`)}
+              retryText="Ir a Asignaciones"
+            />
           ) : datosItems.length === 0 ? (
             <EmptyState
               icon="📊"

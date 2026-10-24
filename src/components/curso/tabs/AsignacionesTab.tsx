@@ -476,42 +476,16 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                     </p>
                                   </div>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={cargarAsignaciones}
-                                  disabled={isLoading}
-                                  className="shrink-0 self-start sm:self-auto rounded-lg border border-amber-500/30 bg-panel px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
-                                >
-                                  Actualizar estado
-                                </button>
                               </div>
                             )}
 
                             {asig.estado === "ERROR" && (
-                              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs sm:text-sm">
-                                <div className="flex items-start sm:items-center gap-3">
-                                  <span className="text-destructive text-base leading-none shrink-0">
-                                    ⚠️
-                                  </span>
-                                  <div className="space-y-0.5">
-                                    <p className="font-semibold text-destructive">
-                                      Ocurrió un error al crear los repositorios en GitHub
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                      No se pudieron generar todos los repositorios de esta asignación y se revirtieron los repositorios creados parcialmente. Te recomendamos eliminar esta asignación y volver a crearla.
-                                    </p>
-                                  </div>
-                                </div>
-                                {isDocente && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setAsignacionAEliminar(asig)}
-                                    className="shrink-0 self-start sm:self-auto rounded-lg bg-destructive px-3 py-1.5 font-mono text-xs font-semibold text-white hover:bg-destructive/90 transition-colors cursor-pointer"
-                                  >
-                                    Eliminar asignación
-                                  </button>
-                                )}
-                              </div>
+                              <ErrorBanner
+                                title="Ocurrió un error al crear los repositorios en GitHub"
+                                message="No se pudieron generar todos los repositorios de esta asignación y se revirtieron los repositorios creados parcialmente. Te recomendamos eliminar esta asignación y volver a crearla."
+                                onRetry={isDocente ? () => setAsignacionAEliminar(asig) : undefined}
+                                retryText="Eliminar asignación"
+                              />
                             )}
 
                             {/* Detalle desplegable de los repositorios y grupos */}

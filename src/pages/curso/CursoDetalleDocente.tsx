@@ -25,6 +25,12 @@ export const CursoDetalleDocente = () => {
       : "alumnos"
   );
 
+  useEffect(() => {
+    if (tabParam && ["alumnos", "asignaciones", "metricas", "correcciones"].includes(tabParam)) {
+      setActiveTab(tabParam as TabType);
+    }
+  }, [tabParam]);
+
   const [openInvitarModal, setOpenInvitarModal] = useState(false);
 
   // Hook para obtener el detalle académico del curso
