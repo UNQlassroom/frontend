@@ -79,14 +79,18 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     };
   }, [curso.id]);
 
-  // Cargar correcciones de la asignación seleccionada
+  // Cargar correcciones de la asignación seleccionada (y refrescar estado de asignaciones)
   const cargarCorrecciones = useCallback(
     async (asignacionId: number) => {
       setIsLoadingCorrecciones(true);
       setError(null);
       try {
-        const res = await obtenerCorrecciones(curso.id, asignacionId);
-        setCorrecciones(res.data);
+        const [asigRes, corrRes] = await Promise.all([
+          obtenerAsignaciones(curso.id),
+          obtenerCorrecciones(curso.id, asignacionId),
+        ]);
+        setAsignaciones(asigRes.data);
+        setCorrecciones(corrRes.data);
       } catch {
         setError("No se pudieron obtener las correcciones de esta asignación.");
       } finally {
@@ -99,13 +103,56 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   const handleSelectAsignacion = (asignacionId: number) => {
     if (asignacionId === selectedAsignacionId) return;
     setSelectedAsignacionId(asignacionId);
+    const targetAsig = asignaciones.find((a) => a.id === asignacionId);
+    if (targetAsig?.estado === "CREANDO" || targetAsig?.estado === "ERROR") {
+      setIsLoadingCorrecciones(false);
+      setError(null);
+      setCorrecciones([]);
+      return;
+    }
     setIsLoadingCorrecciones(true);
     setError(null);
     setCorrecciones([]);
   };
 
+  const asignacionActual = useMemo(
+    () => asignaciones.find((a) => a.id === selectedAsignacionId),
+    [asignaciones, selectedAsignacionId]
+  );
+
+  const hayAsignacionesCreando = useMemo(
+    () => asignaciones.some((a) => a.estado === "CREANDO"),
+    [asignaciones]
+  );
+
+  // Polling silencioso mientras existan asignaciones creando sus repositorios en segundo plano
+  useEffect(() => {
+    if (!hayAsignacionesCreando) return;
+
+    const intervalId = window.setInterval(() => {
+      obtenerAsignaciones(curso.id)
+        .then((res) => {
+          setAsignaciones(res.data);
+        })
+        .catch(() => {
+          // Ignorar errores puntuales de polling silencioso
+        });
+    }, 8000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [curso.id, hayAsignacionesCreando]);
+
   useEffect(() => {
     if (!selectedAsignacionId) return;
+    if (
+      asignacionActual?.estado === "CREANDO" ||
+      asignacionActual?.estado === "ERROR"
+    ) {
+      return;
+    }
+
     let ignore = false;
 
     obtenerCorrecciones(curso.id, selectedAsignacionId)
@@ -128,12 +175,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     return () => {
       ignore = true;
     };
-  }, [curso.id, selectedAsignacionId]);
-
-  const asignacionActual = useMemo(
-    () => asignaciones.find((a) => a.id === selectedAsignacionId),
-    [asignaciones, selectedAsignacionId]
-  );
+  }, [curso.id, selectedAsignacionId, asignacionActual?.estado]);
 
   // Estadísticas globales de la asignación actual
   const metricas = useMemo(() => {
@@ -335,12 +377,57 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                   >
                     {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                   </span>
+                  {asig.estado === "CREANDO" && (
+                    <span
+                      className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0"
+                      title="Creando repositorios en GitHub..."
+                    />
+                  )}
+                  {asig.estado === "ERROR" && (
+                    <span title="Error al crear repositorios en GitHub">⚠️</span>
+                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* Tarjetas KPI de Estado de Correcciones */}
+          {asignacionActual?.estado === "CREANDO" ? (
+            <>
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-center gap-3 font-mono text-xs sm:text-sm">
+                <div className="w-4 h-4 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                <p className="text-muted-foreground">
+                  <strong className="text-amber-700 dark:text-amber-300">
+                    Creando repositorios en GitHub:
+                  </strong>{" "}
+                  Los repositorios de esta asignación se están generando en segundo plano y pueden demorar unos momentos en estar listos.
+                </p>
+              </div>
+              <EmptyState
+                icon="⏳"
+                title="Creando repositorios en GitHub..."
+                description="La asignación fue creada y sus repositorios se están generando en segundo plano. Esto puede demorar unos momentos. El estado se actualizará automáticamente."
+              />
+            </>
+          ) : asignacionActual?.estado === "ERROR" ? (
+            <>
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 flex items-center gap-3 font-mono text-xs sm:text-sm">
+                <span className="text-destructive text-base shrink-0">⚠️</span>
+                <p className="text-muted-foreground">
+                  <strong className="text-destructive">
+                    Error al crear repositorios:
+                  </strong>{" "}
+                  Ocurrió un error al generar los repositorios en GitHub para esta asignación. Te recomendamos eliminarla desde la pestaña Asignaciones y volver a crearla.
+                </p>
+              </div>
+              <EmptyState
+                icon="⚠️"
+                title="Error al generar repositorios"
+                description="Ocurrió un error en GitHub al crear los repositorios de esta asignación. Te recomendamos eliminarla desde el panel de Asignaciones y volver a crearla."
+              />
+            </>
+          ) : (
+            <>
+              {/* Tarjetas KPI de Estado de Correcciones */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             {/* Total Correcciones */}
             <KpiCard
@@ -650,6 +737,8 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                   })}
                 </div>
               )}
+            </>
+          )}
             </>
           )}
         </>

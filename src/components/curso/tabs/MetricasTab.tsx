@@ -101,6 +101,35 @@ export function MetricasTab({
     };
   }, [curso.id]);
 
+  const asignacionActual = useMemo(
+    () => asignaciones.find((a) => a.id === selectedAsignacionId),
+    [asignaciones, selectedAsignacionId]
+  );
+
+  const hayAsignacionesCreando = useMemo(
+    () => asignaciones.some((a) => a.estado === "CREANDO"),
+    [asignaciones]
+  );
+
+  // Polling silencioso mientras existan asignaciones creando sus repositorios en segundo plano
+  useEffect(() => {
+    if (!hayAsignacionesCreando) return;
+
+    const intervalId = window.setInterval(() => {
+      obtenerAsignaciones(curso.id)
+        .then((res) => {
+          setAsignaciones(res.data);
+        })
+        .catch(() => {
+          // Ignorar errores puntuales de polling silencioso
+        });
+    }, 8000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [curso.id, hayAsignacionesCreando]);
+
   // Extraer repositorios filtrados por la asignación seleccionada
   const datosItems: ItemMetrica[] = useMemo(() => {
     if (!asignaciones || asignaciones.length === 0) return [];
@@ -265,13 +294,56 @@ export function MetricasTab({
                   >
                     {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                   </span>
+                  {asig.estado === "CREANDO" && (
+                    <span
+                      className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0"
+                      title="Creando repositorios en GitHub..."
+                    />
+                  )}
+                  {asig.estado === "ERROR" && (
+                    <span title="Error al crear repositorios en GitHub">⚠️</span>
+                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* Si la asignación seleccionada no tiene repositorios generados */}
-          {datosItems.length === 0 ? (
+          {/* Estado asíncrono de la asignación seleccionada o métricas */}
+          {asignacionActual?.estado === "CREANDO" ? (
+            <>
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-center gap-3 font-mono text-xs sm:text-sm">
+                <div className="w-4 h-4 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                <p className="text-muted-foreground">
+                  <strong className="text-amber-700 dark:text-amber-300">
+                    Creando repositorios en GitHub:
+                  </strong>{" "}
+                  Los repositorios de esta asignación se están generando en segundo plano y pueden demorar unos momentos en estar listos.
+                </p>
+              </div>
+              <EmptyState
+                icon="⏳"
+                title="Creando repositorios en GitHub..."
+                description="La asignación fue creada y sus repositorios se están generando en segundo plano. Esto puede demorar unos momentos. El estado se actualizará automáticamente."
+              />
+            </>
+          ) : asignacionActual?.estado === "ERROR" ? (
+            <>
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 flex items-center gap-3 font-mono text-xs sm:text-sm">
+                <span className="text-destructive text-base shrink-0">⚠️</span>
+                <p className="text-muted-foreground">
+                  <strong className="text-destructive">
+                    Error al crear repositorios:
+                  </strong>{" "}
+                  Ocurrió un error al generar los repositorios en GitHub para esta asignación. Te recomendamos eliminarla desde la pestaña Asignaciones y volver a crearla.
+                </p>
+              </div>
+              <EmptyState
+                icon="⚠️"
+                title="Error al generar repositorios"
+                description="Ocurrió un error en GitHub al crear los repositorios de esta asignación. Te recomendamos eliminarla desde el panel de Asignaciones y volver a crearla."
+              />
+            </>
+          ) : datosItems.length === 0 ? (
             <EmptyState
               icon="📊"
               title="No hay repositorios en esta asignación"
