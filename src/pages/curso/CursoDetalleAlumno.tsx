@@ -18,6 +18,7 @@ export const CursoDetalleAlumno = () => {
     correccionesPorAsig,
     cargarCorreccionParaAsig,
     isLoading: isLoadingAsignaciones,
+    isRecargando: isRecargandoAsignaciones,
     error: errorAsignaciones,
     cargarAsignaciones,
     entregar,
@@ -56,6 +57,8 @@ export const CursoDetalleAlumno = () => {
       </main>
     );
   }
+
+  const isActualizando = isRecargandoAsignaciones || isLoadingAsignaciones;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 flex-1 w-full space-y-8 animate-rise">
@@ -119,12 +122,12 @@ export const CursoDetalleAlumno = () => {
             <button
               type="button"
               onClick={cargarAsignaciones}
-              disabled={isLoadingAsignaciones}
+              disabled={isActualizando}
               className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
               title="Actualizar asignaciones y correcciones"
             >
               <svg
-                className={`w-4 h-4 ${isLoadingAsignaciones ? "animate-spin text-primary" : "text-muted-foreground"}`}
+                className={`w-4 h-4 ${isActualizando ? "animate-spin text-primary" : "text-muted-foreground"}`}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -134,7 +137,7 @@ export const CursoDetalleAlumno = () => {
               >
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
               </svg>
-              <span>{isLoadingAsignaciones ? "Actualizando..." : "Actualizar asignaciones"}</span>
+              <span>{isActualizando ? "Actualizando..." : "Actualizar asignaciones"}</span>
             </button>
           }
         />
@@ -145,6 +148,7 @@ export const CursoDetalleAlumno = () => {
           onCargarCorreccion={cargarCorreccionParaAsig}
           cursoId={curso.id}
           isLoading={isLoadingAsignaciones}
+          isRecargando={isRecargandoAsignaciones}
           error={errorAsignaciones}
           onRetry={cargarAsignaciones}
           onEntregar={entregar}

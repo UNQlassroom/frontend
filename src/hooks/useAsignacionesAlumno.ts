@@ -107,6 +107,7 @@ export function useAsignacionesAlumno(cursoId?: number) {
   const [correccionesPorAsig, setCorreccionesPorAsig] =
     useState<CorreccionesPorAsignacionMap>({});
   const [isLoading, setIsLoading] = useState<boolean>(Boolean(cursoId));
+  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [entregandoId, setEntregandoId] = useState<number | string | null>(null);
 
@@ -144,10 +145,14 @@ export function useAsignacionesAlumno(cursoId?: number) {
 
   const cargarAsignaciones = useCallback(async () => {
     if (!cursoId) return;
-    setIsLoading(true);
+    setIsRecargando(true);
     setError(null);
     try {
-      const response = await obtenerAsignaciones(cursoId);
+      // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
+      const [response] = await Promise.all([
+        obtenerAsignaciones(cursoId),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
       const mapeadas = mapAsignacionesDTO(response.data, username);
       setAsignaciones(mapeadas);
 
@@ -165,7 +170,7 @@ export function useAsignacionesAlumno(cursoId?: number) {
       // Error manejado por interceptor
       setError("No se pudieron cargar las asignaciones del curso.");
     } finally {
-      setIsLoading(false);
+      setIsRecargando(false);
     }
   }, [cursoId, username, cargarCorreccionParaAsig]);
 
@@ -273,6 +278,7 @@ export function useAsignacionesAlumno(cursoId?: number) {
     correccionesPorAsig,
     cargarCorreccionParaAsig,
     isLoading,
+    isRecargando,
     error,
     estadisticas,
     entregandoId,

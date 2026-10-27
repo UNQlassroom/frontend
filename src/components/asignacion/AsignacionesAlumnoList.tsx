@@ -12,6 +12,7 @@ interface AsignacionesAlumnoListProps {
   correccionesPorAsig?: CorreccionesPorAsignacionMap;
   onCargarCorreccion?: (asignacionId: number) => Promise<void>;
   isLoading?: boolean;
+  isRecargando?: boolean;
   error?: string | null;
   onRetry?: () => void;
   onEntregar?: (asignacionId: number) => Promise<boolean>;
@@ -24,6 +25,7 @@ export function AsignacionesAlumnoList({
   correccionesPorAsig = {},
   onCargarCorreccion,
   isLoading,
+  isRecargando = false,
   error,
   onRetry,
   onEntregar,
@@ -247,7 +249,11 @@ export function AsignacionesAlumnoList({
           }
         />
       ) : (
-        <div className="space-y-4">
+        <div
+          className={`space-y-4 transition-all duration-300 ${
+            isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
+          }`}
+        >
           {asignacionesFiltradas.map((asig) => {
             const asigIdNum = Number(asig.id);
             const badge = getBadgeEstado(asig.estadoEntrega);

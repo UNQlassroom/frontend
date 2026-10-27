@@ -41,15 +41,20 @@ export function MetricasTab({
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");
 
   const cargarDatos = useCallback(async () => {
-    setIsLoading(true);
+    setIsRecargando(true);
     setError(null);
     try {
-      const response = await obtenerAsignaciones(curso.id);
+      // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
+      const [response] = await Promise.all([
+        obtenerAsignaciones(curso.id),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
       setAsignaciones(response.data);
       if (response.data.length > 0) {
         setSelectedAsignacionId((prev) => {
@@ -64,7 +69,7 @@ export function MetricasTab({
     } catch {
       setError("No se pudieron cargar las asignaciones y repositorios del curso.");
     } finally {
-      setIsLoading(false);
+      setIsRecargando(false);
     }
   }, [curso.id]);
 
@@ -209,6 +214,8 @@ export function MetricasTab({
     setFiltroEstado((prev) => (prev === estadoTarget ? "todos" : estadoTarget));
   };
 
+  const isActualizando = isRecargando || isLoading;
+
   return (
     <div className="space-y-6 animate-rise">
       {/* Encabezado del panel de métricas con botón de actualización */}
@@ -219,13 +226,13 @@ export function MetricasTab({
           <button
             type="button"
             onClick={cargarDatos}
-            disabled={isLoading}
+            disabled={isActualizando}
             className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
             title="Consultar datos actualizados de la base de datos y GitHub"
           >
             <svg
               className={`w-4 h-4 ${
-                isLoading ? "animate-spin text-primary" : "text-muted-foreground"
+                isActualizando ? "animate-spin text-primary" : "text-muted-foreground"
               }`}
               viewBox="0 0 24 24"
               fill="none"
@@ -236,7 +243,7 @@ export function MetricasTab({
             >
               <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
             </svg>
-            <span>{isLoading ? "Actualizando..." : "Actualizar métricas"}</span>
+            <span>{isActualizando ? "Actualizando..." : "Actualizar métricas"}</span>
           </button>
         }
       />
@@ -431,7 +438,11 @@ export function MetricasTab({
               </PanelFilterBar>
 
               {/* Tabla detallada de estado de Repositorios y Commits */}
-              <div className="overflow-x-auto rounded-xl border border-line bg-panel shadow-sm">
+              <div
+                className={`overflow-x-auto rounded-xl border border-line bg-panel shadow-sm transition-all duration-300 ${
+                  isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
+                }`}
+              >
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-line bg-panel2 font-mono text-xs uppercase tracking-wider text-muted-foreground">

@@ -36,6 +36,7 @@ export interface AsignacionesTabProps {
 export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRecargando, setIsRecargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedAsigId, setExpandedAsigId] = useState<number | null>(null);
@@ -89,10 +90,14 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
   });
 
   const cargarAsignaciones = useCallback(async () => {
-    setIsLoading(true);
+    setIsRecargando(true);
     setError(null);
     try {
-      const response = await obtenerAsignaciones(curso.id);
+      // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
+      const [response] = await Promise.all([
+        obtenerAsignaciones(curso.id),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
       setAsignaciones(response.data);
       if (response.data.length > 0) {
         setExpandedAsigId((prev) => (prev === null ? response.data[0].id : prev));
@@ -100,7 +105,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
     } catch {
       setError("No se pudieron cargar las asignaciones del curso.");
     } finally {
-      setIsLoading(false);
+      setIsRecargando(false);
     }
   }, [curso.id]);
 
@@ -201,6 +206,8 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
     });
   }, [asignaciones, busqueda, filtroTipo]);
 
+  const isActualizando = isRecargando || isLoading;
+
   return (
       <div className="space-y-6 animate-rise">
         {/* Encabezado del Panel de Asignaciones */}
@@ -212,13 +219,13 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                 <button
                     type="button"
                     onClick={cargarAsignaciones}
-                    disabled={isLoading}
+                    disabled={isActualizando}
                     className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
                     title="Actualizar asignaciones del curso"
                 >
                   <svg
                       className={`w-4 h-4 ${
-                          isLoading ? "animate-spin text-primary" : "text-muted-foreground"
+                          isActualizando ? "animate-spin text-primary" : "text-muted-foreground"
                       }`}
                       viewBox="0 0 24 24"
                       fill="none"
@@ -229,7 +236,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                   >
                     <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
                   </svg>
-                  <span>{isLoading ? "Actualizando..." : "Actualizar asignaciones"}</span>
+                  <span>{isActualizando ? "Actualizando..." : "Actualizar asignaciones"}</span>
                 </button>
 
                 <button
@@ -331,7 +338,11 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                       }
                   />
               ) : (
-                  <div className="space-y-4">
+                  <div
+                    className={`space-y-4 transition-all duration-300 ${
+                      isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
+                    }`}
+                  >
                     {asignacionesFiltradas.map((asig) => {
                       const isExpanded = expandedAsigId === asig.id;
                       const totalGrupos = asig.grupos?.length || 0;
@@ -571,7 +582,8 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                                         </a>
                                                         {grupo.releaseUrl && (
                                                             <a
-                                                                href={grupo.releaseUrl}target="_blank"
+                                                                href={grupo.releaseUrl}
+                                                                target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="inline-flex items-center rounded-lg border border-line bg-panel px-2 py-1 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
                                                                 title="Ver entrega / release en GitHub"
