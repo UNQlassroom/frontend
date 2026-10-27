@@ -178,40 +178,75 @@ export function AsignacionesAlumnoList({
               <Link
                 key={asig.id}
                 to={detailUrl}
-                className="group block rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-md animate-rise"
+                className="group block rounded-2xl border border-line bg-panel p-6 shadow-xs transition-all duration-200 hover:border-foreground/20 hover:shadow-md animate-rise"
               >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="space-y-2.5 flex-1 min-w-0">
-                    {/* Metadatos y Badges */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-md border border-line bg-panel2 px-3 py-1 font-mono text-xs font-semibold text-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-2 flex-1 min-w-0">
+                    {/* Fila superior de metadatos: Badges, Grupo y Fechas (estilo Docente) */}
+                    <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-semibold text-foreground">
                         {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                       </span>
 
                       {/* Badge de Estado de Entrega */}
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 font-mono text-xs font-semibold ${badge.classes}`}
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-semibold ${badge.classes}`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${badge.dotColor}`} />
                         <span>{badge.label}</span>
                       </span>
 
-                      {/* Estado CI/CD */}
+                      {/* Estado de creación de repo si aún no existe */}
                       {!asig.repoUrl && (
-                        <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 font-mono text-xs text-amber-700 dark:text-amber-300">
+                        <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 font-semibold text-amber-700 dark:text-amber-300">
                           <span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
                           <span>Creando repo...</span>
                         </span>
                       )}
 
-                      {/* Integrantes si es grupal */}
-                      {asig.tipo === "GRUPAL" && asig.integrantes && asig.integrantes.length > 0 && (
-                        <div className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                          <span>Grupo:</span>
-                          <span className="font-semibold text-foreground">
-                            {asig.grupoNombre || asig.integrantes.map((i) => `@${i}`).join(", ")}
+                      {/* Nombre del grupo si es grupal */}
+                      {asig.tipo === "GRUPAL" && asig.grupoNombre && (
+                        <>
+                          <span className="text-muted-foreground/40">•</span>
+                          <span className="inline-flex items-center gap-1">
+                            <span>Grupo:</span>
+                            <span className="font-semibold text-foreground">
+                              {asig.grupoNombre}
+                            </span>
                           </span>
-                        </div>
+                        </>
+                      )}
+
+                      {/* Fecha límite */}
+                      {asig.fechaLimite && (
+                        <>
+                          <span className="text-muted-foreground/40">•</span>
+                          <span className="inline-flex items-center gap-1">
+                            <span>Fecha límite:</span>
+                            <span
+                              className={`font-semibold ${
+                                isVencida && asig.estadoEntrega === "pendiente"
+                                  ? "text-destructive font-bold"
+                                  : "text-foreground"
+                              }`}
+                            >
+                              {asig.fechaLimiteFormatted || formatFechaLegible(asig.fechaLimite)}
+                            </span>
+                          </span>
+                        </>
+                      )}
+
+                      {/* Fecha de entrega */}
+                      {asig.fechaEntregadaFormatted && (
+                        <>
+                          <span className="text-muted-foreground/40">•</span>
+                          <span className="inline-flex items-center gap-1">
+                            <span>Entregado el:</span>
+                            <span className="font-semibold text-foreground">
+                              {asig.fechaEntregadaFormatted}
+                            </span>
+                          </span>
+                        </>
                       )}
                     </div>
 
@@ -226,42 +261,15 @@ export function AsignacionesAlumnoList({
                         {asig.descripcion}
                       </p>
                     )}
-
-                    {/* Fechas de Entrega, Límite y Acción de Ver Detalle */}
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 font-mono text-xs sm:text-sm text-muted-foreground">
-                      {asig.fechaLimite && (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-muted-foreground/80">Fecha límite:</span>
-                          <span
-                            className={`font-semibold ${
-                              isVencida && asig.estadoEntrega === "pendiente"
-                                ? "text-destructive font-bold"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {asig.fechaLimiteFormatted || formatFechaLegible(asig.fechaLimite)}
-                          </span>
-                        </div>
-                      )}
-
-                      {asig.fechaEntregadaFormatted && (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-muted-foreground/80">Entregado el:</span>
-                          <span className="font-semibold text-foreground">
-                            {asig.fechaEntregadaFormatted}
-                          </span>
-                        </div>
-                      )}
-                    </div>
                   </div>
 
                   {/* Panel Lateral Resumen: Solo Calificación */}
-                  <div className="flex flex-col items-center justify-center self-start lg:self-center shrink-0 rounded-xl border border-line bg-panel2 px-5 py-3.5 min-w-[120px] text-center">
-                    <span className="font-mono text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+                  <div className="flex flex-col items-center justify-center self-start sm:self-center shrink-0 rounded-xl border border-line bg-panel2 px-5 py-3.5 min-w-32.5 text-center font-mono">
+                    <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
                       Calificación
                     </span>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="font-medium text-1xl font-bold text-foreground">
+                    <div className="mt-1">
+                      <span className="text-sm font-bold text-foreground">
                         {asig.estadoEntrega === "corregido" && tieneNota
                           ? `${asig.calificacion} / ${notaMaxima}`
                           : "Sin calificar"}
