@@ -27,3 +27,23 @@ export function formatearFechaCommit(fechaIso?: string | null): string {
     return fechaIso;
   }
 }
+
+/**
+ * Formatea una fecha ISO a formato legible dd/mm/yyyy hh:mm (es-AR).
+ */
+export function formatFechaLegible(isoDate?: string | null): string | null {
+  if (!isoDate) return null;
+  try {
+    const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return isoDate;
+    return date.toLocaleDateString("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return isoDate;
+  }
+}
