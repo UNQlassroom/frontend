@@ -420,7 +420,7 @@ export function MetricasTab({
                 <select
                   value={filtroEstado}
                   onChange={(e) => setFiltroEstado(e.target.value)}
-                  className="rounded-lg border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+                  className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
                 >
                   <option value="todos">Todos los pipelines</option>
                   <option value="success">Solo exitosos</option>

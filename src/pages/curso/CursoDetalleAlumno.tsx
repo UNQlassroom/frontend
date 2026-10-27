@@ -15,6 +15,8 @@ export const CursoDetalleAlumno = () => {
 
   const {
     asignaciones,
+    correccionesPorAsig,
+    cargarCorreccionParaAsig,
     isLoading: isLoadingAsignaciones,
     error: errorAsignaciones,
     cargarAsignaciones,
@@ -118,8 +120,8 @@ export const CursoDetalleAlumno = () => {
               type="button"
               onClick={cargarAsignaciones}
               disabled={isLoadingAsignaciones}
-              className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
-              title="Recargar asignaciones y verificar estado actualizado"
+              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
+              title="Actualizar asignaciones y correcciones"
             >
               <svg
                 className={`w-4 h-4 ${isLoadingAsignaciones ? "animate-spin text-primary" : "text-muted-foreground"}`}
@@ -139,6 +141,8 @@ export const CursoDetalleAlumno = () => {
 
         <AsignacionesAlumnoList
           asignaciones={asignaciones}
+          correccionesPorAsig={correccionesPorAsig}
+          onCargarCorreccion={cargarCorreccionParaAsig}
           cursoId={curso.id}
           isLoading={isLoadingAsignaciones}
           error={errorAsignaciones}

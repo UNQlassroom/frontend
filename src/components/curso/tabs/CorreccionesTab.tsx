@@ -297,7 +297,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
               onClick={() => cargarCorrecciones(selectedAsignacionId)}
               disabled={isLoadingCorrecciones}
               className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-              title="Recargar el estado de las correcciones"
+              title="Actualizar el estado de las correcciones"
             >
               <svg
                 className={`w-4 h-4 ${
@@ -498,7 +498,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="rounded-lg border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+              className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
             >
               <option value="todos">
                 Todos los repositorios ({correcciones.length})

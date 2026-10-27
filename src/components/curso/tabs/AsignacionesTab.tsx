@@ -214,10 +214,10 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                     onClick={cargarAsignaciones}
                     disabled={isLoading}
                     className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-                    title="Recargar asignaciones del curso"
+                    title="Actualizar asignaciones del curso"
                 >
                   <svg
-                      className={`w-3.5 h-3.5 ${
+                      className={`w-4 h-4 ${
                           isLoading ? "animate-spin text-primary" : "text-muted-foreground"
                       }`}
                       viewBox="0 0 24 24"
@@ -235,13 +235,13 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                 <button
                     type="button"
                     onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
                     title="Crear una nueva asignación"
                 >
                   <img
                       src={circleAddIcon}
                       alt="Crear"
-                      className="w-3.5 h-3.5 brightness-0 invert"
+                      className="w-4 h-4 brightness-0 invert"
                   />
                   <span>Crear asignación</span>
                 </button>
@@ -303,7 +303,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                 <select
                     value={filtroTipo}
                     onChange={(e) => setFiltroTipo(e.target.value)}
-                    className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
+                    className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
                 >
                   <option value="todos">Todos los tipos ({totalAsignaciones})</option>
                   <option value="INDIVIDUAL">Solo individuales ({individualesCount})</option>
