@@ -15,14 +15,10 @@ export const CursoDetalleAlumno = () => {
 
   const {
     asignaciones,
-    correccionesPorAsig,
-    cargarCorreccionParaAsig,
     isLoading: isLoadingAsignaciones,
     isRecargando: isRecargandoAsignaciones,
     error: errorAsignaciones,
     cargarAsignaciones,
-    entregar,
-    entregandoId,
   } = useAsignacionesAlumno(cursoId);
 
   if (isLoadingCurso) {
@@ -117,14 +113,14 @@ export const CursoDetalleAlumno = () => {
       <section className="space-y-6">
         <PanelHeader
           title="Panel de Asignaciones"
-          description="Aquí podrás ver tus asignaciones, su fecha de entrega, calificación, correcciones y feedback docente."
+          description="Seleccioná una asignación para ver en detalle su consigna, el estado técnico de tu repositorio, entregas y devoluciones."
           actions={
             <button
               type="button"
               onClick={cargarAsignaciones}
               disabled={isActualizando}
               className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
-              title="Actualizar asignaciones y correcciones"
+              title="Actualizar asignaciones"
             >
               <svg
                 className={`w-4 h-4 ${isActualizando ? "animate-spin text-primary" : "text-muted-foreground"}`}
@@ -144,15 +140,11 @@ export const CursoDetalleAlumno = () => {
 
         <AsignacionesAlumnoList
           asignaciones={asignaciones}
-          correccionesPorAsig={correccionesPorAsig}
-          onCargarCorreccion={cargarCorreccionParaAsig}
           cursoId={curso.id}
           isLoading={isLoadingAsignaciones}
           isRecargando={isRecargandoAsignaciones}
           error={errorAsignaciones}
           onRetry={cargarAsignaciones}
-          onEntregar={entregar}
-          entregandoId={entregandoId}
         />
       </section>
     </main>

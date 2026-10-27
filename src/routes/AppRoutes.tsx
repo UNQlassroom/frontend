@@ -4,6 +4,7 @@ import {
   HomeAlumno,
   CursoDetalleDocente,
   CursoDetalleAlumno,
+  AsignacionDetalleAlumno,
   LoginPage,
   OAuthCallbackPage,
 } from "@/pages";
@@ -34,6 +35,15 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute>
             {isDocente ? <CursoDetalleDocente /> : <CursoDetalleAlumno />}
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/cursos/:cursoId/asignaciones/:asignacionId"
+        element={
+          <ProtectedRoute>
+            {isDocente ? <Navigate to="/home" replace /> : <AsignacionDetalleAlumno />}
           </ProtectedRoute>
         }
       />

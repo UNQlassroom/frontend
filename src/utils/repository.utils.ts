@@ -22,7 +22,7 @@ export function getEstadoCIInfo(estado?: string | null): EstadoCIInfo {
     case "pending":
       return {
         label: "CI en ejecución",
-        badgeClass: "bg-amber-500/10 text-amber-600 border border-amber-500/20",
+        badgeClass: "bg-amber-100 text-amber-600 border border-amber-500/25",
         dotClass: "bg-amber-500",
         type: "pending",
       };
@@ -58,7 +58,7 @@ export function getBadgeEstadoEntrega(estado: EstadoEntrega) {
     default:
       return {
         label: "Pendiente",
-        classes: "bg-amber-500/10 text-amber-600 border border-amber-500/20",
+        classes: "bg-amber-100 text-amber-600 dark:text-amber-400 border border-amber-500/25",
         dotColor: "bg-amber-500",
       };
   }
