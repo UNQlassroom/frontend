@@ -448,9 +448,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                           onClick={() => toggleExpand(asig.id)}
                           className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs sm:text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
                         >
-                          <span>
-                            {isExpanded ? "Ocultar repositorios" : "Ver repositorios"}
-                          </span>
+                          <span>Repositorios</span>
                           <span className="rounded-full bg-line/70 px-2 py-0.5 text-xs text-muted-foreground">
                             {totalGrupos}
                           </span>

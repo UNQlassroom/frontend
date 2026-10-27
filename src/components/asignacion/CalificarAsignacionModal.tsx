@@ -64,7 +64,7 @@ function CalificarAsignacionContent({
       onClose();
     } catch {
       // El interceptor global de Axios notifica el error mediante toast amigable
-      setError("Error al calificar la asignación.")
+      setError("Error al calificar la asignación.");
     } finally {
       setIsLoading(false);
     }
@@ -75,75 +75,77 @@ function CalificarAsignacionContent({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4">
       <div className="w-full max-w-2xl rounded-2xl border border-line bg-panel2 p-7 sm:p-8 shadow-xl flex flex-col animate-rise">
-        {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-line">
-          <div>
+        {/* Header con metadatos integrados */}
+        <div className="flex items-start justify-between pb-4 border-b border-line gap-4">
+          <div className="min-w-0">
             <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
               Calificación Docente
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
               {asignacionTitulo}
             </h2>
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm sm:text-base font-semibold text-primary">
+            <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-xs sm:text-sm">
+              <span className="font-semibold text-foreground">
                 {grupo.nombre ||
                   (grupo.integrantes.length === 1
                     ? `@${grupo.integrantes[0]?.username}`
                     : "Grupo")}
               </span>
+
+              <span className="text-muted-foreground/40">•</span>
+
+              {esEntregada ? (
+                <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-xs bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/20">
+                  <span>Entregado</span>
+                  {grupo.fechaEntregada && (
+                    <span className="text-muted-foreground font-normal">
+                      (
+                      {new Date(grupo.fechaEntregada).toLocaleDateString(
+                        "es-AR",
+                        {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                      )
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span className="inline-flex items-center text-amber-600 dark:text-amber-400 text-xs bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/20 font-semibold">
+                  Sin entregar
+                </span>
+              )}
+
+              {grupo.releaseUrl && (
+                <>
+                  <span className="text-muted-foreground/40">•</span>
+                  <a
+                    href={grupo.releaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-foreground hover:underline"
+                  >
+                    <span>🏷️ Release ↗</span>
+                  </a>
+                </>
+              )}
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-sm text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+            className="rounded-lg p-2 text-sm text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer shrink-0"
             aria-label="Cerrar modal"
           >
             ✕
           </button>
         </div>
 
-        {/* Info adicional del grupo: Entrega y Repositorio */}
-        <div className="mt-5 p-4 rounded-xl border border-line bg-panel flex flex-wrap items-center justify-between gap-3 font-mono text-sm">
-          <div className="flex items-center gap-2.5">
-            <span className="text-muted-foreground font-medium">Estado de entrega:</span>
-            {esEntregada ? (
-              <span className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold text-xs bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
-                <span>Entregado</span>
-                {grupo.fechaEntregada && (
-                  <span className="text-muted-foreground font-normal ml-1">
-                    ({new Date(grupo.fechaEntregada).toLocaleDateString("es-AR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })})
-                  </span>
-                )}
-              </span>
-            ) : (
-              <span className="inline-flex items-center text-amber-600 text-xs bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20 font-semibold">
-                Sin entregar
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {grupo.releaseUrl && (
-              <a
-                href={grupo.releaseUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs sm:text-sm text-primary hover:underline font-semibold"
-              >
-                <span>🏷️ Release ↗</span>
-              </a>
-            )}
-          </div>
-        </div>
-
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
           {/* Calificación (1 a 10) */}
           <div>
             <label

@@ -211,10 +211,12 @@ export function CrearAsignacionModal({
 
   if (!open) return null;
 
+  const totalReposACrear = tipo === "INDIVIDUAL" ? alumnos.length : grupos.length;
+
   return (
     <>
       <div className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4">
-        <div className="w-full max-w-4xl max-h-[90vh] rounded-2xl border border-line bg-panel2 p-7 sm:p-8 shadow-xl flex flex-col animate-rise">
+        <div className="w-full max-w-3xl max-h-[90vh] rounded-2xl border border-line bg-panel2 p-6 sm:p-7 shadow-xl flex flex-col animate-rise">
           {/* Header */}
           <div className="flex items-start justify-between pb-4 border-b border-line">
             <div>
@@ -224,9 +226,6 @@ export function CrearAsignacionModal({
               <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                 Crear asignación
               </h2>
-              <p className="mt-1 font-mono text-sm text-muted-foreground">
-                El servidor creará un repositorio en GitHub para cada alumno o grupo con la plantilla seleccionada.
-              </p>
             </div>
             <button
               type="button"
@@ -241,13 +240,13 @@ export function CrearAsignacionModal({
           {/* Formulario */}
           <form
             onSubmit={handleSubmit}
-            className="py-5 space-y-5 overflow-y-auto flex-1 pr-1"
+            className="py-5 space-y-4 overflow-y-auto flex-1 pr-1"
           >
             {/* Título */}
             <div>
               <label
                 htmlFor="asignacion-titulo"
-                className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                className="mb-1.5 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Título de la asignación *
               </label>
@@ -270,7 +269,7 @@ export function CrearAsignacionModal({
             <div>
               <label
                 htmlFor="asignacion-descripcion"
-                className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                className="mb-1.5 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Descripción (opcional)
               </label>
@@ -285,14 +284,14 @@ export function CrearAsignacionModal({
               />
             </div>
 
-            {/* Tipo de asignación: Individual o Grupal */}
+            {/* Tipo de asignación: Individual o Grupal (compacto) */}
             <div>
-              <label className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+              <label className="mb-1.5 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                 Modalidad de entrega *
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <label
-                  className={`flex items-center gap-3.5 p-4 rounded-xl border cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${
                     tipo === "INDIVIDUAL"
                       ? "border-primary bg-primary/10 text-foreground"
                       : "border-line bg-background text-muted-foreground hover:border-foreground/30"
@@ -307,18 +306,13 @@ export function CrearAsignacionModal({
                     disabled={isLoading}
                     className="w-4 h-4 accent-primary"
                   />
-                  <div>
-                    <p className="font-mono text-sm sm:text-base font-semibold text-foreground">
-                      Individual
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Un repositorio por alumno
-                    </p>
-                  </div>
+                  <span className="font-mono text-sm font-semibold text-foreground">
+                    Individual
+                  </span>
                 </label>
 
                 <label
-                  className={`flex items-center gap-3.5 p-4 rounded-xl border cursor-pointer transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${
                     tipo === "GRUPAL"
                       ? "border-primary bg-primary/10 text-foreground"
                       : "border-line bg-background text-muted-foreground hover:border-foreground/30"
@@ -333,14 +327,9 @@ export function CrearAsignacionModal({
                     disabled={isLoading}
                     className="w-4 h-4 accent-primary"
                   />
-                  <div>
-                    <p className="font-mono text-sm sm:text-base font-semibold text-foreground">
-                      Grupal
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Un repositorio por grupo
-                    </p>
-                  </div>
+                  <span className="font-mono text-sm font-semibold text-foreground">
+                    Grupal
+                  </span>
                 </label>
               </div>
             </div>
@@ -348,7 +337,7 @@ export function CrearAsignacionModal({
             {/* Plantilla y Fecha Límite */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
               <div>
-                <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="mb-1.5 flex items-center justify-between gap-2">
                   <label
                     htmlFor="asignacion-template"
                     className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
@@ -362,7 +351,7 @@ export function CrearAsignacionModal({
                       disabled={isLoading}
                       className="font-mono text-xs font-semibold text-primary hover:underline cursor-pointer disabled:opacity-50"
                     >
-                      + Crear nuevo template
+                      + Crear nuevo
                     </button>
                   )}
                 </div>
@@ -370,7 +359,7 @@ export function CrearAsignacionModal({
                 {isLoadingTemplates ? (
                   <div className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 font-mono text-sm text-muted-foreground flex items-center gap-2.5">
                     <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
-                    <span>Cargando templates...</span>
+                    <span>Cargando plantillas...</span>
                   </div>
                 ) : templates.length > 0 ? (
                   <select
@@ -392,7 +381,7 @@ export function CrearAsignacionModal({
                 ) : (
                   <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <p className="font-mono text-xs text-amber-600 dark:text-amber-400">
-                      No hay repositorios plantilla disponibles.
+                      No hay plantillas disponibles.
                     </p>
                     <button
                       type="button"
@@ -409,9 +398,9 @@ export function CrearAsignacionModal({
               <div>
                 <label
                   htmlFor="asignacion-fecha"
-                  className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                  className="mb-1.5 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
-                  Fecha límite de entrega
+                  Fecha límite de entrega *
                 </label>
                 <input
                   id="asignacion-fecha"
@@ -427,21 +416,16 @@ export function CrearAsignacionModal({
 
             {/* Configuración de Grupos (Solo si tipo === "GRUPAL") */}
             {tipo === "GRUPAL" && (
-              <div className="space-y-4 pt-3 border-t border-line">
+              <div className="space-y-3 pt-3 border-t border-line">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-mono text-sm font-bold text-foreground uppercase tracking-wide">
-                      Armado de Grupos
-                    </h4>
-                    <p className="font-mono text-xs text-muted-foreground mt-0.5">
-                      Armá los grupos seleccionando a los alumnos del curso.
-                    </p>
-                  </div>
+                  <h4 className="font-mono text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    Armado de Grupos
+                  </h4>
                   <button
                     type="button"
                     onClick={handleAgregarGrupo}
                     disabled={isLoading}
-                    className="rounded-xl border border-line bg-panel px-4 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                    className="rounded-xl border border-line bg-panel px-3.5 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
                   >
                     + Añadir grupo
                   </button>
@@ -454,11 +438,11 @@ export function CrearAsignacionModal({
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-3.5 max-h-[30vh] overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-[28vh] overflow-y-auto pr-1">
                     {grupos.map((grupo, gIdx) => (
                       <div
                         key={gIdx}
-                        className="rounded-xl border border-line bg-panel p-4 space-y-3"
+                        className="rounded-xl border border-line bg-panel p-3.5 space-y-2.5"
                       >
                         <div className="flex items-center justify-between gap-3">
                           <input
@@ -476,14 +460,14 @@ export function CrearAsignacionModal({
                               type="button"
                               onClick={() => handleEliminarGrupo(gIdx)}
                               disabled={isLoading}
-                              className="text-muted-foreground hover:text-destructive text-sm font-mono px-2 py-1 cursor-pointer"
+                              className="text-muted-foreground hover:text-destructive text-xs font-mono px-2 py-1 cursor-pointer"
                             >
                               Eliminar
                             </button>
                           )}
                         </div>
 
-                        <div className="flex flex-wrap gap-2 pt-1">
+                        <div className="flex flex-wrap gap-2">
                           {alumnos.map((alumno) => {
                             const estaSeleccionado =
                               grupo.integrantesUsernames.includes(alumno.username);
@@ -516,16 +500,11 @@ export function CrearAsignacionModal({
 
             {/* Feedback de progreso cuando está creando repos */}
             {isLoading && (
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-center gap-3.5 animate-pulse">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
-                <div className="font-mono text-xs sm:text-sm space-y-0.5">
-                  <p className="font-semibold text-foreground">
-                    Registrando asignación...
-                  </p>
-                  <p className="text-muted-foreground text-xs">
-                    Validando plantilla y configurando grupos antes de iniciar la creación de repositorios en GitHub.
-                  </p>
-                </div>
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-3.5 flex items-center gap-3 animate-pulse">
+                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+                <p className="font-mono text-xs sm:text-sm font-semibold text-foreground">
+                  Registrando asignación y preparando repositorios en GitHub...
+                </p>
               </div>
             )}
 
@@ -536,11 +515,12 @@ export function CrearAsignacionModal({
             )}
 
             {/* Footer */}
-            <div className="pt-4 border-t border-line flex items-center justify-between">
-              <span className="font-mono text-xs sm:text-sm text-muted-foreground">
-                {tipo === "INDIVIDUAL"
-                  ? `Se crearán repositorios para los ${alumnos.length} alumnos`
-                  : `Se crearán ${grupos.length} repositorios de grupo`}
+            <div className="pt-4 border-t border-line flex items-center justify-between gap-3">
+              <span className="font-mono text-xs text-muted-foreground">
+                {totalReposACrear}{" "}
+                {totalReposACrear === 1
+                  ? "repositorio a crear"
+                  : "repositorios a crear"}
               </span>
 
               <div className="flex items-center gap-3">
@@ -548,16 +528,16 @@ export function CrearAsignacionModal({
                   type="button"
                   onClick={handleClose}
                   disabled={isLoading}
-                  className="rounded-xl px-5 py-2.5 text-sm sm:text-base font-medium text-muted-foreground hover:text-foreground hover:bg-line/30 transition-colors cursor-pointer"
+                  className="rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-line/30 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || isLoadingTemplates}
-                  className="rounded-xl bg-primary px-6 py-2.5 text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm disabled:opacity-50"
+                  className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-sm disabled:opacity-50"
                 >
-                  {isLoading ? "Creando asignación..." : "Crear Asignación"}
+                  {isLoading ? "Creando..." : "Crear asignación"}
                 </button>
               </div>
             </div>
