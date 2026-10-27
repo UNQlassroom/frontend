@@ -15,7 +15,6 @@ export function EliminarAsignacionModal({
   onClose,
   onConfirm,
   asignacionTitulo,
-  tipo,
   totalGrupos = 0,
 }: EliminarAsignacionModalProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +43,7 @@ export function EliminarAsignacionModal({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4">
-      <div className="w-full max-w-xl rounded-2xl border border-destructive/30 bg-panel2 p-7 sm:p-8 shadow-xl flex flex-col animate-rise">
+      <div className="w-full max-w-lg rounded-2xl border border-destructive/30 bg-panel2 p-6 sm:p-7 shadow-xl flex flex-col animate-rise">
         {/* Encabezado */}
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
@@ -72,36 +71,20 @@ export function EliminarAsignacionModal({
           </div>
         ) : (
           <>
-            {/* Cuerpo del Modal */}
-            <div className="mt-5 space-y-4">
-              {/* Advertencia Destacada de Irreversibilidad y GitHub */}
-              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 sm:p-5 text-sm font-mono space-y-2.5">
-                <div className="flex items-center gap-2 text-destructive font-semibold text-base">
-                  <span>⚠️</span>
-                  <span>Esta operación es irreversible</span>
-                </div>
-                <p className="text-muted-foreground leading-relaxed text-sm">
-                  Al confirmar el borrado, se eliminará la asignación del sistema y se disparará la
-                  eliminación de todos los repositorios asociados en GitHub.
-                  Dejará de ser visible de inmediato tanto para el docente como para los alumnos.
+            {/* Cuerpo del Modal unificado y directo */}
+            <div className="mt-5">
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 font-mono text-sm leading-relaxed text-muted-foreground">
+                <p>
+                  <span className="font-semibold text-destructive">
+                    ⚠️ Acción irreversible:
+                  </span>{" "}
+                  Se eliminará la asignación y sus{" "}
+                  <span className="font-semibold text-foreground">
+                    {totalGrupos}{" "}
+                    {totalGrupos === 1 ? "repositorio" : "repositorios"}
+                  </span>{" "}
+                  en GitHub de forma permanente.
                 </p>
-              </div>
-
-              {/* Información contextual de la asignación */}
-              <div className="rounded-xl border border-line bg-panel p-4 space-y-3 font-mono text-sm">
-                <div className="flex items-center justify-between gap-3 min-w-0">
-                  <span className="text-muted-foreground shrink-0">Tipo de asignación:</span>
-                  <span className="font-semibold text-foreground">
-                    {tipo === "GRUPAL" ? "Grupal" : "Individual"}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between gap-3 min-w-0">
-                  <span className="text-muted-foreground shrink-0">Repositorios generados:</span>
-                  <span className="font-semibold text-foreground">
-                    {totalGrupos} {totalGrupos === 1 ? "repositorio" : "repositorios"} en GitHub
-                  </span>
-                </div>
               </div>
             </div>
 
@@ -111,7 +94,7 @@ export function EliminarAsignacionModal({
                 type="button"
                 onClick={handleClose}
                 disabled={isLoading}
-                className="rounded-xl border border-line bg-panel px-5 py-2.5 font-mono text-sm sm:text-base font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-xl border border-line bg-panel px-5 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancelar
               </button>
@@ -119,7 +102,7 @@ export function EliminarAsignacionModal({
                 type="button"
                 onClick={handleConfirm}
                 disabled={isLoading}
-                className="inline-flex items-center gap-2 rounded-xl bg-destructive px-5 py-2.5 font-mono text-sm sm:text-base font-semibold text-white hover:bg-destructive/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+                className="inline-flex items-center gap-2 rounded-xl bg-destructive px-5 py-2.5 font-mono text-sm font-semibold text-white hover:bg-destructive/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
               >
                 {isLoading ? (
                   <>
@@ -127,9 +110,7 @@ export function EliminarAsignacionModal({
                     <span>Eliminando...</span>
                   </>
                 ) : (
-                  <>
-                    <span>Eliminar</span>
-                  </>
+                  <span>Eliminar</span>
                 )}
               </button>
             </div>

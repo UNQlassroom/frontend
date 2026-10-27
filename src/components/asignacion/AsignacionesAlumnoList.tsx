@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import type { AsignacionAlumnoDTO, EstadoEntrega, CorreccionGrupoResponseDTO } from "@/types";
-import { obtenerCorrecciones } from "@/services";
+import type { AsignacionAlumnoDTO, EstadoEntrega } from "@/types";
+import type { CorreccionesPorAsignacionMap } from "@/hooks/useAsignacionesAlumno";
 import { CIStatusBadge, IssueEstadoBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelFilterBar } from "@/components/panel";
 import { ConfirmarReentregaModal } from "./ConfirmarReentregaModal";
@@ -9,7 +9,10 @@ import githubIcon from "@/assets/github_favicon.svg";
 interface AsignacionesAlumnoListProps {
   cursoId?: number;
   asignaciones: AsignacionAlumnoDTO[];
+  correccionesPorAsig?: CorreccionesPorAsignacionMap;
+  onCargarCorreccion?: (asignacionId: number) => Promise<void>;
   isLoading?: boolean;
+  isRecargando?: boolean;
   error?: string | null;
   onRetry?: () => void;
   onEntregar?: (asignacionId: number) => Promise<boolean>;
@@ -19,7 +22,10 @@ interface AsignacionesAlumnoListProps {
 export function AsignacionesAlumnoList({
   cursoId,
   asignaciones,
+  correccionesPorAsig = {},
+  onCargarCorreccion,
   isLoading,
+  isRecargando = false,
   error,
   onRetry,
   onEntregar,
@@ -32,16 +38,6 @@ export function AsignacionesAlumnoList({
 
   // Estado para la sección desplegable de correcciones e issues
   const [expandedCorrecciones, setExpandedCorrecciones] = useState<Set<number>>(new Set());
-  const [correccionesPorAsig, setCorreccionesPorAsig] = useState<
-    Record<
-      number,
-      {
-        loading: boolean;
-        error: string | null;
-        grupo: CorreccionGrupoResponseDTO | null;
-      }
-    >
-  >({});
 
   const conteo = useMemo(() => ({
     todas: asignaciones.length,
@@ -85,32 +81,6 @@ export function AsignacionesAlumnoList({
     }
   };
 
-  const cargarCorreccionParaAsig = async (asigId: number) => {
-    if (!cursoId) return;
-    setCorreccionesPorAsig((prev) => ({
-      ...prev,
-      [asigId]: { loading: true, error: null, grupo: prev[asigId]?.grupo ?? null },
-    }));
-    try {
-      const res = await obtenerCorrecciones(cursoId, asigId);
-      const miGrupo = res.data[0] || null;
-      setCorreccionesPorAsig((prev) => ({
-        ...prev,
-        [asigId]: { loading: false, error: null, grupo: miGrupo },
-      }));
-    } catch {
-      
-      setCorreccionesPorAsig((prev) => ({
-        ...prev,
-        [asigId]: {
-          loading: false,
-          error: "No se pudieron obtener las correcciones.",
-          grupo: null,
-        },
-      }));
-    }
-  };
-
   const toggleCorrecciones = async (asigId: number) => {
     const isCurrentlyOpen = expandedCorrecciones.has(asigId);
     const next = new Set(expandedCorrecciones);
@@ -120,8 +90,8 @@ export function AsignacionesAlumnoList({
     } else {
       next.add(asigId);
       setExpandedCorrecciones(next);
-      if (!correccionesPorAsig[asigId] && cursoId) {
-        await cargarCorreccionParaAsig(asigId);
+      if (!correccionesPorAsig[asigId] && cursoId && onCargarCorreccion) {
+        await onCargarCorreccion(asigId);
       }
     }
   };
@@ -279,7 +249,11 @@ export function AsignacionesAlumnoList({
           }
         />
       ) : (
-        <div className="space-y-4">
+        <div
+          className={`space-y-4 transition-all duration-300 ${
+            isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
+          }`}
+        >
           {asignacionesFiltradas.map((asig) => {
             const asigIdNum = Number(asig.id);
             const badge = getBadgeEstado(asig.estadoEntrega);
@@ -467,26 +441,6 @@ export function AsignacionesAlumnoList({
                             <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80" />
                             <span>Correcciones del docente en GitHub</span>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => cargarCorreccionParaAsig(asigIdNum)}
-                            disabled={asigCorreccion?.loading}
-                            className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
-                            title="Recargar correcciones desde GitHub"
-                          >
-                            <svg
-                              className={`w-3.5 h-3.5 ${asigCorreccion?.loading ? "animate-spin text-primary" : ""}`}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                            </svg>
-                            <span>{asigCorreccion?.loading ? "Actualizando..." : "Actualizar"}</span>
-                          </button>
                         </div>
 
                         {asigCorreccion?.loading ? (
@@ -799,4 +753,3 @@ export function AsignacionesAlumnoList({
     </div>
   );
 }
-

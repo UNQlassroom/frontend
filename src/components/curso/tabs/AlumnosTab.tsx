@@ -64,8 +64,8 @@ export function AlumnosTab({
                 type="button"
                 onClick={onRecargar}
                 disabled={isRecargando || isLoading}
-                className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-                title="Recargar la lista de alumnos"
+                className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+                title="Actualizar la lista de alumnos"
               >
                 <svg
                   className={`w-4 h-4 ${
@@ -80,14 +80,14 @@ export function AlumnosTab({
                 >
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
                 </svg>
-                <span>{isRecargando ? "Recargando..." : "Recargar alumnos"}</span>
+                <span>{isRecargando ? "Actualizando..." : "Actualizar alumnos"}</span>
               </button>
             )}
 
             <button
               type="button"
               onClick={onOpenInvitarModal}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
               title="Invitar nuevos alumnos al curso"
             >
               <img

@@ -27,6 +27,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   >([]);
   const [isLoadingAsignaciones, setIsLoadingAsignaciones] = useState(true);
   const [isLoadingCorrecciones, setIsLoadingCorrecciones] = useState(false);
+  const [isRecargando, setIsRecargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Filtros
@@ -84,19 +85,21 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   // Cargar correcciones de la asignación seleccionada (y refrescar estado de asignaciones)
   const cargarCorrecciones = useCallback(
     async (asignacionId: number) => {
-      setIsLoadingCorrecciones(true);
+      setIsRecargando(true);
       setError(null);
       try {
+        // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
         const [asigRes, corrRes] = await Promise.all([
           obtenerAsignaciones(curso.id),
           obtenerCorrecciones(curso.id, asignacionId),
+          new Promise((resolve) => setTimeout(resolve, 600)),
         ]);
         setAsignaciones(asigRes.data);
         setCorrecciones(corrRes.data);
       } catch {
         setError("No se pudieron obtener las correcciones de esta asignación.");
       } finally {
-        setIsLoadingCorrecciones(false);
+        setIsRecargando(false);
       }
     },
     [curso.id]
@@ -284,6 +287,8 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     setFiltroEstado((prev) => (prev === estadoTarget ? "todos" : estadoTarget));
   };
 
+  const isActualizando = isRecargando || isLoadingCorrecciones;
+
   return (
     <div className="space-y-6 animate-rise">
       {/* Encabezado del panel de Correcciones */}
@@ -295,13 +300,13 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <button
               type="button"
               onClick={() => cargarCorrecciones(selectedAsignacionId)}
-              disabled={isLoadingCorrecciones}
+              disabled={isActualizando || isLoadingAsignaciones}
               className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-              title="Recargar el estado de las correcciones"
+              title="Actualizar el estado de las correcciones"
             >
               <svg
                 className={`w-4 h-4 ${
-                  isLoadingCorrecciones
+                  isActualizando
                     ? "animate-spin text-primary"
                     : "text-muted-foreground"
                 }`}
@@ -315,7 +320,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
               </svg>
               <span>
-                {isLoadingCorrecciones
+                {isActualizando
                   ? "Actualizando..."
                   : "Actualizar correcciones"}
               </span>
@@ -498,7 +503,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="rounded-lg border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+              className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
             >
               <option value="todos">
                 Todos los repositorios ({correcciones.length})
@@ -540,7 +545,11 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                   description="Probá cambiando el texto de búsqueda o el filtro seleccionado."
                 />
               ) : (
-                <div className="space-y-4">
+                <div
+                  className={`space-y-4 transition-all duration-300 ${
+                    isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
+                  }`}
+                >
                   {gruposFiltrados.map((grupo) => {
                     const allIssuesUrl = getGitHubIssuesUrl(grupo.repoNombre);
                     const totalGrupoCorrecciones = grupo.issues.length;

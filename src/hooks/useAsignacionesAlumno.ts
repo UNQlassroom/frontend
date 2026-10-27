@@ -1,6 +1,15 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import type { AsignacionAlumnoDTO, AsignacionResponseDTO, EstadoEntrega } from "@/types";
-import { obtenerAsignaciones, entregarAsignacion } from "@/services";
+import type {
+  AsignacionAlumnoDTO,
+  AsignacionResponseDTO,
+  CorreccionGrupoResponseDTO,
+  EstadoEntrega,
+} from "@/types";
+import {
+  obtenerAsignaciones,
+  obtenerCorrecciones,
+  entregarAsignacion,
+} from "@/services";
 import { useAuth } from "./useAuth";
 
 export interface EstadisticasProgresoAlumno {
@@ -11,6 +20,15 @@ export interface EstadisticasProgresoAlumno {
   promedioCalificaciones: number | null;
   porcentajeCompletado: number;
 }
+
+export type CorreccionesPorAsignacionMap = Record<
+  number,
+  {
+    loading: boolean;
+    error: string | null;
+    grupo: CorreccionGrupoResponseDTO | null;
+  }
+>;
 
 function mapAsignacionesDTO(
   asignaciones: AsignacionResponseDTO[],
@@ -86,24 +104,75 @@ export function useAsignacionesAlumno(cursoId?: number) {
   const { user } = useAuth();
   const username = user?.username;
   const [asignaciones, setAsignaciones] = useState<AsignacionAlumnoDTO[]>([]);
+  const [correccionesPorAsig, setCorreccionesPorAsig] =
+    useState<CorreccionesPorAsignacionMap>({});
   const [isLoading, setIsLoading] = useState<boolean>(Boolean(cursoId));
+  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [entregandoId, setEntregandoId] = useState<number | string | null>(null);
 
+  const cargarCorreccionParaAsig = useCallback(
+    async (asigId: number) => {
+      if (!cursoId) return;
+      setCorreccionesPorAsig((prev) => ({
+        ...prev,
+        [asigId]: {
+          loading: true,
+          error: null,
+          grupo: prev[asigId]?.grupo ?? null,
+        },
+      }));
+      try {
+        const res = await obtenerCorrecciones(cursoId, asigId);
+        const miGrupo = res.data[0] || null;
+        setCorreccionesPorAsig((prev) => ({
+          ...prev,
+          [asigId]: { loading: false, error: null, grupo: miGrupo },
+        }));
+      } catch {
+        setCorreccionesPorAsig((prev) => ({
+          ...prev,
+          [asigId]: {
+            loading: false,
+            error: "No se pudieron obtener las correcciones.",
+            grupo: null,
+          },
+        }));
+      }
+    },
+    [cursoId]
+  );
+
   const cargarAsignaciones = useCallback(async () => {
     if (!cursoId) return;
-    setIsLoading(true);
+    setIsRecargando(true);
     setError(null);
     try {
-      const response = await obtenerAsignaciones(cursoId);
-      setAsignaciones(mapAsignacionesDTO(response.data, username));
+      // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
+      const [response] = await Promise.all([
+        obtenerAsignaciones(cursoId),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
+      const mapeadas = mapAsignacionesDTO(response.data, username);
+      setAsignaciones(mapeadas);
+
+      const asignacionesValidas = mapeadas.filter(
+        (a) => a.estado !== "CREANDO" && a.estado !== "ERROR"
+      );
+      if (asignacionesValidas.length > 0) {
+        await Promise.all(
+          asignacionesValidas.map((asig) =>
+            cargarCorreccionParaAsig(Number(asig.id))
+          )
+        );
+      }
     } catch {
       // Error manejado por interceptor
       setError("No se pudieron cargar las asignaciones del curso.");
     } finally {
-      setIsLoading(false);
+      setIsRecargando(false);
     }
-  }, [cursoId, username]);
+  }, [cursoId, username, cargarCorreccionParaAsig]);
 
   useEffect(() => {
     if (!cursoId) return;
@@ -112,7 +181,8 @@ export function useAsignacionesAlumno(cursoId?: number) {
     obtenerAsignaciones(cursoId)
       .then((response) => {
         if (!ignore) {
-          setAsignaciones(mapAsignacionesDTO(response.data, username));
+          const mapeadas = mapAsignacionesDTO(response.data, username);
+          setAsignaciones(mapeadas);
         }
       })
       .catch(() => {
@@ -205,7 +275,10 @@ export function useAsignacionesAlumno(cursoId?: number) {
 
   return {
     asignaciones,
+    correccionesPorAsig,
+    cargarCorreccionParaAsig,
     isLoading,
+    isRecargando,
     error,
     estadisticas,
     entregandoId,
