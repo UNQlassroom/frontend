@@ -1,10 +1,4 @@
-import type { AsignacionAlumnoDTO } from "@/types";
-
-interface BuenasPracticasTabProps {
-  asignacion?: AsignacionAlumnoDTO;
-}
-
-export function BuenasPracticasTab({}: BuenasPracticasTabProps) {
+export function BuenasPracticasTab() {
   return (
     <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-4">
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-line">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAsignacionDetalleAlumno } from "@/hooks";
@@ -44,16 +44,11 @@ export const AsignacionDetalleAlumno = () => {
   const subSeccionTecnica: SubSeccionTecnica =
     subParam === "cobertura" || subParam === "git" ? subParam : "ci";
 
-  const [menuTecnicoAbierto, setMenuTecnicoAbierto] = useState<boolean>(
-    seccionActiva === "tecnico"
-  );
+  const [menuTecnicoOverride, setMenuTecnicoOverride] = useState<boolean | null>(null);
 
-  // Mantener abierto el submenú si la URL apunta a técnico
-  useEffect(() => {
-    if (seccionActiva === "tecnico") {
-      setMenuTecnicoAbierto(true);
-    }
-  }, [seccionActiva]);
+  // El menú técnico se mantiene abierto si la sección activa es 'tecnico' salvo que el usuario lo colapse manualmente
+  const menuTecnicoAbierto =
+    menuTecnicoOverride !== null ? menuTecnicoOverride : seccionActiva === "tecnico";
 
   const [copied, setCopied] = useState(false);
   const [modalReentregaOpen, setModalReentregaOpen] = useState(false);
@@ -410,7 +405,7 @@ export const AsignacionDetalleAlumno = () => {
               type="button"
               onClick={() => {
                 navegarSeccion("general");
-                setMenuTecnicoAbierto(false);
+                setMenuTecnicoOverride(false);
               }}
               className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 font-mono text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
                 seccionActiva === "general"
@@ -428,9 +423,9 @@ export const AsignacionDetalleAlumno = () => {
                 onClick={() => {
                   if (seccionActiva !== "tecnico") {
                     navegarSeccion("tecnico", subSeccionTecnica);
-                    setMenuTecnicoAbierto(true);
+                    setMenuTecnicoOverride(true);
                   } else {
-                    setMenuTecnicoAbierto((prev) => !prev);
+                    setMenuTecnicoOverride((prev) => (prev !== null ? !prev : false));
                   }
                 }}
                 className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 font-mono text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
@@ -477,7 +472,7 @@ export const AsignacionDetalleAlumno = () => {
               type="button"
               onClick={() => {
                 navegarSeccion("correcciones");
-                setMenuTecnicoAbierto(false);
+                setMenuTecnicoOverride(false);
               }}
               className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 font-mono text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
                 seccionActiva === "correcciones"
@@ -513,7 +508,6 @@ export const AsignacionDetalleAlumno = () => {
 
           {seccionActiva === "tecnico" && (
             <EstadoTecnicoTab
-              asignacion={asignacion}
               subSeccionActiva={subSeccionTecnica}
             />
           )}

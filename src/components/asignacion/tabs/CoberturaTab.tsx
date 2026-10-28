@@ -1,10 +1,4 @@
-import type { AsignacionAlumnoDTO } from "@/types";
-
-interface CoberturaTabProps {
-  asignacion?: AsignacionAlumnoDTO;
-}
-
-export function CoberturaTab({}: CoberturaTabProps) {
+export function CoberturaTab() {
   return (
     <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-4">
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-line">

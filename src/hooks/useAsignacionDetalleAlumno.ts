@@ -83,8 +83,45 @@ export function useAsignacionDetalleAlumno(
   );
 
   useEffect(() => {
-    void cargarDetalle(false);
-  }, [cargarDetalle]);
+    if (!cursoId || !asignacionId) return;
+    let isMounted = true;
+
+    // Cargar correcciones iniciales
+    obtenerCorrecciones(cursoId, asignacionId)
+      .then((res) => {
+        if (isMounted) {
+          setCorreccionGrupo(res.data[0] || null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
+        }
+      });
+
+    // Cargar detalle de la asignación
+    obtenerAsignacionPorId(cursoId, asignacionId)
+      .then((res) => {
+        if (isMounted) {
+          const mapeadas = mapAsignacionesDTO([res.data], username);
+          setAsignacion(mapeadas[0] ?? null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setError("No se pudo cargar el detalle de la asignación.");
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [cursoId, asignacionId, username]);
 
   const entregar = useCallback(async (): Promise<boolean> => {
     if (!cursoId || !asignacionId || !asignacion) return false;

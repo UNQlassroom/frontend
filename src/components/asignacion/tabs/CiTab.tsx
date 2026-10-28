@@ -1,10 +1,4 @@
-import type { AsignacionAlumnoDTO } from "@/types";
-
-interface CiTabProps {
-  asignacion?: AsignacionAlumnoDTO;
-}
-
-export function CiTab({}: CiTabProps) {
+export function CiTab() {
   return (
     <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-4">
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-line">
