@@ -14,9 +14,7 @@ export function ConfirmarReentregaModal({
   onClose,
   onConfirm,
   asignacionTitulo,
-  repoNombre,
-  fechaEntregadaPrevia,
-  fechaLimite,
+
   isLoading = false,
 }: ConfirmarReentregaModalProps) {
   if (!open) return null;
@@ -57,32 +55,7 @@ export function ConfirmarReentregaModal({
             </p>
           </div>
 
-          {/* Información contextual del trabajo */}
-          <div className="rounded-xl border border-line bg-panel p-4 space-y-3 font-mono text-sm">
-            {repoNombre && (
-              <div className="flex items-center justify-between gap-3 min-w-0">
-                <span className="text-muted-foreground shrink-0">Repositorio:</span>
-                <span
-                  className="font-semibold text-foreground truncate text-right max-w-[280px] sm:max-w-[340px]"
-                  title={repoNombre}
-                >
-                  {repoNombre}
-                </span>
-              </div>
-            )}
-            {fechaEntregadaPrevia && (
-              <div className="flex items-center justify-between gap-3 min-w-0">
-                <span className="text-muted-foreground shrink-0">Última entrega registrada:</span>
-                <span className="text-foreground text-right shrink-0">{fechaEntregadaPrevia}</span>
-              </div>
-            )}
-            {fechaLimite && (
-              <div className="flex items-center justify-between gap-3 min-w-0">
-                <span className="text-muted-foreground shrink-0">Fecha límite de entrega:</span>
-                <span className="font-semibold text-foreground text-right shrink-0">{fechaLimite}</span>
-              </div>
-            )}
-          </div>
+
         </div>
 
         {/* Acciones */}
@@ -91,7 +64,7 @@ export function ConfirmarReentregaModal({
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="rounded-xl border border-line bg-panel px-5 py-2.5 font-mono text-sm sm:text-base font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
+            className="rounded-xl border border-line bg-panel px-5 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -99,7 +72,7 @@ export function ConfirmarReentregaModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="rounded-xl bg-sky-600 hover:bg-sky-700 text-white px-6 py-2.5 font-mono text-sm sm:text-base font-semibold transition-colors cursor-pointer disabled:opacity-50 inline-flex items-center gap-2 shadow-sm"
+            className="rounded-xl bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 font-mono text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 inline-flex items-center gap-2 shadow-sm"
           >
             {isLoading ? (
               <>

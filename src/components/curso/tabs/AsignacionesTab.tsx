@@ -740,7 +740,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                         <span>
                                           {grupo.calificacion !== null &&
                                           grupo.calificacion !== undefined
-                                            ? "Editar"
+                                            ? "Editar calificación"
                                             : "Calificar"}
                                         </span>
                                       </button>

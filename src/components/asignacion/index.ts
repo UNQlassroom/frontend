@@ -5,3 +5,4 @@ export * from "./CrearAsignacionModal";
 export * from "./EliminarAsignacionModal";
 export * from "./CrearTemplateModal";
 export * from "./ModificarAsignacionModal";
+export * from "./tabs";

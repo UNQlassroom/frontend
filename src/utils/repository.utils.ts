@@ -1,4 +1,4 @@
-import type { EstadoCIInfo } from "@/types";
+import type { EstadoCIInfo, EstadoEntrega } from "@/types";
 
 /**
  * Obtiene la configuración de estilos, etiquetas e icono para el estado de CI.
@@ -22,7 +22,7 @@ export function getEstadoCIInfo(estado?: string | null): EstadoCIInfo {
     case "pending":
       return {
         label: "CI en ejecución",
-        badgeClass: "bg-amber-500/10 text-amber-600 border border-amber-500/20",
+        badgeClass: "bg-amber-100 text-amber-600 border border-amber-500/25",
         dotClass: "bg-amber-500",
         type: "pending",
       };
@@ -33,6 +33,33 @@ export function getEstadoCIInfo(estado?: string | null): EstadoCIInfo {
         badgeClass: "bg-line/40 text-muted-foreground border border-line",
         dotClass: "bg-muted-foreground/60",
         type: "sin_ci",
+      };
+  }
+}
+
+/**
+ * Obtiene la configuración visual del badge para el estado de entrega de una asignación.
+ */
+export function getBadgeEstadoEntrega(estado: EstadoEntrega) {
+  switch (estado) {
+    case "corregido":
+      return {
+        label: "Corregido",
+        classes: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+        dotColor: "bg-emerald-500",
+      };
+    case "entregado":
+      return {
+        label: "Entregado",
+        classes: "bg-sky-500/10 text-sky-600 border border-sky-500/20",
+        dotColor: "bg-sky-500",
+      };
+    case "pendiente":
+    default:
+      return {
+        label: "Pendiente",
+        classes: "bg-amber-100 text-amber-600 dark:text-amber-400 border border-amber-500/25",
+        dotColor: "bg-amber-500",
       };
   }
 }

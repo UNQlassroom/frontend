@@ -112,6 +112,7 @@ export interface AsignacionAlumnoDTO {
   grupoId?: number;
   grupoNombre?: string | null;
   integrantes?: string[];
+  integrantesDetalle?: UsuarioResponseDTO[];
   repoNombre?: string | null;
   repoUrl?: string | null;
   releaseUrl?: string | null;
