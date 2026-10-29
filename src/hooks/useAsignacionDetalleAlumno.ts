@@ -62,6 +62,8 @@ export function useAsignacionDetalleAlumno(
 
   const [entregando, setEntregando] = useState<boolean>(false);
 
+  const grupoId = asignacion?.grupoId;
+
   const cargarCorrecciones = useCallback(async () => {
     if (!cursoId || !asignacionId) return;
     setIsLoadingCorrecciones(true);
@@ -86,7 +88,7 @@ export function useAsignacionDetalleAlumno(
         const res = await obtenerDiagnosticoCI(
           cursoId,
           asignacionId,
-          asignacion?.grupoId
+          grupoId
         );
         setDiagnosticoCI(res.data);
 
@@ -107,7 +109,7 @@ export function useAsignacionDetalleAlumno(
         setIsLoadingCI(false);
       }
     },
-    [cursoId, asignacionId, asignacion?.grupoId, diagnosticoCI]
+    [cursoId, asignacionId, grupoId, diagnosticoCI]
   );
 
   // Carga Lazy de Métricas (JaCoCo / JUnit)
@@ -120,7 +122,7 @@ export function useAsignacionDetalleAlumno(
         const res = await obtenerMetricasCI(
           cursoId,
           asignacionId,
-          asignacion?.grupoId
+          grupoId
         );
         setMetricasCI(res.data);
       } catch {
@@ -129,7 +131,7 @@ export function useAsignacionDetalleAlumno(
         setIsLoadingMetricas(false);
       }
     },
-    [cursoId, asignacionId, asignacion?.grupoId, metricasCI]
+    [cursoId, asignacionId, grupoId, metricasCI]
   );
 
   // Carga Lazy de Linter
@@ -142,7 +144,7 @@ export function useAsignacionDetalleAlumno(
         const res = await obtenerReporteLinter(
           cursoId,
           asignacionId,
-          asignacion?.grupoId
+          grupoId
         );
         setReporteLinter(res.data);
       } catch {
@@ -151,20 +153,28 @@ export function useAsignacionDetalleAlumno(
         setIsLoadingLinter(false);
       }
     },
-    [cursoId, asignacionId, asignacion?.grupoId, reporteLinter]
+    [cursoId, asignacionId, grupoId, reporteLinter]
   );
 
   // Lazy Loading reactivo: solo consulta lo que el usuario está viendo actualmente
   useEffect(() => {
     if (seccionActiva !== "tecnico" || !asignacion) return;
 
-    if (subSeccionTecnica === "ci") {
-      void cargarDiagnostico();
-    } else if (subSeccionTecnica === "cobertura") {
-      void cargarMetricas();
-    } else if (subSeccionTecnica === "git") {
-      void cargarLinter();
-    }
+    let isMounted = true;
+    queueMicrotask(() => {
+      if (!isMounted) return;
+      if (subSeccionTecnica === "ci") {
+        void cargarDiagnostico();
+      } else if (subSeccionTecnica === "cobertura") {
+        void cargarMetricas();
+      } else if (subSeccionTecnica === "git") {
+        void cargarLinter();
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [
     seccionActiva,
     subSeccionTecnica,

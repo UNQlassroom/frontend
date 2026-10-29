@@ -17,7 +17,10 @@ export function BuenasPracticasTab({
   reporteLinter,
   isLoadingLinter = false,
 }: BuenasPracticasTabProps) {
-  const advertenciasGit = asignacion.advertenciasGit ?? [];
+  const advertenciasGit = useMemo(
+    () => asignacion.advertenciasGit ?? [],
+    [asignacion.advertenciasGit]
+  );
 
   const storageKey = `unqlassroom_git_descartadas_${asignacion.id ?? "general"}`;
 
