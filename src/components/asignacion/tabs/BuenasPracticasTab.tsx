@@ -4,7 +4,6 @@ import type {
   ReporteLinterResponseDTO,
   SeveridadLinter,
 } from "@/types";
-import { formatFechaLegible } from "@/utils";
 
 export interface BuenasPracticasTabProps {
   asignacion: AsignacionAlumnoDTO;
@@ -18,6 +17,20 @@ export function BuenasPracticasTab({
   isLoadingLinter = false,
 }: BuenasPracticasTabProps) {
   const advertenciasGit = asignacion.advertenciasGit ?? [];
+
+  const storageKey = `unqlassroom_git_descartadas_${asignacion.id ?? "general"}`;
+
+  const [descartadas, setDescartadas] = useState<Set<string>>(() => {
+    try {
+      const guardadas = localStorage.getItem(storageKey);
+      if (guardadas) {
+        return new Set(JSON.parse(guardadas) as string[]);
+      }
+    } catch {
+      // Ignorar errores al acceder a localStorage
+    }
+    return new Set<string>();
+  });
 
   const [listaLinterAbierta, setListaLinterAbierta] = useState(true);
   const [filtroSeveridad, setFiltroSeveridad] = useState<
@@ -43,170 +56,40 @@ export function BuenasPracticasTab({
       totalIncidencias === 0 &&
       incidencias.length === 0);
 
+  const sugerenciasActivas = useMemo(() => {
+    return advertenciasGit.filter((adv, index) => {
+      const key =
+        adv.id?.toString() ?? `${adv.commitSha}-${adv.tipo}-${index}`;
+      return !descartadas.has(key);
+    });
+  }, [advertenciasGit, descartadas]);
+
+  const handleDescartar = (key: string) => {
+    setDescartadas((prev) => {
+      const next = new Set(prev);
+      next.add(key);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(Array.from(next)));
+      } catch {
+        // Fallback seguro
+      }
+      return next;
+    });
+  };
+
+  const handleRestablecer = () => {
+    setDescartadas(new Set());
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      // Fallback seguro
+    }
+  };
+
   return (
     <div className="space-y-6 animate-rise font-mono">
       {/* =====================================================================
-          SECCIÓN 1: Alertas y Diagnóstico de Calidad de Git (Subtask #142)
-      ===================================================================== */}
-      <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
-          <div className="space-y-1">
-            <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-              Calidad de Git y Commits
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Diagnóstico pedagógico sobre atomicidad y convenciones de mensajes
-              en tus commits.
-            </p>
-          </div>
-
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${
-              advertenciasGit.length > 0
-                ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"
-                : "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-            }`}
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                advertenciasGit.length > 0 ? "bg-amber-500" : "bg-emerald-500"
-              }`}
-            />
-            <span>
-              {advertenciasGit.length === 0
-                ? "Sin advertencias de Git"
-                : `${advertenciasGit.length} ${
-                    advertenciasGit.length === 1
-                      ? "sugerencia activa"
-                      : "sugerencias activas"
-                  }`}
-            </span>
-          </span>
-        </div>
-
-        {advertenciasGit.length === 0 ? (
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 flex items-start gap-3.5">
-            <div className="w-9 h-9 rounded-xl border border-emerald-500/30 bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-base">
-              ✓
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                Buenas prácticas de Git al día
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                No se detectaron alertas de atomicidad ni de formato en los
-                mensajes de tus commits recientes.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {advertenciasGit.map((adv, index) => {
-              const esMensajeInadecuado = adv.tipo === "MENSAJE_INADECUADO";
-              const key = adv.id ?? `${adv.commitSha}-${adv.tipo}-${index}`;
-
-              return (
-                <article
-                  key={key}
-                  className="rounded-xl border border-amber-500/35 bg-amber-500/5 p-5 space-y-4"
-                >
-                  {/* Encabezado de la tarjeta de alerta */}
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/35 bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-800 dark:text-amber-300">
-                        <span>💡</span>
-                        <span>
-                          {esMensajeInadecuado
-                            ? "Sugerencia de Conventional Commits"
-                            : "Alerta de Commit no atómico"}
-                        </span>
-                      </span>
-
-                      <span className="rounded-md border border-line bg-panel px-2 py-0.5 text-xs font-semibold text-foreground">
-                        SHA: {adv.commitSha.slice(0, 7)}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      {adv.autorUsername && <span>Por @{adv.autorUsername}</span>}
-                      {adv.fechaCommit && (
-                        <>
-                          <span>•</span>
-                          <span>{formatFechaLegible(adv.fechaCommit)}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Mensaje del commit analizado y métricas de archivos/líneas */}
-                  <div className="rounded-lg border border-line bg-panel p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">
-                        Mensaje del commit registrado
-                      </span>
-                      <p className="text-xs sm:text-sm font-semibold text-foreground wrap-break-word">
-                        &ldquo;{adv.mensajeCommit}&rdquo;
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 text-xs shrink-0">
-                      <span className="rounded-md border border-line bg-panel2 px-2.5 py-1 text-muted-foreground">
-                        <strong className="text-foreground">
-                          {adv.archivosModificados}
-                        </strong>{" "}
-                        {adv.archivosModificados === 1 ? "archivo" : "archivos"}
-                      </span>
-                      <span className="rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-1 font-semibold text-emerald-700 dark:text-emerald-400">
-                        +{adv.lineasAgregadas}
-                      </span>
-                      <span className="rounded-md border border-rose-500/25 bg-rose-500/10 px-2 py-1 font-semibold text-rose-700 dark:text-rose-400">
-                        -{adv.lineasEliminadas}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Mensaje explicativo recomendado y guía no bloqueante */}
-                  <div className="rounded-lg border border-amber-500/25 bg-panel/90 p-4 space-y-2.5">
-                    <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                      <span> Diagnóstico y recomendación pedagógica:</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap wrap-break-word">
-                      {adv.mensajeExplicativo}
-                    </p>
-
-                    {esMensajeInadecuado ? (
-                      <div className="pt-2 border-t border-line/70 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-                        <span className="font-semibold text-foreground">
-                          Formato sugerido (Conventional Commits):
-                        </span>
-                        <code className="px-1.5 py-0.5 rounded bg-panel2 border border-line text-foreground">
-                          feat: agregar validación
-                        </code>
-                        <code className="px-1.5 py-0.5 rounded bg-panel2 border border-line text-foreground">
-                          fix: corregir cálculo
-                        </code>
-                        <code className="px-1.5 py-0.5 rounded bg-panel2 border border-line text-foreground">
-                          test: sumar pruebas unitarias
-                        </code>
-                      </div>
-                    ) : (
-                      <div className="pt-2 border-t border-line/70 text-[11px] text-muted-foreground">
-                        <strong className="text-foreground">Consejo:</strong>{" "}
-                        Realizá commits más pequeños y frecuentes enfocados en un
-                        único cambio lógico para facilitar la revisión y el
-                        diagnóstico de errores.
-                      </div>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* =====================================================================
-          SECCIÓN 2: Lista Colapsable y Contador de Incidencias de Linter (#150)
+          SECCIÓN 1: Análisis Estático de Código (Linter)
       ===================================================================== */}
       <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
@@ -462,6 +345,145 @@ export function BuenasPracticasTab({
                 )}
               </div>
             )}
+          </div>
+        )}
+      </section>
+
+      {/* =====================================================================
+          SECCIÓN 2: Sugerencias de Git (Buenas Prácticas)
+      ===================================================================== */}
+      <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
+          <div className="space-y-1">
+            <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+              Sugerencias de Git
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Recomendaciones y buenas prácticas para mantener un historial limpio.
+            </p>
+          </div>
+
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${
+              sugerenciasActivas.length > 0
+                ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                : "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                sugerenciasActivas.length > 0 ? "bg-amber-500" : "bg-emerald-500"
+              }`}
+            />
+            <span>
+              {sugerenciasActivas.length === 0
+                ? "Sin sugerencias"
+                : `${sugerenciasActivas.length} ${
+                    sugerenciasActivas.length === 1
+                      ? "sugerencia"
+                      : "sugerencias"
+                  }`}
+            </span>
+          </span>
+        </div>
+
+        {sugerenciasActivas.length === 0 ? (
+          <div className="rounded-xl border border-line/70 bg-panel2/40 p-6 text-center space-y-1.5">
+            <p className="text-sm font-semibold text-foreground">
+              Sin sugerencias pendientes
+            </p>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+              ¡Tus commits vienen respetando las buenas prácticas!
+            </p>
+            {descartadas.size > 0 && (
+              <button
+                type="button"
+                onClick={handleRestablecer}
+                className="pt-2 text-xs font-semibold text-primary hover:underline cursor-pointer block mx-auto"
+              >
+                Volver a ver sugerencias descartadas ({descartadas.size})
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sugerenciasActivas.map((adv, index) => {
+              const esMensajeInadecuado = adv.tipo === "MENSAJE_INADECUADO";
+              const key =
+                adv.id?.toString() ?? `${adv.commitSha}-${adv.tipo}-${index}`;
+
+              const commitUrl =
+                asignacion.repoUrl && adv.commitSha
+                  ? `${asignacion.repoUrl}/commit/${adv.commitSha}`
+                  : asignacion.repoUrl
+                    ? `${asignacion.repoUrl}/commits`
+                    : null;
+
+              return (
+                <article
+                  key={key}
+                  className="rounded-xl border border-line bg-panel2/40 hover:bg-panel2/70 p-4 transition-colors space-y-2.5"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <span
+                        className="text-base select-none shrink-0 mt-0.5"
+                        aria-hidden="true"
+                      >
+                        💡
+                      </span>
+                      <div className="space-y-1.5 min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-xs sm:text-sm font-bold text-foreground">
+                            {esMensajeInadecuado
+                              ? "Formato del mensaje"
+                              : "Commit con muchos cambios"}
+                          </h3>
+                          {adv.mensajeCommit && (
+                            commitUrl ? (
+                              <a
+                                href={commitUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 rounded-md border border-line bg-panel px-2 py-0.5 text-[11px] font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors group truncate max-w-md"
+                                title="Ver commit en GitHub"
+                              >
+                                <span className="truncate italic">
+                                  &ldquo;{adv.mensajeCommit}&rdquo;
+                                </span>
+                                <span className="text-muted-foreground group-hover:text-primary text-[11px] font-bold transition-colors shrink-0">
+                                  ↗
+                                </span>
+                              </a>
+                            ) : (
+                              <span className="rounded-md border border-line bg-panel px-2 py-0.5 text-[11px] text-muted-foreground italic truncate max-w-md">
+                                &ldquo;{adv.mensajeCommit}&rdquo;
+                              </span>
+                            )
+                          )}
+                        </div>
+
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {esMensajeInadecuado
+                            ? "Te sugerimos usar prefijos descriptivos (como feat:, fix: o docs:) para que se entienda el propósito del cambio a primera vista."
+                            : "Este commit reúne muchos cambios a la vez. Tratá de hacer commits más pequeños y enfocados para que el historial sea más fácil de revisar."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDescartar(key)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-line/70 bg-panel px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer shrink-0 shadow-2xs"
+                      title="Descartar sugerencia"
+                    >
+                      <span>Descartar</span>
+                      <span className="text-[11px]">✕</span>
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>

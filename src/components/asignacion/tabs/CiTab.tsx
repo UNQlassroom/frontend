@@ -271,7 +271,6 @@ export function CiTab({
                       className="inline-flex items-center gap-1.5 font-semibold text-primary hover:underline"
                     >
                       <span>Ver detalle</span>
-                      <span>↗</span>
                     </a>
                   </div>
                 )}
