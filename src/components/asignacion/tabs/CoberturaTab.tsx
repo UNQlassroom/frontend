@@ -1,5 +1,5 @@
 import type { AsignacionAlumnoDTO, MetricasCIResponseDTO } from "@/types";
-import { formatFechaLegible } from "@/utils";
+import { formatFechaLegible, obtenerPrimerLineaCommit } from "@/utils";
 
 export interface CoberturaTabProps {
   asignacion: AsignacionAlumnoDTO;
@@ -8,6 +8,7 @@ export interface CoberturaTabProps {
 }
 
 export function CoberturaTab({
+  asignacion,
   metricas,
   isLoading = false,
 }: CoberturaTabProps) {
@@ -39,6 +40,33 @@ export function CoberturaTab({
   const tasaTestsPasados =
     testsEjecutados > 0 ? Math.round((testsPasados / testsEjecutados) * 100) : 0;
 
+  const commitSha =
+    metricas?.commitSha?.trim() ||
+    (asignacion.ultimoCommit &&
+    /^[0-9a-f]{7,40}$/i.test(asignacion.ultimoCommit.trim())
+      ? asignacion.ultimoCommit.trim()
+      : null) ||
+    asignacion.advertenciasGit?.[0]?.commitSha ||
+    null;
+
+  const commitUrl = (() => {
+    if (!asignacion.repoUrl || !commitSha) return null;
+    if (/^[0-9a-f]{7,40}$/i.test(commitSha)) {
+      return `${asignacion.repoUrl}/commit/${commitSha}`;
+    }
+    const shaAdvertencia = asignacion.advertenciasGit?.[0]?.commitSha;
+    if (shaAdvertencia) {
+      return `${asignacion.repoUrl}/commit/${shaAdvertencia}`;
+    }
+    return `${asignacion.repoUrl}/commits`;
+  })();
+
+  const nombreCommit = asignacion.ultimoCommit
+    ? obtenerPrimerLineaCommit(asignacion.ultimoCommit)
+    : commitSha
+      ? commitSha.slice(0, 7)
+      : null;
+
   // Parámetros del gráfico circular SVG
   const radius = 52;
   const circumference = 2 * Math.PI * radius;
@@ -63,7 +91,7 @@ export function CoberturaTab({
 
   return (
     <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-6 animate-rise font-mono">
-      {/* Encabezado */}
+      {/* Encabezado general */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
         <div className="space-y-1">
           <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
@@ -75,7 +103,7 @@ export function CoberturaTab({
           </p>
         </div>
 
-        {/* Semáforo de umbral sugerido por la cátedra (#148) */}
+        {/* Semáforo de umbral sugerido por la cátedra */}
         {!sinDatosRegistrados ? (
           <span
             className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
@@ -124,61 +152,75 @@ export function CoberturaTab({
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Bloque principal: Widget de Cobertura Circular + Lineal y Semáforo */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Widget de Cobertura de Líneas (7 columnas en desktop) */}
-            <div className="lg:col-span-7 rounded-2xl border border-line bg-panel2/50 p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-6 justify-between">
-              {/* Progreso Circular SVG */}
-              <div className="relative flex items-center justify-center shrink-0">
-                <svg
-                  className="w-32 h-32 -rotate-90 transform"
-                  viewBox="0 0 128 128"
-                >
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r={radius}
-                    fill="transparent"
-                    stroke="currentColor"
-                    strokeWidth="10"
-                    className="text-line/70"
-                  />
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r={radius}
-                    fill="transparent"
-                    strokeWidth="10"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                    className={`${colorCoberturaStroke} transition-all duration-500`}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-xl font-bold text-foreground">
-                    {porcentaje.toFixed(1)}%
-                  </span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-                    Cobertura
+          {/* Bloque principal: Dos Cards equilibradas (50% / 50% en desktop) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            {/* CARD 1: Widget de Cobertura de Líneas */}
+            <div className="rounded-2xl border border-line bg-panel2/50 p-6 flex flex-col justify-between space-y-6">
+              {/* Encabezado Card 1 */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                    Cobertura de Código
+                  </h3>
+                  <span className="rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-bold text-foreground shrink-0">
+                    Meta: {umbral}%
                   </span>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Porcentaje de líneas cubiertas por pruebas unitarias.
+                </p>
               </div>
 
-              {/* Barra lineal + desglose de líneas y semáforo */}
-              <div className="flex-1 w-full space-y-4 min-w-0">
-                <div className="space-y-1.5">
+              {/* Gráfico circular + Barra de progreso */}
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                {/* Progreso Circular SVG */}
+                <div className="relative flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-32 h-32 -rotate-90 transform"
+                    viewBox="0 0 128 128"
+                  >
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r={radius}
+                      fill="transparent"
+                      stroke="currentColor"
+                      strokeWidth="10"
+                      className="text-line/70"
+                    />
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r={radius}
+                      fill="transparent"
+                      strokeWidth="10"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      className={`${colorCoberturaStroke} transition-all duration-500`}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl font-bold text-foreground">
+                      {porcentaje.toFixed(1)}%
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                      Cobertura
+                    </span>
+                  </div>
+                </div>
+
+                {/* Barra lineal */}
+                <div className="flex-1 w-full space-y-2.5 min-w-0">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-foreground">
-                      Cobertura de líneas
+                      Progreso global
                     </span>
-                    <span className="text-muted-foreground">
-                      Meta: <strong className="text-foreground">{umbral}%</strong>
-                    </span>
+
                   </div>
 
                   {/* Barra de progreso lineal con marcador de umbral */}
-                  <div className="relative h-3 w-full rounded-full bg-line/70 overflow-hidden">
+                  <div className="relative h-3.5 w-full rounded-full bg-line/70 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${colorBarraLineal}`}
                       style={{ width: `${porcentaje}%` }}
@@ -189,67 +231,51 @@ export function CoberturaTab({
                       title={`Umbral mínimo sugerido: ${umbral}%`}
                     />
                   </div>
-                </div>
-
-                {/* Contadores de líneas cubiertas vs perdidas */}
-                <div className="grid grid-cols-3 gap-2.5 text-center">
-                  <div className="rounded-xl border border-line bg-panel p-2.5">
-                    <span className="block text-[10px] uppercase text-muted-foreground">
-                      Cubiertas
-                    </span>
-                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                      {lineasCubiertas}
-                    </span>
-                  </div>
-                  <div className="rounded-xl border border-line bg-panel p-2.5">
-                    <span className="block text-[10px] uppercase text-muted-foreground">
-                      Perdidas
-                    </span>
-                    <span className="text-sm font-bold text-rose-600 dark:text-rose-400">
-                      {lineasPerdidas}
-                    </span>
-                  </div>
-                  <div className="rounded-xl border border-line bg-panel p-2.5">
-                    <span className="block text-[10px] uppercase text-muted-foreground">
-                      Total Líneas
-                    </span>
-                    <span className="text-sm font-bold text-foreground">
-                      {totalLineas}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Mensaje del semáforo */}
-                <div
-                  className={`rounded-xl border px-3.5 py-2.5 text-xs leading-relaxed ${
-                    cumpleUmbral
-                      ? "border-emerald-500/25 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300"
-                      : "border-amber-500/30 bg-amber-500/5 text-amber-800 dark:text-amber-300"
-                  }`}
-                >
-                  {cumpleUmbral ? (
-                    <span>
-                      ✓ Tu cobertura supera el umbral mínimo del{" "}
-                      <strong>{umbral}%</strong> sugerido por la cátedra.
-                    </span>
-                  ) : (
-                    <span>
-                      ⚠ Te recomendamos agregar tests unitarios hasta alcanzar al
-                      menos el <strong>{umbral}%</strong> de cobertura sugerido.
-                    </span>
-                  )}
+                  <p className="text-[11px] text-muted-foreground">
+                    Línea divisoria marca el objetivo de la cátedra ({umbral}%).
+                  </p>
                 </div>
               </div>
+
+              {/* Subcards de líneas: Cubiertas, Perdidas, Total Líneas */}
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="rounded-xl border border-line bg-panel p-3.5 sm:p-4 space-y-1 shadow-2xs">
+                  <span className="block text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Líneas Cubiertas
+                  </span>
+                  <span className="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 block">
+                    {lineasCubiertas}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-line bg-panel p-3.5 sm:p-4 space-y-1 shadow-2xs">
+                  <span className="block text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Líneas Perdidas
+                  </span>
+                  <span className="text-xl sm:text-2xl font-extrabold text-rose-600 dark:text-rose-400 block">
+                    {lineasPerdidas}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-line bg-panel p-3.5 sm:p-4 space-y-1 shadow-2xs">
+                  <span className="block text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Líneas Totales
+                  </span>
+                  <span className="text-xl sm:text-2xl font-extrabold text-foreground block">
+                    {totalLineas}
+                  </span>
+                </div>
+              </div>
+
             </div>
 
-            {/* Resumen de Estado de Tests JUnit (5 columnas en desktop) */}
-            <div className="lg:col-span-5 rounded-2xl border border-line bg-panel2/50 p-5 sm:p-6 flex flex-col justify-between space-y-4">
+            {/* CARD 2: Resumen de Estado de Tests JUnit */}
+            <div className="rounded-2xl border border-line bg-panel2/50 p-6 flex flex-col justify-between space-y-6">
+              {/* Encabezado Card 2 */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                    Estado de Pruebas (JUnit)
+                    Estado de Pruebas
                   </h3>
-                  <span className="rounded-md border border-line bg-panel px-2 py-0.5 text-xs font-bold text-foreground">
+                  <span className="rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-bold text-foreground shrink-0">
                     {tasaTestsPasados}% exitosos
                   </span>
                 </div>
@@ -258,37 +284,38 @@ export function CoberturaTab({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* 4 Subcards en cuadrícula 2x2 que se expanden proporcionalmente */}
+              <div className="grid grid-cols-2 gap-3.5 sm:gap-4 flex-1">
                 {/* Ejecutados */}
-                <div className="rounded-xl border border-line bg-panel p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground block">
+                <div className="rounded-xl border border-line bg-panel p-4 sm:p-5 flex flex-col justify-between space-y-2 shadow-2xs">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold block">
                     Ejecutados
                   </span>
-                  <span className="text-xl font-bold text-foreground block">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-foreground block">
                     {testsEjecutados}
                   </span>
                 </div>
 
                 {/* Pasados */}
-                <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3.5 space-y-1">
-                  <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold block">
+                <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4 sm:p-5 flex flex-col justify-between space-y-2 shadow-2xs">
+                  <span className="text-xs uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-semibold block">
                     Pasados ✓
                   </span>
-                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 block">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 block">
                     {testsPasados}
                   </span>
                 </div>
 
                 {/* Fallados */}
                 <div
-                  className={`rounded-xl border p-3.5 space-y-1 ${
+                  className={`rounded-xl border p-4 sm:p-5 flex flex-col justify-between space-y-2 shadow-2xs ${
                     testsFallados > 0
                       ? "border-rose-500/30 bg-rose-500/5"
                       : "border-line bg-panel"
                   }`}
                 >
                   <span
-                    className={`text-[11px] font-semibold block ${
+                    className={`text-xs uppercase tracking-wider font-semibold block ${
                       testsFallados > 0
                         ? "text-rose-700 dark:text-rose-400"
                         : "text-muted-foreground"
@@ -297,7 +324,7 @@ export function CoberturaTab({
                     Fallados ✕
                   </span>
                   <span
-                    className={`text-xl font-bold block ${
+                    className={`text-2xl sm:text-3xl font-extrabold block ${
                       testsFallados > 0
                         ? "text-rose-600 dark:text-rose-400"
                         : "text-foreground"
@@ -308,34 +335,49 @@ export function CoberturaTab({
                 </div>
 
                 {/* Salteados */}
-                <div className="rounded-xl border border-line bg-panel p-3.5 space-y-1">
-                  <span className="text-[11px] text-muted-foreground block">
+                <div className="rounded-xl border border-line bg-panel p-4 sm:p-5 flex flex-col justify-between space-y-2 shadow-2xs">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold block">
                     Salteados
                   </span>
-                  <span className="text-xl font-bold text-muted-foreground block">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-muted-foreground block">
                     {testsSalteados}
                   </span>
                 </div>
               </div>
 
-              {/* Metadatos del reporte */}
-              <div className="pt-2 border-t border-line flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                {metricas?.commitSha && (
-                  <span>
-                    Commit:{" "}
-                    <strong className="text-foreground">
-                      {metricas.commitSha.slice(0, 7)}
-                    </strong>
-                  </span>
-                )}
-                {metricas?.fechaActualizacion && (
-                  <span>
+              {/* Metadatos del reporte: Commit (link estilo CI) y Actualizado */}
+              <div className="pt-3 border-t border-line flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+                {nombreCommit ? (
+                  <div className="inline-flex items-center gap-1.5 min-w-0">
+                    <span className="shrink-0">Commit:</span>
+                    {commitUrl ? (
+                      <a
+                        href={commitUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors inline-flex items-center gap-1.5 group max-w-xs sm:max-w-md truncate"
+                        title="Ver commit en GitHub"
+                      >
+                        <span className="truncate">{nombreCommit}</span>
+                        <span className="text-muted-foreground group-hover:text-primary text-[10px] font-bold transition-colors shrink-0">
+                          ↗
+                        </span>
+                      </a>
+                    ) : (
+                      <span className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground truncate max-w-xs sm:max-w-md">
+                        {nombreCommit}
+                      </span>
+                    )}
+                  </div>
+                ) : null}
+                {metricas?.fechaActualizacion ? (
+                  <span className="shrink-0">
                     Actualizado:{" "}
                     <strong className="text-foreground">
                       {formatFechaLegible(metricas.fechaActualizacion)}
                     </strong>
                   </span>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

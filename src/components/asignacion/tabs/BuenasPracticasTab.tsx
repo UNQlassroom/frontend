@@ -4,6 +4,7 @@ import type {
   ReporteLinterResponseDTO,
   SeveridadLinter,
 } from "@/types";
+import { formatFechaLegible, obtenerPrimerLineaCommit } from "@/utils";
 
 export interface BuenasPracticasTabProps {
   asignacion: AsignacionAlumnoDTO;
@@ -56,6 +57,33 @@ export function BuenasPracticasTab({
       totalIncidencias === 0 &&
       incidencias.length === 0);
 
+  const commitShaLinter =
+    reporteLinter?.commitSha?.trim() ||
+    (asignacion.ultimoCommit &&
+    /^[0-9a-f]{7,40}$/i.test(asignacion.ultimoCommit.trim())
+      ? asignacion.ultimoCommit.trim()
+      : null) ||
+    asignacion.advertenciasGit?.[0]?.commitSha ||
+    null;
+
+  const commitUrlLinter = (() => {
+    if (!asignacion.repoUrl || !commitShaLinter) return null;
+    if (/^[0-9a-f]{7,40}$/i.test(commitShaLinter)) {
+      return `${asignacion.repoUrl}/commit/${commitShaLinter}`;
+    }
+    const shaAdvertencia = asignacion.advertenciasGit?.[0]?.commitSha;
+    if (shaAdvertencia) {
+      return `${asignacion.repoUrl}/commit/${shaAdvertencia}`;
+    }
+    return `${asignacion.repoUrl}/commits`;
+  })();
+
+  const nombreCommitLinter = asignacion.ultimoCommit
+    ? obtenerPrimerLineaCommit(asignacion.ultimoCommit)
+    : commitShaLinter
+      ? commitShaLinter.slice(0, 7)
+      : null;
+
   const sugerenciasActivas = useMemo(() => {
     return advertenciasGit.filter((adv, index) => {
       const key =
@@ -105,47 +133,7 @@ export function BuenasPracticasTab({
             </p>
           </div>
 
-          {/* Contador general diferenciando errores y advertencias */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold ${
-                cantidadErrores > 0
-                  ? "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-400"
-                  : "border-line bg-panel2 text-muted-foreground"
-              }`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  cantidadErrores > 0
-                    ? "bg-rose-500"
-                    : "bg-muted-foreground/50"
-                }`}
-              />
-              <span>
-                {cantidadErrores} {cantidadErrores === 1 ? "Error" : "Errores"}
-              </span>
-            </span>
 
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold ${
-                cantidadAdvertencias > 0
-                  ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"
-                  : "border-line bg-panel2 text-muted-foreground"
-              }`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  cantidadAdvertencias > 0
-                    ? "bg-amber-500"
-                    : "bg-muted-foreground/50"
-                }`}
-              />
-              <span>
-                {cantidadAdvertencias}{" "}
-                {cantidadAdvertencias === 1 ? "Advertencia" : "Advertencias"}
-              </span>
-            </span>
-          </div>
         </div>
 
         {isLoadingLinter ? (
@@ -278,34 +266,23 @@ export function BuenasPracticasTab({
                             className="p-4 hover:bg-line/15 transition-colors space-y-2"
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                              {/* Archivo afectado + Línea exacta */}
-                              <div className="flex flex-wrap items-center gap-2 min-w-0">
+                              <div className="flex items-center gap-2">
                                 <span
-                                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-bold shrink-0 ${
+                                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold ${
                                     esError
-                                      ? "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-400"
-                                      : "border-amber-500/30 bg-amber-500/15 text-amber-800 dark:text-amber-300"
+                                      ? "bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30"
+                                      : "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30"
                                   }`}
                                 >
-                                  <span>{esError ? "✕ error" : "⚠ advertencia"}</span>
+                                  {esError ? "ERROR" : "ADVERTENCIA"}
                                 </span>
-
-                                <span
-                                  className="text-xs sm:text-sm font-bold text-foreground break-all"
-                                  title={item.archivo}
-                                >
-                                  {item.archivo}
-                                </span>
-
-                                <span className="rounded-md border border-line bg-panel px-2 py-0.5 text-xs font-semibold text-primary shrink-0">
-                                  Línea {item.linea}
-                                  {typeof item.columna === "number"
-                                    ? `:${item.columna}`
-                                    : ""}
+                                <span className="font-semibold text-xs text-foreground">
+                                  {item.archivo}:{item.linea}
+                                  {item.columna !== null &&
+                                    `:${item.columna}`}
                                 </span>
                               </div>
 
-                              {/* Regla violada (ej: unused import) */}
                               <span
                                 className="inline-flex items-center gap-1 rounded-md border border-line bg-panel px-2.5 py-0.5 text-xs font-semibold text-foreground shrink-0"
                                 title={`Regla violada: ${item.regla}`}
@@ -328,6 +305,43 @@ export function BuenasPracticasTab({
                     )}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Metadatos del reporte del linter (igual que en CiTab y Cobertura) */}
+            {(nombreCommitLinter || reporteLinter?.fechaActualizacion) && (
+              <div className="pt-3 border-t border-line flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+                {nombreCommitLinter ? (
+                  <div className="inline-flex items-center gap-1.5 min-w-0">
+                    <span className="shrink-0">Commit:</span>
+                    {commitUrlLinter ? (
+                      <a
+                        href={commitUrlLinter}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors inline-flex items-center gap-1.5 group max-w-xs sm:max-w-md truncate"
+                        title="Ver commit en GitHub"
+                      >
+                        <span className="truncate">{nombreCommitLinter}</span>
+                        <span className="text-muted-foreground group-hover:text-primary text-[10px] font-bold transition-colors shrink-0">
+                          ↗
+                        </span>
+                      </a>
+                    ) : (
+                      <span className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground truncate max-w-xs sm:max-w-md">
+                        {nombreCommitLinter}
+                      </span>
+                    )}
+                  </div>
+                ) : null}
+                {reporteLinter?.fechaActualizacion ? (
+                  <span className="shrink-0">
+                    Actualizado:{" "}
+                    <strong className="text-foreground">
+                      {formatFechaLegible(reporteLinter.fechaActualizacion)}
+                    </strong>
+                  </span>
+                ) : null}
               </div>
             )}
           </div>
@@ -361,21 +375,24 @@ export function BuenasPracticasTab({
               }`}
             />
             <span>
-              {sugerenciasActivas.length === 0
-                ? "Sin sugerencias"
-                : `${sugerenciasActivas.length} ${
+              {sugerenciasActivas.length > 0
+                ? `${sugerenciasActivas.length} ${
                     sugerenciasActivas.length === 1
-                      ? "sugerencia"
-                      : "sugerencias"
-                  }`}
+                      ? "Sugerencia activa"
+                      : "Sugerencias activas"
+                  }`
+                : "Sin sugerencias pendientes"}
             </span>
           </span>
         </div>
 
         {sugerenciasActivas.length === 0 ? (
-          <div className="rounded-xl border border-line/70 bg-panel2/40 p-6 text-center space-y-1.5">
+          <div className="rounded-xl border border-line/70 bg-panel2/40 p-8 text-center space-y-2">
+            <div className="w-10 h-10 rounded-full border border-emerald-500/30 bg-emerald-500/15 text-emerald-600 flex items-center justify-center mx-auto font-bold text-base">
+              ✓
+            </div>
             <p className="text-sm font-semibold text-foreground">
-              Sin sugerencias pendientes
+              Todo en orden con tus commits
             </p>
             <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
               ¡Tus commits vienen respetando las buenas prácticas!
