@@ -8,6 +8,9 @@ import type {
   TemplateRepoResponseDTO,
   CrearTemplateRepoRequestDTO,
   CorreccionGrupoResponseDTO,
+  DiagnosticoCIResponseDTO,
+  MetricasCIResponseDTO,
+  ReporteLinterResponseDTO,
 } from "@/types";
 
 export const asignacionService = {
@@ -104,6 +107,57 @@ export const asignacionService = {
   },
 
   /**
+   * Envía la petición GET /cursos/{cursoId}/asignaciones/{asignacionId}/diagnostico-ci
+   * Obtiene el diagnóstico detallado del último pipeline de CI (etapa fallida, extracto de log y link).
+   */
+  obtenerDiagnosticoCI: (
+    cursoId: number,
+    asignacionId: number,
+    grupoId?: number
+  ): Promise<ApiResponse<DiagnosticoCIResponseDTO>> => {
+    const query =
+      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    return get<DiagnosticoCIResponseDTO>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/diagnostico-ci${query}`,
+      { timeout: 60000 }
+    );
+  },
+
+  /**
+   * Envía la petición GET /cursos/{cursoId}/asignaciones/{asignacionId}/metricas
+   * Obtiene las métricas de cobertura (JaCoCo) y estado de tests (JUnit) del grupo.
+   */
+  obtenerMetricasCI: (
+    cursoId: number,
+    asignacionId: number,
+    grupoId?: number
+  ): Promise<ApiResponse<MetricasCIResponseDTO>> => {
+    const query =
+      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    return get<MetricasCIResponseDTO>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/metricas${query}`,
+      { timeout: 60000 }
+    );
+  },
+
+  /**
+   * Envía la petición GET /cursos/{cursoId}/asignaciones/{asignacionId}/linter
+   * Obtiene el resumen y listado de incidencias del linter para el repositorio del grupo.
+   */
+  obtenerReporteLinter: (
+    cursoId: number,
+    asignacionId: number,
+    grupoId?: number
+  ): Promise<ApiResponse<ReporteLinterResponseDTO>> => {
+    const query =
+      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    return get<ReporteLinterResponseDTO>(
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/linter${query}`,
+      { timeout: 60000 }
+    );
+  },
+
+  /**
    * Envía la petición GET /templates
    * Lista los repositorios plantillas disponibles en la organización
    */
@@ -151,7 +205,6 @@ export const asignacionService = {
       data
     );
   },
-
 };
 
 export const {
@@ -161,6 +214,9 @@ export const {
   entregarAsignacion,
   calificarAsignacion,
   obtenerCorrecciones,
+  obtenerDiagnosticoCI,
+  obtenerMetricasCI,
+  obtenerReporteLinter,
   listarTemplates,
   crearTemplate,
   eliminarAsignacion,

@@ -40,6 +40,9 @@ export interface RepositorioDTO {
   ultimoCommit?: string | null;
   fechaUltimoCommit?: string | null;
   estadoCI?: "sin_ci" | "success" | "failure" | "pending" | string | null;
+  ciEtapaFallida?: string | null;
+  ciLogError?: string | null;
+  ciRunUrl?: string | null;
 }
 
 /**

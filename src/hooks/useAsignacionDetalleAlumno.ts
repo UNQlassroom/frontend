@@ -2,10 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 import type {
   AsignacionAlumnoDTO,
   CorreccionGrupoResponseDTO,
+  DiagnosticoCIResponseDTO,
+  MetricasCIResponseDTO,
+  ReporteLinterResponseDTO,
 } from "@/types";
 import {
   obtenerAsignacionPorId,
   obtenerCorrecciones,
+  obtenerDiagnosticoCI,
+  obtenerMetricasCI,
+  obtenerReporteLinter,
   entregarAsignacion,
 } from "@/services";
 import { useAuth } from "./useAuth";
@@ -31,6 +37,17 @@ export function useAsignacionDetalleAlumno(
     null
   );
 
+  // Estados para Estado Técnico (CI, Cobertura/Tests y Linter)
+  const [diagnosticoCI, setDiagnosticoCI] =
+    useState<DiagnosticoCIResponseDTO | null>(null);
+  const [metricasCI, setMetricasCI] =
+    useState<MetricasCIResponseDTO | null>(null);
+  const [reporteLinter, setReporteLinter] =
+    useState<ReporteLinterResponseDTO | null>(null);
+  const [isLoadingTecnico, setIsLoadingTecnico] = useState<boolean>(
+    Boolean(cursoId && asignacionId)
+  );
+
   const [entregando, setEntregando] = useState<boolean>(false);
 
   const cargarCorrecciones = useCallback(async () => {
@@ -44,6 +61,30 @@ export function useAsignacionDetalleAlumno(
       setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
     } finally {
       setIsLoadingCorrecciones(false);
+    }
+  }, [cursoId, asignacionId]);
+
+  const cargarDatosTecnicos = useCallback(async () => {
+    if (!cursoId || !asignacionId) return;
+    setIsLoadingTecnico(true);
+    try {
+      const [diagRes, metricasRes, linterRes] = await Promise.allSettled([
+        obtenerDiagnosticoCI(cursoId, asignacionId),
+        obtenerMetricasCI(cursoId, asignacionId),
+        obtenerReporteLinter(cursoId, asignacionId),
+      ]);
+
+      if (diagRes.status === "fulfilled") {
+        setDiagnosticoCI(diagRes.value.data);
+      }
+      if (metricasRes.status === "fulfilled") {
+        setMetricasCI(metricasRes.value.data);
+      }
+      if (linterRes.status === "fulfilled") {
+        setReporteLinter(linterRes.value.data);
+      }
+    } finally {
+      setIsLoadingTecnico(false);
     }
   }, [cursoId, asignacionId]);
 
@@ -62,12 +103,14 @@ export function useAsignacionDetalleAlumno(
           const [response] = await Promise.all([
             obtenerAsignacionPorId(cursoId, asignacionId),
             cargarCorrecciones(),
+            cargarDatosTecnicos(),
             new Promise((resolve) => setTimeout(resolve, 600)),
           ]);
           const mapeadas = mapAsignacionesDTO([response.data], username);
           setAsignacion(mapeadas[0] ?? null);
         } else {
           void cargarCorrecciones();
+          void cargarDatosTecnicos();
           const response = await obtenerAsignacionPorId(cursoId, asignacionId);
           const mapeadas = mapAsignacionesDTO([response.data], username);
           setAsignacion(mapeadas[0] ?? null);
@@ -79,7 +122,7 @@ export function useAsignacionDetalleAlumno(
         setIsRecargando(false);
       }
     },
-    [cursoId, asignacionId, username, cargarCorrecciones]
+    [cursoId, asignacionId, username, cargarCorrecciones, cargarDatosTecnicos]
   );
 
   useEffect(() => {
@@ -96,6 +139,30 @@ export function useAsignacionDetalleAlumno(
       .catch(() => {
         if (isMounted) {
           setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
+        }
+      });
+
+    // Cargar datos técnicos iniciales (CI, Cobertura/Tests y Linter)
+    Promise.allSettled([
+      obtenerDiagnosticoCI(cursoId, asignacionId),
+      obtenerMetricasCI(cursoId, asignacionId),
+      obtenerReporteLinter(cursoId, asignacionId),
+    ])
+      .then(([diagRes, metricasRes, linterRes]) => {
+        if (!isMounted) return;
+        if (diagRes.status === "fulfilled") {
+          setDiagnosticoCI(diagRes.value.data);
+        }
+        if (metricasRes.status === "fulfilled") {
+          setMetricasCI(metricasRes.value.data);
+        }
+        if (linterRes.status === "fulfilled") {
+          setReporteLinter(linterRes.value.data);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingTecnico(false);
         }
       });
 
@@ -153,6 +220,10 @@ export function useAsignacionDetalleAlumno(
     correccionGrupo,
     isLoadingCorrecciones,
     errorCorrecciones,
+    diagnosticoCI,
+    metricasCI,
+    reporteLinter,
+    isLoadingTecnico,
     entregando,
     cargarDetalle,
     entregar,

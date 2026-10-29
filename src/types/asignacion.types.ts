@@ -24,6 +24,75 @@ export interface CrearAsignacionRequestDTO {
   fechaLimite?: string | null;
 }
 
+export type TipoAdvertenciaGit = "COMMIT_NO_ATOMICO" | "MENSAJE_INADECUADO";
+
+export interface AdvertenciaGitResponseDTO {
+  id: number | null;
+  commitSha: string;
+  mensajeCommit: string;
+  tipo: TipoAdvertenciaGit;
+  mensajeExplicativo: string;
+  archivosModificados: number;
+  lineasModificadas: number;
+  lineasAgregadas: number;
+  lineasEliminadas: number;
+  autorUsername: string | null;
+  fechaCommit: string | null;
+}
+
+export interface DiagnosticoCIResponseDTO {
+  repoNombre: string;
+  estadoCI: string | null;
+  etapaFallida: string | null;
+  logError: string | null;
+  runUrl: string | null;
+  runId: number | null;
+}
+
+export interface MetricasCIResponseDTO {
+  id: number | null;
+  repoNombre: string;
+  commitSha: string | null;
+  coberturaLineas: number;
+  lineasCubiertas: number;
+  lineasPerdidas: number;
+  umbralCobertura: number;
+  cumpleUmbralCobertura: boolean;
+  testsEjecutados: number;
+  testsPasados: number;
+  testsFallados: number;
+  testsSalteados: number;
+  autorUsername: string | null;
+  runId: number | null;
+  fechaActualizacion: string | null;
+}
+
+export type SeveridadLinter = "ERROR" | "WARNING";
+
+export interface IncidenciaLinterResponseDTO {
+  id: number | null;
+  archivo: string;
+  linea: number;
+  columna: number | null;
+  severidad: SeveridadLinter;
+  regla: string;
+  mensaje: string | null;
+}
+
+export interface ReporteLinterResponseDTO {
+  id: number | null;
+  repoNombre: string;
+  commitSha: string | null;
+  herramienta: string | null;
+  totalIncidencias: number;
+  cantidadErrores: number;
+  cantidadAdvertencias: number;
+  incidencias: IncidenciaLinterResponseDTO[];
+  autorUsername: string | null;
+  runId: number | null;
+  fechaActualizacion: string | null;
+}
+
 export interface GrupoAsignacionResponseDTO {
   id: number;
   nombre: string | null;
@@ -35,6 +104,7 @@ export interface GrupoAsignacionResponseDTO {
   calificacion?: number | null;
   observaciones?: string | null;
   fechaCalificacion?: string | null;
+  advertenciasGit?: AdvertenciaGitResponseDTO[];
 }
 
 export interface AsignacionResponseDTO {
@@ -118,6 +188,10 @@ export interface AsignacionAlumnoDTO {
   releaseUrl?: string | null;
   issueFeedbackUrl?: string | null;
   estadoCI?: "success" | "failure" | "pending" | "sin_ci" | string | null;
+  ciEtapaFallida?: string | null;
+  ciLogError?: string | null;
+  ciRunUrl?: string | null;
+  advertenciasGit?: AdvertenciaGitResponseDTO[];
   ultimoCommit?: string | null;
   fechaUltimoCommit?: string | null;
   fechaUltimaEntrega?: string | null;
