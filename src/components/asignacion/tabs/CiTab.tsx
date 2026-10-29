@@ -148,13 +148,13 @@ export function CiTab({
           {/* Tarjeta principal de alerta de falla y etapa */}
           <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-xl border border-rose-500/30 bg-rose-500/15 text-rose-600 flex items-center justify-center shrink-0 font-bold text-base">
                   ✕
                 </div>
-                <div className="space-y-1 min-w-0">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm font-bold text-rose-700 dark:text-rose-400">
+                    <h3 className="text-base font-bold text-rose-700 dark:text-rose-400">
                       El pipeline de CI falló
                     </h3>
                     {diagnosticoCI?.runId && (
@@ -280,12 +280,12 @@ export function CiTab({
           </div>
         </div>
       ) : esExitoso ? (
-        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-6 flex items-start sm:items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl border border-emerald-500/30 bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-lg">
+        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-5 flex items-start sm:items-center gap-3.5">
+          <div className="w-9 h-9 rounded-xl border border-emerald-500/30 bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-base">
             ✓
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+            <h3 className="text-base font-bold text-emerald-700 dark:text-emerald-400">
               Pipeline ejecutado correctamente
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -295,10 +295,12 @@ export function CiTab({
           </div>
         </div>
       ) : esPendiente ? (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 flex items-center gap-4">
-          <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin shrink-0" />
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5 flex items-start sm:items-center gap-3.5">
+          <div className="w-9 h-9 rounded-xl border border-amber-500/30 bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0">
+            <div className="w-4 h-4 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin" />
+          </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-amber-700 dark:text-amber-400">
+            <h3 className="text-base font-bold text-amber-700 dark:text-amber-400">
               Pipeline en ejecución
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
