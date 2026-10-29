@@ -2,18 +2,29 @@ import { useState, useEffect, useCallback } from "react";
 import type {
   AsignacionAlumnoDTO,
   CorreccionGrupoResponseDTO,
+  DiagnosticoCIResponseDTO,
+  MetricasCIResponseDTO,
+  ReporteLinterResponseDTO,
 } from "@/types";
+import type { SubSeccionTecnica } from "@/components/asignacion/tabs/EstadoTecnicoTab";
 import {
   obtenerAsignacionPorId,
   obtenerCorrecciones,
+  obtenerDiagnosticoCI,
+  obtenerMetricasCI,
+  obtenerReporteLinter,
   entregarAsignacion,
 } from "@/services";
 import { useAuth } from "./useAuth";
 import { mapAsignacionesDTO } from "./useAsignacionesAlumno";
 
+export type SeccionDetalle = "general" | "tecnico" | "correcciones";
+
 export function useAsignacionDetalleAlumno(
   cursoId?: number,
-  asignacionId?: number
+  asignacionId?: number,
+  seccionActiva: SeccionDetalle = "general",
+  subSeccionTecnica: SubSeccionTecnica = "ci"
 ) {
   const { user } = useAuth();
   const username = user?.username;
@@ -31,7 +42,27 @@ export function useAsignacionDetalleAlumno(
     null
   );
 
+  // Estados técnicos cargados bajo demanda (Lazy Loading)
+  const [diagnosticoCI, setDiagnosticoCI] =
+    useState<DiagnosticoCIResponseDTO | null>(null);
+  const [metricasCI, setMetricasCI] =
+    useState<MetricasCIResponseDTO | null>(null);
+  const [reporteLinter, setReporteLinter] =
+    useState<ReporteLinterResponseDTO | null>(null);
+
+  const [isLoadingCI, setIsLoadingCI] = useState<boolean>(false);
+  const [isLoadingMetricas, setIsLoadingMetricas] = useState<boolean>(false);
+  const [isLoadingLinter, setIsLoadingLinter] = useState<boolean>(false);
+
+  // El indicador general de carga técnica refleja el estado de la sub-sección que se está visualizando
+  const isLoadingTecnico =
+    (subSeccionTecnica === "ci" && isLoadingCI) ||
+    (subSeccionTecnica === "cobertura" && isLoadingMetricas) ||
+    (subSeccionTecnica === "git" && isLoadingLinter);
+
   const [entregando, setEntregando] = useState<boolean>(false);
+
+  const grupoId = asignacion?.grupoId;
 
   const cargarCorrecciones = useCallback(async () => {
     if (!cursoId || !asignacionId) return;
@@ -47,6 +78,112 @@ export function useAsignacionDetalleAlumno(
     }
   }, [cursoId, asignacionId]);
 
+  // Carga Lazy de Diagnóstico de CI + Unificación de estado
+  const cargarDiagnostico = useCallback(
+    async (force = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!force && diagnosticoCI !== null) return;
+      setIsLoadingCI(true);
+      try {
+        const res = await obtenerDiagnosticoCI(
+          cursoId,
+          asignacionId,
+          grupoId
+        );
+        setDiagnosticoCI(res.data);
+
+        // Solución a la dualidad de estado: sincronizar el diagnóstico en la entidad de asignación
+        setAsignacion((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            estadoCI: res.data.estadoCI ?? prev.estadoCI,
+            ciEtapaFallida: res.data.etapaFallida ?? prev.ciEtapaFallida,
+            ciLogError: res.data.logError ?? prev.ciLogError,
+            ciRunUrl: res.data.runUrl ?? prev.ciRunUrl,
+          };
+        });
+      } catch {
+        // Fallback defensivo
+      } finally {
+        setIsLoadingCI(false);
+      }
+    },
+    [cursoId, asignacionId, grupoId, diagnosticoCI]
+  );
+
+  // Carga Lazy de Métricas (JaCoCo / JUnit)
+  const cargarMetricas = useCallback(
+    async (force = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!force && metricasCI !== null) return;
+      setIsLoadingMetricas(true);
+      try {
+        const res = await obtenerMetricasCI(
+          cursoId,
+          asignacionId,
+          grupoId
+        );
+        setMetricasCI(res.data);
+      } catch {
+        // Fallback defensivo
+      } finally {
+        setIsLoadingMetricas(false);
+      }
+    },
+    [cursoId, asignacionId, grupoId, metricasCI]
+  );
+
+  // Carga Lazy de Linter
+  const cargarLinter = useCallback(
+    async (force = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!force && reporteLinter !== null) return;
+      setIsLoadingLinter(true);
+      try {
+        const res = await obtenerReporteLinter(
+          cursoId,
+          asignacionId,
+          grupoId
+        );
+        setReporteLinter(res.data);
+      } catch {
+        // Fallback defensivo
+      } finally {
+        setIsLoadingLinter(false);
+      }
+    },
+    [cursoId, asignacionId, grupoId, reporteLinter]
+  );
+
+  // Lazy Loading reactivo: solo consulta lo que el usuario está viendo actualmente
+  useEffect(() => {
+    if (seccionActiva !== "tecnico" || !asignacion) return;
+
+    let isMounted = true;
+    queueMicrotask(() => {
+      if (!isMounted) return;
+      if (subSeccionTecnica === "ci") {
+        void cargarDiagnostico();
+      } else if (subSeccionTecnica === "cobertura") {
+        void cargarMetricas();
+      } else if (subSeccionTecnica === "git") {
+        void cargarLinter();
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    seccionActiva,
+    subSeccionTecnica,
+    asignacion,
+    cargarDiagnostico,
+    cargarMetricas,
+    cargarLinter,
+  ]);
+
   const cargarDetalle = useCallback(
     async (esRecarga = false) => {
       if (!cursoId || !asignacionId) return;
@@ -58,20 +195,40 @@ export function useAsignacionDetalleAlumno(
       setError(null);
 
       try {
-        if (esRecarga) {
-          const [response] = await Promise.all([
-            obtenerAsignacionPorId(cursoId, asignacionId),
-            cargarCorrecciones(),
-            new Promise((resolve) => setTimeout(resolve, 600)),
-          ]);
-          const mapeadas = mapAsignacionesDTO([response.data], username);
-          setAsignacion(mapeadas[0] ?? null);
-        } else {
-          void cargarCorrecciones();
-          const response = await obtenerAsignacionPorId(cursoId, asignacionId);
-          const mapeadas = mapAsignacionesDTO([response.data], username);
-          setAsignacion(mapeadas[0] ?? null);
+        const tareas: Promise<unknown>[] = [
+          obtenerAsignacionPorId(cursoId, asignacionId),
+          cargarCorrecciones(),
+        ];
+
+        // Al recargar, si está en técnico, solo forzar la subsección activa
+        if (seccionActiva === "tecnico") {
+          if (subSeccionTecnica === "ci") tareas.push(cargarDiagnostico(true));
+          else if (subSeccionTecnica === "cobertura") tareas.push(cargarMetricas(true));
+          else if (subSeccionTecnica === "git") tareas.push(cargarLinter(true));
         }
+
+        if (esRecarga) {
+          tareas.push(new Promise((resolve) => setTimeout(resolve, 600)));
+        }
+
+        const [asigResponse] = (await Promise.all(tareas)) as [
+          Awaited<ReturnType<typeof obtenerAsignacionPorId>>,
+          ...unknown[]
+        ];
+
+        const mapeadas = mapAsignacionesDTO([asigResponse.data], username);
+        setAsignacion(() => {
+          const nueva = mapeadas[0] ?? null;
+          if (!nueva) return null;
+          // Conservar diagnósticos unificados si ya se obtuvieron
+          return {
+            ...nueva,
+            estadoCI: diagnosticoCI?.estadoCI ?? nueva.estadoCI,
+            ciEtapaFallida: diagnosticoCI?.etapaFallida ?? nueva.ciEtapaFallida,
+            ciLogError: diagnosticoCI?.logError ?? nueva.ciLogError,
+            ciRunUrl: diagnosticoCI?.runUrl ?? nueva.ciRunUrl,
+          };
+        });
       } catch {
         setError("No se pudo cargar el detalle de la asignación.");
       } finally {
@@ -79,7 +236,18 @@ export function useAsignacionDetalleAlumno(
         setIsRecargando(false);
       }
     },
-    [cursoId, asignacionId, username, cargarCorrecciones]
+    [
+      cursoId,
+      asignacionId,
+      username,
+      seccionActiva,
+      subSeccionTecnica,
+      cargarCorrecciones,
+      cargarDiagnostico,
+      cargarMetricas,
+      cargarLinter,
+      diagnosticoCI,
+    ]
   );
 
   useEffect(() => {
@@ -99,7 +267,7 @@ export function useAsignacionDetalleAlumno(
         }
       });
 
-    // Cargar detalle de la asignación
+    // Cargar detalle de la asignación (sin llamadas técnicas pesadas)
     obtenerAsignacionPorId(cursoId, asignacionId)
       .then((res) => {
         if (isMounted) {
@@ -153,6 +321,10 @@ export function useAsignacionDetalleAlumno(
     correccionGrupo,
     isLoadingCorrecciones,
     errorCorrecciones,
+    diagnosticoCI,
+    metricasCI,
+    reporteLinter,
+    isLoadingTecnico,
     entregando,
     cargarDetalle,
     entregar,

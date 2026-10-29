@@ -15,8 +15,7 @@ import {
   getBadgeEstadoEntrega,
 } from "@/utils";
 import githubIcon from "@/assets/github_favicon.svg";
-
-type SeccionDetalle = "general" | "tecnico" | "correcciones";
+import type { SeccionDetalle } from "@/types";
 
 const subItemsTecnicos: { id: SubSeccionTecnica; label: string }[] = [
   { id: "ci", label: "Integración Continua (CI/CD)" },
@@ -44,11 +43,15 @@ export const AsignacionDetalleAlumno = () => {
   const subSeccionTecnica: SubSeccionTecnica =
     subParam === "cobertura" || subParam === "git" ? subParam : "ci";
 
-  const [menuTecnicoOverride, setMenuTecnicoOverride] = useState<boolean | null>(null);
+  const [menuTecnicoOverride, setMenuTecnicoOverride] = useState<boolean | null>(
+    null
+  );
 
   // El menú técnico se mantiene abierto si la sección activa es 'tecnico' salvo que el usuario lo colapse manualmente
   const menuTecnicoAbierto =
-    menuTecnicoOverride !== null ? menuTecnicoOverride : seccionActiva === "tecnico";
+    menuTecnicoOverride !== null
+      ? menuTecnicoOverride
+      : seccionActiva === "tecnico";
 
   const [copied, setCopied] = useState(false);
   const [modalReentregaOpen, setModalReentregaOpen] = useState(false);
@@ -62,10 +65,19 @@ export const AsignacionDetalleAlumno = () => {
     correccionGrupo,
     isLoadingCorrecciones,
     errorCorrecciones,
+    diagnosticoCI,
+    metricasCI,
+    reporteLinter,
+    isLoadingTecnico,
     entregando,
     cargarDetalle,
     entregar,
-  } = useAsignacionDetalleAlumno(cursoIdNum, asignacionIdNum);
+  } = useAsignacionDetalleAlumno(
+    cursoIdNum,
+    asignacionIdNum,
+    seccionActiva,
+    subSeccionTecnica
+  );
 
   const handleCopyClone = (repoUrl: string) => {
     const cloneCmd = `git clone ${repoUrl}.git`;
@@ -138,7 +150,8 @@ export const AsignacionDetalleAlumno = () => {
 
   const badge = getBadgeEstadoEntrega(asignacion.estadoEntrega);
   const isVencida = esFechaLimiteVencida(asignacion.fechaLimite);
-  const isActualizando = isRecargando || isLoadingCorrecciones;
+  const isActualizando =
+    isRecargando || isLoadingCorrecciones || isLoadingTecnico;
   const cantIssues = correccionGrupo?.issues?.length ?? 0;
   const fechaEntregaVisible =
     asignacion.fechaEntregadaFormatted ||
@@ -425,7 +438,9 @@ export const AsignacionDetalleAlumno = () => {
                     navegarSeccion("tecnico", subSeccionTecnica);
                     setMenuTecnicoOverride(true);
                   } else {
-                    setMenuTecnicoOverride((prev) => (prev !== null ? !prev : false));
+                    setMenuTecnicoOverride((prev) =>
+                      prev !== null ? !prev : false
+                    );
                   }
                 }}
                 className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 font-mono text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
@@ -503,12 +518,21 @@ export const AsignacionDetalleAlumno = () => {
               entregando={entregando}
               onEntregar={() => void handleEntregarInicial()}
               onAbrirModalReentrega={() => setModalReentregaOpen(true)}
+              onVerBuenasPracticas={() => {
+                navegarSeccion("tecnico", "git");
+                setMenuTecnicoOverride(true);
+              }}
             />
           )}
 
           {seccionActiva === "tecnico" && (
             <EstadoTecnicoTab
               subSeccionActiva={subSeccionTecnica}
+              asignacion={asignacion}
+              diagnosticoCI={diagnosticoCI}
+              metricasCI={metricasCI}
+              reporteLinter={reporteLinter}
+              isLoadingTecnico={isLoadingTecnico}
             />
           )}
 

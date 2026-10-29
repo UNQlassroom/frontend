@@ -15,6 +15,7 @@ export interface GeneralTabProps {
   entregando: boolean;
   onEntregar: () => void;
   onAbrirModalReentrega: () => void;
+  onVerBuenasPracticas?: () => void;
 }
 
 export function GeneralTab({
@@ -98,9 +99,9 @@ export function GeneralTab({
                     className="inline-flex items-center gap-1 font-semibold text-foreground decoration-muted-foreground/40 hover:decoration-foreground hover:text-primary transition-colors"
                   >
                     <img
-                        src={githubIcon}
-                        alt="GitHub"
-                        className="w-4 h-4 opacity-80"
+                      src={githubIcon}
+                      alt="GitHub"
+                      className="w-4 h-4 opacity-80"
                     />
                     <span>Ver en GitHub</span>
                   </a>
