@@ -67,7 +67,7 @@ export function CoberturaTab({
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
         <div className="space-y-1">
           <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-            Cobertura de Tests y Métricas (JaCoCo / JUnit)
+            Cobertura de Tests y Métricas
           </h2>
           <p className="text-xs text-muted-foreground">
             Porcentaje de líneas cubiertas por pruebas unitarias y resultado de
@@ -170,7 +170,7 @@ export function CoberturaTab({
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-foreground">
-                      Cobertura de líneas (JaCoCo)
+                      Cobertura de líneas
                     </span>
                     <span className="text-muted-foreground">
                       Meta: <strong className="text-foreground">{umbral}%</strong>

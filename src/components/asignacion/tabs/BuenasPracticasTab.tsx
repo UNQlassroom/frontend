@@ -96,13 +96,8 @@ export function BuenasPracticasTab({
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                Análisis Estático de Código (Linter)
+                Análisis Estático de Código
               </h2>
-              {reporteLinter?.herramienta && (
-                <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-[11px] font-semibold text-foreground">
-                  {reporteLinter.herramienta}
-                </span>
-              )}
             </div>
             <p className="text-xs text-muted-foreground">
               Resumen de estilo, convenciones y posibles defectos detectados en
@@ -255,23 +250,13 @@ export function BuenasPracticasTab({
                   >
                     <span>
                       {listaLinterAbierta
-                        ? "▾ Ocultar detalle de infracciones"
-                        : "▸ Ver detalle de infracciones"}
+                        ? "▾ Ocultar detalle"
+                        : "▸ Ver detalle"}
                     </span>
                     <span className="rounded-full bg-line/70 px-2.5 py-0.5 text-xs text-muted-foreground font-semibold">
                       {incidenciasFiltradas.length}
                     </span>
                   </button>
-
-                  {filtroSeveridad !== "TODAS" && (
-                    <button
-                      type="button"
-                      onClick={() => setFiltroSeveridad("TODAS")}
-                      className="text-xs font-semibold text-primary hover:underline cursor-pointer"
-                    >
-                      Mostrar todas ({incidencias.length})
-                    </button>
-                  )}
                 </div>
 
                 {listaLinterAbierta && (
@@ -302,7 +287,7 @@ export function BuenasPracticasTab({
                                       : "border-amber-500/30 bg-amber-500/15 text-amber-800 dark:text-amber-300"
                                   }`}
                                 >
-                                  <span>{esError ? "✕ ERROR" : "⚠ WARNING"}</span>
+                                  <span>{esError ? "✕ error" : "⚠ advertencia"}</span>
                                 </span>
 
                                 <span
@@ -326,7 +311,7 @@ export function BuenasPracticasTab({
                                 title={`Regla violada: ${item.regla}`}
                               >
                                 <span className="text-muted-foreground">
-                                  Regla:
+                                  Regla violada:
                                 </span>
                                 <code>{item.regla}</code>
                               </span>
