@@ -32,6 +32,19 @@ export function CiTab({
     asignacion.ciRunUrl ??
     (asignacion.repoUrl ? `${asignacion.repoUrl}/actions` : null);
 
+  const commitUrl = (() => {
+    if (!asignacion.repoUrl) return null;
+    const ultimoCommit = asignacion.ultimoCommit?.trim();
+    if (ultimoCommit && /^[0-9a-f]{7,40}$/i.test(ultimoCommit)) {
+      return `${asignacion.repoUrl}/commit/${ultimoCommit}`;
+    }
+    const shaAdvertencia = asignacion.advertenciasGit?.[0]?.commitSha;
+    if (shaAdvertencia) {
+      return `${asignacion.repoUrl}/commit/${shaAdvertencia}`;
+    }
+    return `${asignacion.repoUrl}/commits`;
+  })();
+
   const esFallo = estadoCI === "failure";
   const esExitoso = estadoCI === "success";
   const esPendiente = estadoCI === "pending";
@@ -66,13 +79,28 @@ export function CiTab({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line bg-panel2/60 p-4">
         <div className="space-y-1.5 min-w-0 flex-1">
           <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground block">
-            Última actividad del repositorio
+            Último commit analizado por CI
           </span>
           {asignacion.ultimoCommit ? (
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground">
-                {obtenerPrimerLineaCommit(asignacion.ultimoCommit)}
-              </span>
+              {commitUrl ? (
+                <a
+                  href={commitUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors inline-flex items-center gap-1.5 group"
+                  title="Ver commit en GitHub"
+                >
+                  <span>{obtenerPrimerLineaCommit(asignacion.ultimoCommit)}</span>
+                  <span className="text-muted-foreground group-hover:text-primary text-[10px] transition-colors">
+                    ↗
+                  </span>
+                </a>
+              ) : (
+                <span className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground">
+                  {obtenerPrimerLineaCommit(asignacion.ultimoCommit)}
+                </span>
+              )}
               {asignacion.fechaUltimoCommit && (
                 <>
                   <span className="text-muted-foreground/40">•</span>
@@ -101,7 +129,7 @@ export function CiTab({
               alt="GitHub"
               className="w-4 h-4 opacity-80"
             />
-            <span>Ver corrida en GitHub Actions</span>
+            <span>GitHub Actions</span>
             <span className="text-muted-foreground text-xs">↗</span>
           </a>
         )}
@@ -127,7 +155,7 @@ export function CiTab({
                 <div className="space-y-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-sm font-bold text-rose-700 dark:text-rose-400">
-                      El pipeline de Integración Continua falló
+                      El pipeline de CI falló
                     </h3>
                     {diagnosticoCI?.runId && (
                       <span className="rounded-md border border-rose-500/25 bg-rose-500/10 px-2 py-0.5 text-[11px] font-semibold text-rose-600">
@@ -135,38 +163,20 @@ export function CiTab({
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Revisá la etapa en la que se detuvo la ejecución y el extracto
-                    del log para identificar la causa del error.
-                  </p>
                 </div>
               </div>
 
-              {/* Botón de Acordeón: "Ver detalle del error" */}
+              {/* Botón de Acordeón */}
               <button
                 type="button"
                 onClick={() => setDetalleAbierto((prev) => !prev)}
                 aria-expanded={detalleAbierto}
                 className="inline-flex items-center justify-between sm:justify-center gap-2 rounded-xl border border-rose-500/35 bg-panel hover:bg-rose-500/10 px-4 py-2.5 text-xs font-semibold text-rose-700 dark:text-rose-300 transition-colors cursor-pointer shrink-0 shadow-2xs"
               >
-                <span>Ver detalle del error</span>
                 <span className="text-[11px] transition-transform duration-150">
-                  {detalleAbierto ? "▴" : "▾"}
+                  {detalleAbierto ? "Achicar ▴" : "Expandir ▾"}
                 </span>
               </button>
-            </div>
-
-            {/* Indicador claro de la etapa en la que falló */}
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-rose-500/20 bg-panel px-4 py-3 text-xs">
-              <span className="text-muted-foreground font-semibold">
-                Etapa en la que falló:
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-md bg-rose-500/10 border border-rose-500/25 px-2.5 py-1 font-bold text-rose-700 dark:text-rose-400">
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span>
-                  {etapaFallida || "Ejecución de Build / Pruebas automatizadas"}
-                </span>
-              </span>
             </div>
 
             {/* Contenido colapsable del acordeón */}
@@ -254,16 +264,13 @@ export function CiTab({
                 {/* Pie del acordeón con enlace directo a la corrida completa */}
                 {runUrl && (
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
-                    <span className="text-muted-foreground">
-                      ¿Necesitás inspeccionar todos los pasos del workflow?
-                    </span>
                     <a
                       href={runUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 font-semibold text-primary hover:underline"
                     >
-                      <span>Ver corrida completa en GitHub Actions</span>
+                      <span>Ver detalle</span>
                       <span>↗</span>
                     </a>
                   </div>
@@ -273,33 +280,19 @@ export function CiTab({
           </div>
         </div>
       ) : esExitoso ? (
-        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl border border-emerald-500/30 bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-lg">
-              ✓
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                Pipeline ejecutado correctamente
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Tu último push superó todas las etapas de compilación y verificación
-                en GitHub Actions sin registrar errores.
-              </p>
-            </div>
+        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-6 flex items-start sm:items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl border border-emerald-500/30 bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-lg">
+            ✓
           </div>
-
-          {runUrl && (
-            <a
-              href={runUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-panel px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10 transition-colors shrink-0"
-            >
-              <span>Ver detalle en Actions</span>
-              <span>↗</span>
-            </a>
-          )}
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+              Pipeline ejecutado correctamente
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Tu último push superó todas las etapas de compilación y verificación
+              en GitHub Actions sin registrar errores.
+            </p>
+          </div>
         </div>
       ) : esPendiente ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 flex items-center gap-4">
