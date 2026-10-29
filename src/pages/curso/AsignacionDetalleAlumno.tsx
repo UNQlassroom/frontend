@@ -15,8 +15,7 @@ import {
   getBadgeEstadoEntrega,
 } from "@/utils";
 import githubIcon from "@/assets/github_favicon.svg";
-
-type SeccionDetalle = "general" | "tecnico" | "correcciones";
+import type { SeccionDetalle } from "@/types";
 
 const subItemsTecnicos: { id: SubSeccionTecnica; label: string }[] = [
   { id: "ci", label: "Integración Continua (CI/CD)" },
@@ -73,7 +72,12 @@ export const AsignacionDetalleAlumno = () => {
     entregando,
     cargarDetalle,
     entregar,
-  } = useAsignacionDetalleAlumno(cursoIdNum, asignacionIdNum);
+  } = useAsignacionDetalleAlumno(
+    cursoIdNum,
+    asignacionIdNum,
+    seccionActiva,
+    subSeccionTecnica
+  );
 
   const handleCopyClone = (repoUrl: string) => {
     const cloneCmd = `git clone ${repoUrl}.git`;
