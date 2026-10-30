@@ -19,7 +19,7 @@ export function CursoCardAlumno({ curso }: Props) {
     >
       <div>
         <div className="flex items-start justify-between gap-2">
-          <span className="font-mono text-xs text-muted-foreground uppercase tracking-wider font-medium">
+          <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
             Curso inscripto
           </span>
         </div>
@@ -32,7 +32,7 @@ export function CursoCardAlumno({ curso }: Props) {
             →
           </span>
         </div>
-        <p className="mt-1.5 font-mono text-sm text-muted-foreground">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
         </p>
       </div>
@@ -44,7 +44,7 @@ export function CursoCardAlumno({ curso }: Props) {
             e.stopPropagation();
             handleCardClick();
           }}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
         >
           <span>Ver curso</span>
         </button>

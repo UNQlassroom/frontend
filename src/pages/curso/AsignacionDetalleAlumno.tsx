@@ -117,7 +117,7 @@ export const AsignacionDetalleAlumno = () => {
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cargando detalle de la asignación...
           </p>
         </div>
@@ -139,7 +139,7 @@ export const AsignacionDetalleAlumno = () => {
         >
           <Link
             to={`/cursos/${cursoId}`}
-            className="rounded-lg border border-line bg-panel px-4 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+            className="rounded-lg border border-line bg-panel px-4 py-2 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
           >
             ← Volver al Curso
           </Link>
@@ -165,7 +165,7 @@ export const AsignacionDetalleAlumno = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           to={`/cursos/${cursoId}`}
-          className="inline-flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-foreground transition-colors group"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
         >
           <span className="group-hover:-translate-x-0.5 transition-transform">
             ←
@@ -177,7 +177,7 @@ export const AsignacionDetalleAlumno = () => {
           type="button"
           onClick={() => void cargarDetalle(true)}
           disabled={isActualizando}
-          className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+          className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
           title="Actualizar estado de la asignación y correcciones"
         >
           <svg
@@ -204,7 +204,7 @@ export const AsignacionDetalleAlumno = () => {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
           <div className="space-y-2.5 flex-1 min-w-0">
             {/* Fila superior de metadatos unificada */}
-            <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-semibold text-foreground">
                 {asignacion.tipo === "GRUPAL" ? "Grupal" : "Individual"}
               </span>
@@ -253,7 +253,7 @@ export const AsignacionDetalleAlumno = () => {
             </h1>
 
             {asignacion.descripcion && (
-              <p className="font-mono text-sm text-muted-foreground leading-relaxed max-w-3xl whitespace-pre-wrap wrap-break-word pt-0.5">
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl whitespace-pre-wrap wrap-break-word pt-0.5">
                 {asignacion.descripcion}
               </p>
             )}
@@ -267,7 +267,7 @@ export const AsignacionDetalleAlumno = () => {
                   href={asignacion.repoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2.5 font-mono text-xs sm:text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-2xs"
+                  className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer shadow-2xs"
                   title="Abrir tu repositorio en GitHub"
                 >
                   <img
@@ -282,7 +282,7 @@ export const AsignacionDetalleAlumno = () => {
                 <button
                   type="button"
                   onClick={() => handleCopyClone(asignacion.repoUrl!)}
-                  className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 font-mono text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-2xs ${
+                  className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-2xs ${
                     copied
                       ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
                       : "border-line bg-panel2 text-foreground hover:bg-line/40"
@@ -331,12 +331,12 @@ export const AsignacionDetalleAlumno = () => {
                   <button
                     type="button"
                     aria-label="¿Cómo clonar este repositorio?"
-                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-line bg-panel2 text-muted-foreground hover:text-foreground hover:bg-line/40 font-mono text-sm font-bold transition-colors cursor-help shadow-2xs"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-line bg-panel2 text-muted-foreground hover:text-foreground hover:bg-line/40 text-sm font-bold transition-colors cursor-help shadow-2xs"
                   >
                     ?
                   </button>
 
-                  <div className="pointer-events-none group-hover/help:pointer-events-auto opacity-0 group-hover/help:opacity-100 group-hover/help:translate-y-0 translate-y-1 transition-all duration-150 absolute top-full mt-2 right-0 w-80 sm:w-92 rounded-xl border border-line bg-panel p-4.5 shadow-xl z-30 text-left font-mono text-xs text-foreground">
+                  <div className="pointer-events-none group-hover/help:pointer-events-auto opacity-0 group-hover/help:opacity-100 group-hover/help:translate-y-0 translate-y-1 transition-all duration-150 absolute top-full mt-2 right-0 w-80 sm:w-92 rounded-xl border border-line bg-panel p-4.5 shadow-xl z-30 text-left text-xs text-foreground">
                     <div className="flex items-center gap-2 mb-2 pb-2 border-b border-line text-primary font-bold">
                       <span className="text-base">💡</span>
                       <span className="text-sm">
@@ -392,7 +392,7 @@ export const AsignacionDetalleAlumno = () => {
                 </div>
               </>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-100 px-3.5 py-2 font-mono text-xs font-semibold text-amber-700 dark:text-amber-300">
+              <span className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-100 px-3.5 py-2 text-xs font-semibold text-amber-700 dark:text-amber-300">
                 <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
                 <span>Creando repositorio en GitHub...</span>
               </span>
@@ -420,7 +420,7 @@ export const AsignacionDetalleAlumno = () => {
                 navegarSeccion("general");
                 setMenuTecnicoOverride(false);
               }}
-              className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 font-mono text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
+              className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
                 seccionActiva === "general"
                   ? "bg-primary text-primary-foreground shadow-2xs"
                   : "text-muted-foreground hover:text-foreground hover:bg-line/40"
@@ -443,7 +443,7 @@ export const AsignacionDetalleAlumno = () => {
                     );
                   }
                 }}
-                className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 font-mono text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
+                className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
                   seccionActiva === "tecnico"
                     ? "bg-primary text-primary-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground hover:bg-line/40"
@@ -468,7 +468,7 @@ export const AsignacionDetalleAlumno = () => {
                         onClick={() => {
                           navegarSeccion("tecnico", sub.id);
                         }}
-                        className={`flex items-center justify-between gap-2 w-full rounded-lg px-2.5 py-2 font-mono text-xs font-semibold text-left transition-colors cursor-pointer ${
+                        className={`flex items-center justify-between gap-2 w-full rounded-lg px-2.5 py-2 text-xs font-semibold text-left transition-colors cursor-pointer ${
                           isSubActive
                             ? "bg-line/70 text-foreground"
                             : "text-muted-foreground hover:text-foreground hover:bg-line/30"
@@ -489,7 +489,7 @@ export const AsignacionDetalleAlumno = () => {
                 navegarSeccion("correcciones");
                 setMenuTecnicoOverride(false);
               }}
-              className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 font-mono text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
+              className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
                 seccionActiva === "correcciones"
                   ? "bg-primary text-primary-foreground shadow-2xs"
                   : "text-muted-foreground hover:text-foreground hover:bg-line/40"

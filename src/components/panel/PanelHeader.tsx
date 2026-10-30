@@ -22,7 +22,7 @@ export function PanelHeader({
           {title}
         </h3>
         {description && (
-          <p className="font-mono text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {description}
           </p>
         )}

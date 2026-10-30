@@ -227,7 +227,7 @@ export function MetricasTab({
             type="button"
             onClick={cargarDatos}
             disabled={isActualizando}
-            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
+            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
             title="Consultar datos actualizados de la base de datos y GitHub"
           >
             <svg
@@ -252,7 +252,7 @@ export function MetricasTab({
       {isLoading && (
         <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Cargando repositorios y métricas desde el servidor...
           </p>
         </div>
@@ -277,7 +277,7 @@ export function MetricasTab({
         <>
           {/* Selector de Asignación idéntico al de Correcciones */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-line">
-            <span className="font-mono text-sm font-semibold text-muted-foreground shrink-0 mr-1">
+            <span className="text-sm font-semibold text-muted-foreground shrink-0 mr-1">
               Asignación:
             </span>
             {asignaciones.map((asig) => {
@@ -287,7 +287,7 @@ export function MetricasTab({
                   key={asig.id}
                   type="button"
                   onClick={() => setSelectedAsignacionId(asig.id)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-sm font-semibold transition-colors cursor-pointer shrink-0 ${
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer shrink-0 ${
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-xs"
                       : "bg-panel2 border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
@@ -320,7 +320,7 @@ export function MetricasTab({
           {/* Estado asíncrono de la asignación seleccionada o métricas */}
           {asignacionActual?.estado === "CREANDO" ? (
             <>
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-center gap-3 font-mono text-xs sm:text-sm">
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-center gap-3 text-xs sm:text-sm">
                 <div className="w-4 h-4 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin shrink-0" />
                 <p className="text-muted-foreground">
                   <strong className="text-amber-700 dark:text-amber-300">
@@ -427,7 +427,7 @@ export function MetricasTab({
                 <select
                   value={filtroEstado}
                   onChange={(e) => setFiltroEstado(e.target.value)}
-                  className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+                  className="rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none cursor-pointer"
                 >
                   <option value="todos">Todos los pipelines</option>
                   <option value="success">Solo exitosos</option>
@@ -445,7 +445,7 @@ export function MetricasTab({
               >
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-line bg-panel2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    <tr className="border-b border-line bg-panel2 text-xs uppercase tracking-wider text-muted-foreground">
                       <th className="py-3.5 px-4.5">Repositorio</th>
                       <th className="py-3.5 px-4.5">Alumno / Grupo</th>
                       <th className="py-3.5 px-4.5">Pipeline CI/CD</th>
@@ -454,7 +454,7 @@ export function MetricasTab({
                       <th className="py-3.5 px-4.5">Fecha Commit</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-line/70 font-mono text-sm">
+                  <tbody className="divide-y divide-line/70 text-sm">
                     {itemsFiltrados.map((item) => (
                       <tr
                         key={item.id}
@@ -496,7 +496,7 @@ export function MetricasTab({
                         {/* Último commit */}
                         <td className="py-4 px-4.5">
                           <div className="flex items-center gap-2 min-w-[200px] max-w-[320px]">
-                            <span className="rounded bg-panel2 border border-line px-2 py-0.5 text-xs font-mono text-muted-foreground shrink-0">
+                            <span className="rounded bg-panel2 border border-line px-2 py-0.5 text-xs text-muted-foreground shrink-0">
                               {item.commitHash}
                             </span>
                             <span

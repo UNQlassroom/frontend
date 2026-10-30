@@ -110,7 +110,7 @@ export function KpiCard({
     >
       <div className="flex items-center justify-between">
         <span
-          className={`font-mono text-xs uppercase tracking-wider font-semibold ${styles.labelColor}`}
+          className={`text-xs uppercase tracking-wider font-semibold ${styles.labelColor}`}
         >
           {label}
         </span>
@@ -126,12 +126,12 @@ export function KpiCard({
           {value}
         </span>
         {unit && (
-          <span className="font-mono text-sm text-muted-foreground">{unit}</span>
+          <span className="text-sm text-muted-foreground">{unit}</span>
         )}
       </div>
 
       {subtext && (
-        <p className={`mt-1.5 font-mono text-xs sm:text-sm ${styles.subtextColor}`}>
+        <p className={`mt-1.5 text-xs sm:text-sm ${styles.subtextColor}`}>
           {subtext}
         </p>
       )}

@@ -46,7 +46,7 @@ export function PanelFilterBar({
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full rounded-xl border border-line bg-background pl-10 pr-3.5 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-xl border border-line bg-background pl-10 pr-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -56,7 +56,7 @@ export function PanelFilterBar({
 
       <div className="flex items-center gap-3">
         {count !== undefined && (
-          <span className="font-mono text-sm text-muted-foreground whitespace-nowrap font-medium">
+          <span className="text-sm text-muted-foreground whitespace-nowrap font-medium">
             {count} {countLabel}
           </span>
         )}

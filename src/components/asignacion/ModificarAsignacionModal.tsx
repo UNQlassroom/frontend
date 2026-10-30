@@ -100,7 +100,7 @@ function ModificarAsignacionContent({
         {/* Encabezado */}
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
               Modificar Asignación
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -125,7 +125,7 @@ function ModificarAsignacionContent({
             <div className="flex items-center justify-between mb-2">
               <label
                 htmlFor="modificar-titulo"
-                className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Título
               </label>
@@ -136,7 +136,7 @@ function ModificarAsignacionContent({
               readOnly
               disabled
               value={asignacion.titulo}
-              className="w-full rounded-xl border border-line bg-line/20 px-3.5 py-2.5 font-mono text-sm text-muted-foreground cursor-not-allowed select-none opacity-85"
+              className="w-full rounded-xl border border-line bg-line/20 px-3.5 py-2.5 text-sm text-muted-foreground cursor-not-allowed select-none opacity-85"
             />
           </div>
 
@@ -146,7 +146,7 @@ function ModificarAsignacionContent({
               <div className="flex items-center justify-between mb-2">
                 <label
                   htmlFor="modificar-tipo"
-                  className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                  className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
                   Tipo de asignación
                 </label>
@@ -157,7 +157,7 @@ function ModificarAsignacionContent({
                 readOnly
                 disabled
                 value={asignacion.tipo === "GRUPAL" ? "Grupal" : "Individual"}
-                className="w-full rounded-xl border border-line bg-line/20 px-3.5 py-2.5 font-mono text-sm text-muted-foreground cursor-not-allowed select-none opacity-85"
+                className="w-full rounded-xl border border-line bg-line/20 px-3.5 py-2.5 text-sm text-muted-foreground cursor-not-allowed select-none opacity-85"
               />
             </div>
 
@@ -165,7 +165,7 @@ function ModificarAsignacionContent({
               <div className="flex items-center justify-between mb-2">
                 <label
                   htmlFor="modificar-template"
-                  className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                  className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
                   Repositorio Plantilla
                 </label>
@@ -176,7 +176,7 @@ function ModificarAsignacionContent({
                 readOnly
                 disabled
                 value={asignacion.templateRepoName}
-                className="w-full rounded-xl border border-line bg-line/20 px-3.5 py-2.5 font-mono text-sm text-muted-foreground cursor-not-allowed select-none opacity-85 truncate"
+                className="w-full rounded-xl border border-line bg-line/20 px-3.5 py-2.5 text-sm text-muted-foreground cursor-not-allowed select-none opacity-85 truncate"
               />
             </div>
           </div>
@@ -185,7 +185,7 @@ function ModificarAsignacionContent({
           <div>
             <label
               htmlFor="modificar-fecha"
-              className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
             >
               Fecha límite de entrega
             </label>
@@ -199,7 +199,7 @@ function ModificarAsignacionContent({
                 setFechaLimite(e.target.value);
                 setError(null);
               }}
-              className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 font-mono text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer disabled:opacity-50"
+              className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer disabled:opacity-50"
             />
           </div>
 
@@ -207,7 +207,7 @@ function ModificarAsignacionContent({
           <div>
             <label
               htmlFor="modificar-descripcion"
-              className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
             >
               Descripción
             </label>
@@ -221,14 +221,14 @@ function ModificarAsignacionContent({
                 setError(null);
               }}
               placeholder="Instrucciones, pautas o consignas del trabajo práctico..."
-              className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 font-mono text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 resize-y"
+              className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 resize-y"
             />
           </div>
 
           {/* Mensaje de Error si la petición falla */}
           {error && (
             <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 animate-rise">
-              <p className="font-mono text-sm text-destructive">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 

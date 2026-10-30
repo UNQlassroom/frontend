@@ -118,7 +118,7 @@ export function BuenasPracticasTab({
   };
 
   return (
-    <div className="space-y-6 animate-rise font-mono">
+    <div className="space-y-6 animate-rise">
       {/* =====================================================================
           SECCIÓN 1: Análisis Estático de Código (Linter)
       ===================================================================== */}

@@ -97,13 +97,13 @@ export function InvitarAlumnosModal({
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
               Gestión de alumnos
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <span>Invitar alumnos</span>
             </h2>
-            <p className="mt-1 font-mono text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
             </p>
           </div>
@@ -127,7 +127,7 @@ export function InvitarAlumnosModal({
               <h3 className="font-display text-xl font-bold text-foreground">
                 ¡Invitaciones enviadas!
               </h3>
-              <p className="mt-1 font-mono text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Se agregaron {usernames.length} alumno(s) al curso.
               </p>
             </div>
@@ -146,7 +146,7 @@ export function InvitarAlumnosModal({
             <div>
               <label
                 htmlFor="github-username-input"
-                className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Usuarios de GitHub
               </label>
@@ -156,7 +156,7 @@ export function InvitarAlumnosModal({
                 {usernames.map((u) => (
                   <span
                     key={u}
-                    className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 font-mono text-sm font-medium text-foreground animate-rise"
+                    className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-foreground animate-rise"
                   >
                     <span>@{u}</span>
                     <button
@@ -185,24 +185,24 @@ export function InvitarAlumnosModal({
                       ? "Escribí un usuario y presioná Enter..."
                       : "Escribí otro y presioná Enter..."
                   }
-                  className="flex-1 min-w-[220px] bg-transparent outline-none py-1.5 px-2 font-mono text-base placeholder:text-muted-foreground/60"
+                  className="flex-1 min-w-[220px] bg-transparent outline-none py-1.5 px-2 text-base placeholder:text-muted-foreground/60"
                 />
               </div>
 
-              <p className="mt-2 font-mono text-xs text-muted-foreground">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Presioná <kbd className="rounded border border-line px-1.5 py-0.5 bg-panel text-xs">Enter</kbd> luego de cada usuario para agregarlo como burbuja.
               </p>
             </div>
 
             {error && (
               <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5">
-                <p className="font-mono text-sm text-destructive">{error}</p>
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
 
             {/* Footer con botones */}
             <div className="pt-4 border-t border-line flex items-center justify-between">
-              <span className="font-mono text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 {usernames.length} {usernames.length === 1 ? "alumno listo" : "alumnos listos"}
               </span>
 

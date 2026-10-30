@@ -25,7 +25,7 @@ export function ConfirmarReentregaModal({
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400 font-semibold">
+            <p className="text-xs uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400 font-semibold">
               Reentrega de Asignación
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -45,7 +45,7 @@ export function ConfirmarReentregaModal({
 
         {/* Mensaje descriptivo */}
         <div className="mt-5 space-y-4">
-          <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-4 sm:p-5 text-sm font-mono space-y-2.5">
+          <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-4 sm:p-5 text-sm space-y-2.5">
             <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-semibold text-base">
               <span>ℹ️</span>
               <span>¿Querés volver a entregar este trabajo?</span>
@@ -64,7 +64,7 @@ export function ConfirmarReentregaModal({
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="rounded-xl border border-line bg-panel px-5 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
+            className="rounded-xl border border-line bg-panel px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -72,7 +72,7 @@ export function ConfirmarReentregaModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="rounded-xl bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 font-mono text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 inline-flex items-center gap-2 shadow-sm"
+            className="rounded-xl bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 inline-flex items-center gap-2 shadow-sm"
           >
             {isLoading ? (
               <>

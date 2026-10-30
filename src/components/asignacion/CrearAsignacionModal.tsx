@@ -220,7 +220,7 @@ export function CrearAsignacionModal({
           {/* Header */}
           <div className="flex items-start justify-between pb-4 border-b border-line">
             <div>
-              <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+              <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
                 Nueva Asignación
               </p>
               <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -246,7 +246,7 @@ export function CrearAsignacionModal({
             <div>
               <label
                 htmlFor="asignacion-titulo"
-                className="mb-1.5 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Título de la asignación *
               </label>
@@ -261,7 +261,7 @@ export function CrearAsignacionModal({
                   setTitulo(e.target.value);
                   setError(null);
                 }}
-                className="w-full rounded-xl border border-line bg-background px-4 py-2.5 font-mono text-sm sm:text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-xl border border-line bg-background px-4 py-2.5 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
@@ -269,7 +269,7 @@ export function CrearAsignacionModal({
             <div>
               <label
                 htmlFor="asignacion-descripcion"
-                className="mb-1.5 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Descripción (opcional)
               </label>
@@ -280,13 +280,13 @@ export function CrearAsignacionModal({
                 placeholder="Describí los objetivos principales de la asignación..."
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                className="w-full rounded-xl border border-line bg-background px-4 py-2.5 font-mono text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                className="w-full rounded-xl border border-line bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
               />
             </div>
 
             {/* Tipo de asignación: Individual o Grupal (compacto) */}
             <div>
-              <label className="mb-1.5 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+              <label className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                 Modalidad de entrega *
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -306,7 +306,7 @@ export function CrearAsignacionModal({
                     disabled={isLoading}
                     className="w-4 h-4 accent-primary"
                   />
-                  <span className="font-mono text-sm font-semibold text-foreground">
+                  <span className="text-sm font-semibold text-foreground">
                     Individual
                   </span>
                 </label>
@@ -327,7 +327,7 @@ export function CrearAsignacionModal({
                     disabled={isLoading}
                     className="w-4 h-4 accent-primary"
                   />
-                  <span className="font-mono text-sm font-semibold text-foreground">
+                  <span className="text-sm font-semibold text-foreground">
                     Grupal
                   </span>
                 </label>
@@ -340,7 +340,7 @@ export function CrearAsignacionModal({
                 <div className="mb-1.5 flex items-center justify-between gap-2">
                   <label
                     htmlFor="asignacion-template"
-                    className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                    className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                   >
                     Repositorio Plantilla *
                   </label>
@@ -349,7 +349,7 @@ export function CrearAsignacionModal({
                       type="button"
                       onClick={() => setIsCrearTemplateOpen(true)}
                       disabled={isLoading}
-                      className="font-mono text-xs font-semibold text-primary hover:underline cursor-pointer disabled:opacity-50"
+                      className="text-xs font-semibold text-primary hover:underline cursor-pointer disabled:opacity-50"
                     >
                       + Crear nuevo
                     </button>
@@ -357,7 +357,7 @@ export function CrearAsignacionModal({
                 </div>
 
                 {isLoadingTemplates ? (
-                  <div className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 font-mono text-sm text-muted-foreground flex items-center gap-2.5">
+                  <div className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm text-muted-foreground flex items-center gap-2.5">
                     <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
                     <span>Cargando plantillas...</span>
                   </div>
@@ -370,7 +370,7 @@ export function CrearAsignacionModal({
                       setError(null);
                     }}
                     disabled={isLoading}
-                    className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 font-mono text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                    className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
                   >
                     {templates.map((tpl) => (
                       <option key={tpl.name} value={tpl.name}>
@@ -380,14 +380,14 @@ export function CrearAsignacionModal({
                   </select>
                 ) : (
                   <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <p className="font-mono text-xs text-amber-600 dark:text-amber-400">
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
                       No hay plantillas disponibles.
                     </p>
                     <button
                       type="button"
                       onClick={() => setIsCrearTemplateOpen(true)}
                       disabled={isLoading}
-                      className="shrink-0 rounded-lg bg-primary px-3 py-1.5 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-2xs disabled:opacity-50"
+                      className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-2xs disabled:opacity-50"
                     >
                       Crear
                     </button>
@@ -398,7 +398,7 @@ export function CrearAsignacionModal({
               <div>
                 <label
                   htmlFor="asignacion-fecha"
-                  className="mb-1.5 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                  className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
                   Fecha límite de entrega *
                 </label>
@@ -409,7 +409,7 @@ export function CrearAsignacionModal({
                   disabled={isLoading}
                   value={fechaLimite}
                   onChange={(e) => setFechaLimite(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 font-mono text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
                 />
               </div>
             </div>
@@ -418,14 +418,14 @@ export function CrearAsignacionModal({
             {tipo === "GRUPAL" && (
               <div className="space-y-3 pt-3 border-t border-line">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-mono text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Armado de Grupos
                   </h4>
                   <button
                     type="button"
                     onClick={handleAgregarGrupo}
                     disabled={isLoading}
-                    className="rounded-xl border border-line bg-panel px-3.5 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                    className="rounded-xl border border-line bg-panel px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
                   >
                     + Añadir grupo
                   </button>
@@ -433,7 +433,7 @@ export function CrearAsignacionModal({
 
                 {alumnos.length === 0 ? (
                   <div className="rounded-xl border border-line bg-panel p-5 text-center">
-                    <p className="font-mono text-sm text-amber-600 dark:text-amber-400">
+                    <p className="text-sm text-amber-600 dark:text-amber-400">
                       No hay alumnos en este curso todavía. Invitá alumnos antes de crear asignaciones grupales.
                     </p>
                   </div>
@@ -453,14 +453,14 @@ export function CrearAsignacionModal({
                             }
                             disabled={isLoading}
                             placeholder={`Nombre del Grupo ${gIdx + 1}`}
-                            className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-sm font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="rounded-lg border border-line bg-background px-3 py-1.5 text-sm font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                           />
                           {grupos.length > 1 && (
                             <button
                               type="button"
                               onClick={() => handleEliminarGrupo(gIdx)}
                               disabled={isLoading}
-                              className="text-muted-foreground hover:text-destructive text-xs font-mono px-2 py-1 cursor-pointer"
+                              className="text-muted-foreground hover:text-destructive text-xs px-2 py-1 cursor-pointer"
                             >
                               Eliminar
                             </button>
@@ -479,7 +479,7 @@ export function CrearAsignacionModal({
                                   handleToggleIntegrante(gIdx, alumno.username)
                                 }
                                 disabled={isLoading}
-                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs transition-colors cursor-pointer ${
+                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors cursor-pointer ${
                                   estaSeleccionado
                                     ? "bg-primary text-primary-foreground font-semibold"
                                     : "border border-line bg-panel2 text-muted-foreground hover:text-foreground"
@@ -502,7 +502,7 @@ export function CrearAsignacionModal({
             {isLoading && (
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-3.5 flex items-center gap-3 animate-pulse">
                 <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
-                <p className="font-mono text-xs sm:text-sm font-semibold text-foreground">
+                <p className="text-xs sm:text-sm font-semibold text-foreground">
                   Registrando asignación y preparando repositorios en GitHub...
                 </p>
               </div>
@@ -510,13 +510,13 @@ export function CrearAsignacionModal({
 
             {error && (
               <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5">
-                <p className="font-mono text-sm text-destructive">{error}</p>
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
 
             {/* Footer */}
             <div className="pt-4 border-t border-line flex items-center justify-between gap-3">
-              <span className="font-mono text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {totalReposACrear}{" "}
                 {totalReposACrear === 1
                   ? "repositorio a crear"

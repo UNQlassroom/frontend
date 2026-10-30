@@ -11,7 +11,7 @@ export function CIStatusBadge({ estado, className = "", showIcon = true }: CISta
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 font-mono text-xs font-semibold shrink-0 ${info.badgeClass} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold shrink-0 ${info.badgeClass} ${className}`}
       title={`Estado de CI: ${info.label}`}
     >
       {showIcon && (

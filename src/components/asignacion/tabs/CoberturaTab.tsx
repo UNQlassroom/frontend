@@ -90,7 +90,7 @@ export function CoberturaTab({
         : "bg-rose-500";
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-6 animate-rise font-mono">
+    <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-6 animate-rise">
       {/* Encabezado general */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
         <div className="space-y-1">
