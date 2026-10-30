@@ -301,7 +301,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
               type="button"
               onClick={() => cargarCorrecciones(selectedAsignacionId)}
               disabled={isActualizando || isLoadingAsignaciones}
-              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
               title="Actualizar el estado de las correcciones"
             >
               <svg
@@ -333,7 +333,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
       {isLoadingAsignaciones && (
         <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Cargando asignaciones del curso...
           </p>
         </div>
@@ -358,7 +358,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
         <>
           {/* Selector de Asignación */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-line">
-            <span className="font-mono text-sm font-semibold text-muted-foreground shrink-0 mr-1">
+            <span className="text-sm font-semibold text-muted-foreground shrink-0 mr-1">
               Asignación:
             </span>
             {asignaciones.map((asig) => {
@@ -368,7 +368,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                   key={asig.id}
                   type="button"
                   onClick={() => handleSelectAsignacion(asig.id)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-sm font-semibold transition-colors cursor-pointer shrink-0 ${
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer shrink-0 ${
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-xs"
                       : "bg-panel2 border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
@@ -400,7 +400,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
           {asignacionActual?.estado === "CREANDO" ? (
             <>
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-center gap-3 font-mono text-xs sm:text-sm">
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-center gap-3 text-xs sm:text-sm">
                 <div className="w-4 h-4 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin shrink-0" />
                 <p className="text-muted-foreground">
                   <strong className="text-amber-700 dark:text-amber-300">
@@ -503,7 +503,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+              className="rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none cursor-pointer"
             >
               <option value="todos">
                 Todos los repositorios ({correcciones.length})
@@ -529,7 +529,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
           {isLoadingCorrecciones && (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="font-mono text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Consultando correcciones desde GitHub...
               </p>
             </div>
@@ -578,7 +578,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               </h4>
 
                               {/* Badge con cantidad de correcciones */}
-                              <span className="font-mono text-xs px-2.5 py-0.5 rounded-full border border-line bg-panel2 text-muted-foreground font-semibold">
+                              <span className="text-xs px-2.5 py-0.5 rounded-full border border-line bg-panel2 text-muted-foreground font-semibold">
                                 {totalGrupoCorrecciones}{" "}
                                 {totalGrupoCorrecciones === 1
                                   ? "corrección"
@@ -587,7 +587,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                             </div>
 
                             {/* Integrantes y Repositorio */}
-                            <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                               {grupo.integrantes.length > 0 && (
                                 <span>
                                   Integrantes:{" "}
@@ -599,9 +599,31 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                 </span>
                               )}
                               <span>•</span>
-                              <span className="text-foreground font-medium truncate max-w-xs sm:max-w-md">
-                                {grupo.repoNombre}
-                              </span>
+                              {grupo.repoHtmlUrl ? (
+                                <a
+                                  href={grupo.repoHtmlUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+                                  title={grupo.repoHtmlUrl}
+                                >
+                                  <img
+                                    src={githubIcon}
+                                    alt="GitHub"
+                                    className="w-4 h-4 opacity-80"
+                                  />
+                                  <span className="truncate max-w-[220px]">
+                                    {grupo.repoNombre}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    ↗
+                                  </span>
+                                </a>
+                              ) : (
+                                <span className="text-foreground font-medium truncate max-w-xs sm:max-w-md">
+                                  {grupo.repoNombre}
+                                </span>
+                              )}
                             </div>
                           </div>
 
@@ -611,7 +633,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               href={allIssuesUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors shadow-2xs"
+                              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors shadow-2xs"
                               title="Ver correcciones en GitHub"
                             >
                               <img
@@ -629,7 +651,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               href={newIssueUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
                               title="Crear una nueva corrección en el repositorio de GitHub"
                             >
                               <span>+ Crear corrección</span>
@@ -640,7 +662,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
                         {/* Lista de Correcciones dentro del grupo */}
                         {grupo.issues.length === 0 ? (
-                          <div className="p-4 sm:p-5 rounded-xl border border-line/60 bg-panel2/40 text-center font-mono text-sm text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-3">
+                          <div className="p-4 sm:p-5 rounded-xl border border-line/60 bg-panel2/40 text-center text-sm text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-3">
                             <span>
                               Aún no se crearon correcciones en este repositorio.
                             </span>
@@ -648,13 +670,13 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               href={newIssueUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary hover:underline font-semibold font-mono text-sm inline-flex items-center gap-1"
+                              className="text-primary hover:underline font-semibold text-sm inline-flex items-center gap-1"
                             >
                               Crear la primera corrección ↗
                             </a>
                           </div>
                         ) : (
-                          <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden font-mono text-sm">
+                          <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden text-sm">
                             {grupo.issues.map((issue: IssueResponseDTO) => (
                               <div
                                 key={issue.numero}
@@ -677,7 +699,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     <IssueEstadoBadge estado={issue.estado} />
                                     {issue.tieneCommitsPosteriores && (
                                       <span
-                                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                                         title="El alumno hizo commits posteriores a la creación de esta corrección"
                                       >
                                         <span>⚡ Commits posteriores detectados</span>

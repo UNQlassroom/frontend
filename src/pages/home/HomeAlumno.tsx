@@ -8,7 +8,7 @@ export const HomeAlumno = () => {
     <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
       <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b border-line">
         <div className="text-left">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+          <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
             Espacio del Alumno
           </p>
           <h1 className="mt-2 font-suez text-4xl sm:text-5xl tracking-tight">
@@ -24,7 +24,7 @@ export const HomeAlumno = () => {
       {isLoading && (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cargando tus cursos...
           </p>
         </div>

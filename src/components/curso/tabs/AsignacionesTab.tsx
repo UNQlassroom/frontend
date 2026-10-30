@@ -238,7 +238,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
               type="button"
               onClick={cargarAsignaciones}
               disabled={isActualizando}
-              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
               title="Actualizar asignaciones del curso"
             >
               <svg
@@ -260,7 +260,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
               title="Crear una nueva asignación"
             >
               <img
@@ -278,7 +278,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
       {isLoading && (
         <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cargando asignaciones del curso...
           </p>
         </div>
@@ -299,7 +299,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
             >
               <img
                 src={circleAddIcon}
@@ -328,7 +328,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
             <select
               value={filtroTipo}
               onChange={(e) => setFiltroTipo(e.target.value)}
-              className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+              className="rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none cursor-pointer"
             >
               <option value="todos">Todos los tipos ({totalAsignaciones})</option>
               <option value="INDIVIDUAL">Solo individuales ({individualesCount})</option>
@@ -349,7 +349,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                     setBusqueda("");
                     setFiltroTipo("todos");
                   }}
-                  className="rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                  className="rounded-lg border border-line bg-panel2 px-4 py-2 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
                 >
                   Restablecer filtros
                 </button>
@@ -378,7 +378,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="space-y-2 flex-1 min-w-0">
                         {/* Metadatos livianos: Tipo, Plantilla y Fecha límite */}
-                        <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-semibold ${
                               asig.tipo === "GRUPAL"
@@ -435,7 +435,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                         </h4>
 
                         {asig.descripcion && (
-                          <p className="font-mono text-sm text-muted-foreground leading-relaxed">
+                          <p className="text-sm text-muted-foreground leading-relaxed">
                             {asig.descripcion}
                           </p>
                         )}
@@ -446,7 +446,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                         <button
                           type="button"
                           onClick={() => toggleExpand(asig.id)}
-                          className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs sm:text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
                         >
                           <span>Repositorios</span>
                           <span className="rounded-full bg-line/70 px-2 py-0.5 text-xs text-muted-foreground">
@@ -489,7 +489,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                             {isMenuOpen && (
                               <div
                                 role="menu"
-                                className="absolute right-0 top-full mt-1.5 w-48 rounded-xl border border-line bg-panel shadow-lg py-1.5 z-20 font-mono text-xs sm:text-sm animate-rise"
+                                className="absolute right-0 top-full mt-1.5 w-48 rounded-xl border border-line bg-panel shadow-lg py-1.5 z-20 text-xs sm:text-sm animate-rise"
                               >
                                 <button
                                   type="button"
@@ -554,7 +554,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
 
                     {/* Avisos de estado asíncrono (CREANDO o ERROR) */}
                     {asig.estado === "CREANDO" && (
-                      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs sm:text-sm">
+                      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm">
                         <div className="flex items-start sm:items-center gap-3">
                           <div className="w-4 h-4 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin shrink-0 mt-0.5 sm:mt-0" />
                           <div className="space-y-0.5">
@@ -582,12 +582,12 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                     {isExpanded && (
                       <div className="pt-4 border-t border-line">
                         {totalGrupos === 0 ? (
-                          <p className="font-mono text-sm text-muted-foreground italic">
+                          <p className="text-sm text-muted-foreground italic">
                             No hay repositorios asociados a esta asignación todavía.
                           </p>
                         ) : (
                           <div className="overflow-x-auto rounded-2xl border border-line bg-panel2/60">
-                            <table className="w-full text-left border-collapse font-mono text-sm">
+                            <table className="w-full text-left border-collapse text-sm">
                               <thead>
                                 <tr className="border-b border-line bg-panel2 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                                   <th className="py-3 px-4">
@@ -595,7 +595,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                       ? "Grupo / Integrantes"
                                       : "Alumno"}
                                   </th>
-                                  <th className="py-3 px-4">Repositorio GitHub</th>
+                                  <th className="py-3 px-4">Repositorio</th>
                                   <th className="py-3 px-4">Estado / Entrega</th>
                                   <th className="py-3 px-4 text-right">Acción</th>
                                 </tr>

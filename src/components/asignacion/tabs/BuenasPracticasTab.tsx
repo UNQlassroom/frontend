@@ -118,7 +118,7 @@ export function BuenasPracticasTab({
   };
 
   return (
-    <div className="space-y-6 animate-rise font-mono">
+    <div className="space-y-6 animate-rise">
       {/* =====================================================================
           SECCIÓN 1: Análisis Estático de Código (Linter)
       ===================================================================== */}
@@ -220,7 +220,7 @@ export function BuenasPracticasTab({
                 </div>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                    ¡Código limpio! 0 infracciones detectadas
+                    ¡Código limpio!
                   </h3>
                   <p className="text-xs text-muted-foreground">
                     El análisis del linter finalizó sin encontrar errores ni

@@ -78,13 +78,13 @@ function CalificarAsignacionContent({
         {/* Header con metadatos integrados */}
         <div className="flex items-start justify-between pb-4 border-b border-line gap-4">
           <div className="min-w-0">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
               Calificación Docente
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
               {asignacionTitulo}
             </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-xs sm:text-sm">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
               <span className="font-semibold text-foreground">
                 {grupo.nombre ||
                   (grupo.integrantes.length === 1
@@ -150,7 +150,7 @@ function CalificarAsignacionContent({
           <div>
             <label
               htmlFor="calificacion-nota"
-              className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
             >
               Nota (1 a 10) *
             </label>
@@ -170,7 +170,7 @@ function CalificarAsignacionContent({
                   setNota(val === "" ? "" : Number(val));
                   setError(null);
                 }}
-                className="w-32 rounded-xl border border-line bg-panel px-4 py-2.5 font-mono text-xl font-bold text-foreground outline-none focus:border-primary transition-colors text-center"
+                className="w-32 rounded-xl border border-line bg-panel px-4 py-2.5 text-xl font-bold text-foreground outline-none focus:border-primary transition-colors text-center"
               />
             </div>
           </div>
@@ -179,7 +179,7 @@ function CalificarAsignacionContent({
           <div>
             <label
               htmlFor="calificacion-observaciones"
-              className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
             >
               Observaciones / Devolución (opcional)
             </label>
@@ -193,14 +193,14 @@ function CalificarAsignacionContent({
                 setObservaciones(e.target.value);
                 setError(null);
               }}
-              className="w-full rounded-xl border border-line bg-panel p-4 font-mono text-sm sm:text-base text-foreground outline-none focus:border-primary transition-colors resize-none leading-relaxed"
+              className="w-full rounded-xl border border-line bg-panel p-4 text-sm sm:text-base text-foreground outline-none focus:border-primary transition-colors resize-none leading-relaxed"
             />
           </div>
 
           {/* Error de validación local */}
           {error && (
             <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5">
-              <p className="font-mono text-sm text-destructive">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 
@@ -210,14 +210,14 @@ function CalificarAsignacionContent({
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="rounded-xl border border-line bg-panel px-5 py-2.5 font-mono text-sm sm:text-base font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
+              className="rounded-xl border border-line bg-panel px-5 py-2.5 text-sm sm:text-base font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isLoading || nota === ""}
-              className="rounded-xl bg-primary px-6 py-2.5 font-mono text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 inline-flex items-center gap-2"
+              className="rounded-xl bg-primary px-6 py-2.5 text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 inline-flex items-center gap-2"
             >
               {isLoading ? (
                 <>

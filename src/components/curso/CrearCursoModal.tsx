@@ -50,7 +50,7 @@ export function CrearCursoModal({
       >
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
               Nueva ficha
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -71,7 +71,7 @@ export function CrearCursoModal({
           <div>
             <label
               htmlFor="materia"
-              className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
             >
               Materia
             </label>
@@ -94,7 +94,7 @@ export function CrearCursoModal({
             <div>
               <label
                 htmlFor="comision"
-                className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Comisión
               </label>
@@ -114,7 +114,7 @@ export function CrearCursoModal({
             <div>
               <label
                 htmlFor="semestre"
-                className="mb-2 block font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Semestre
               </label>
@@ -133,7 +133,7 @@ export function CrearCursoModal({
           </div>
 
           {error && (
-            <p className="text-sm text-destructive font-mono">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           )}
         </div>
 

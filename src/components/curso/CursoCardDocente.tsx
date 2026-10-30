@@ -27,7 +27,7 @@ export function CursoCardDocente({ curso }: Props) {
       >
         <div>
           <div className="flex items-start justify-between gap-2">
-            <span className="font-mono text-xs text-muted-foreground uppercase tracking-wider font-medium">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
               Curso activo
             </span>
           </div>
@@ -40,7 +40,7 @@ export function CursoCardDocente({ curso }: Props) {
               →
             </span>
           </div>
-          <p className="mt-1.5 font-mono text-sm text-muted-foreground">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
           </p>
         </div>
@@ -53,7 +53,7 @@ export function CursoCardDocente({ curso }: Props) {
                 e.stopPropagation();
                 setOpenAlumnosModal(true);
               }}
-              className="shrink-0 rounded-xl border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+              className="shrink-0 rounded-xl border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
             >
               Ver Alumnos
             </button>
@@ -65,7 +65,7 @@ export function CursoCardDocente({ curso }: Props) {
               e.stopPropagation();
               setOpenInvitarModal(true);
             }}
-            className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+            className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
             title="Invitar alumnos"
           >
             <img src={circleAddIcon} alt="Invitar" className="w-4 h-4 opacity-80" />

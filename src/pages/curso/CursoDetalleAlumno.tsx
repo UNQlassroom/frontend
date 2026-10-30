@@ -26,7 +26,7 @@ export const CursoDetalleAlumno = () => {
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cargando detalle del curso...
           </p>
         </div>
@@ -45,7 +45,7 @@ export const CursoDetalleAlumno = () => {
         >
           <Link
             to="/home"
-            className="rounded-lg border border-line bg-panel px-4 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+            className="rounded-lg border border-line bg-panel px-4 py-2 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
           >
             ← Volver a Cursos
           </Link>
@@ -62,7 +62,7 @@ export const CursoDetalleAlumno = () => {
       <div>
         <Link
           to="/home"
-          className="inline-flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-foreground transition-colors group"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
         >
           <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
           <span>Volver a Cursos</span>
@@ -74,11 +74,11 @@ export const CursoDetalleAlumno = () => {
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+              <span className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
                 Espacio del Alumno
               </span>
               <span className="text-muted-foreground/40">•</span>
-              <span className="rounded-lg border border-line bg-panel2 px-2.5 py-1 font-mono text-xs font-semibold text-foreground">
+              <span className="rounded-lg border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground">
                 Año {curso.anio}
               </span>
             </div>
@@ -89,18 +89,18 @@ export const CursoDetalleAlumno = () => {
 
             {/* Metadatos Académicos: Comisión y Semestre */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 font-mono text-sm font-semibold text-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
                 <span className="text-muted-foreground font-normal">Comisión:</span>
                 <span>{curso.comision}</span>
               </span>
 
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 font-mono text-sm font-semibold text-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
                 <span className="text-muted-foreground font-normal">Semestre:</span>
                 <span>{curso.semestre}° Semestre</span>
               </span>
 
               {curso.descripcion && (
-                <p className="font-mono text-sm text-muted-foreground mt-1.5 block w-full leading-relaxed">
+                <p className="text-sm text-muted-foreground mt-1.5 block w-full leading-relaxed">
                   {curso.descripcion}
                 </p>
               )}
@@ -119,7 +119,7 @@ export const CursoDetalleAlumno = () => {
               type="button"
               onClick={cargarAsignaciones}
               disabled={isActualizando}
-              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
+              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
               title="Actualizar asignaciones"
             >
               <svg

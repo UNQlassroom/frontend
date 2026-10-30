@@ -54,18 +54,18 @@ export function GeneralTab({
         >
           <div className="space-y-3.5">
             <div className="flex items-center justify-between gap-2 pb-3 border-b border-line">
-              <h2 className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+              <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                 Estado de tu Entrega
               </h2>
               <span
-                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-mono text-xs font-semibold ${badge.classes}`}
+                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-xs font-semibold ${badge.classes}`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${badge.dotColor}`} />
                 <span>{badge.label}</span>
               </span>
             </div>
 
-            <div className="space-y-2 font-mono text-xs">
+            <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-muted-foreground">Fecha límite:</span>
                 <span
@@ -114,7 +114,7 @@ export function GeneralTab({
           <div>
             {!fueEntregada ? (
               isVencida ? (
-                <div className="w-full rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-center font-mono text-xs font-semibold text-destructive">
+                <div className="w-full rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-center text-xs font-semibold text-destructive">
                   Plazo de entrega vencido
                 </div>
               ) : (
@@ -126,7 +126,7 @@ export function GeneralTab({
                     !asignacion.repoUrl ||
                     asignacion.estado === "CREANDO"
                   }
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 font-mono text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                   title={
                     !asignacion.repoUrl || asignacion.estado === "CREANDO"
                       ? "Tu repositorio aún se está generando en GitHub"
@@ -148,7 +148,7 @@ export function GeneralTab({
                 type="button"
                 onClick={onAbrirModalReentrega}
                 disabled={entregando}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 px-4 py-2.5 font-mono text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
                 title="Volver a entregar con el último commit del repositorio"
               >
                 {entregando ? (
@@ -174,7 +174,7 @@ export function GeneralTab({
                 )}
               </button>
             ) : (
-              <div className="w-full rounded-xl border border-line bg-panel2 px-4 py-2.5 text-center font-mono text-xs text-muted-foreground">
+              <div className="w-full rounded-xl border border-line bg-panel2 px-4 py-2.5 text-center text-xs text-muted-foreground">
                 Plazo cerrado para reentregas
               </div>
             )}
@@ -194,17 +194,17 @@ export function GeneralTab({
         >
           <div className="space-y-3.5">
             <div className="flex items-center justify-between gap-2 pb-3 border-b border-line">
-              <h2 className="font-mono text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+              <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                 Calificación y Devolución
               </h2>
               {asignacion.fechaCalificacion && (
-                <span className="font-mono text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   {formatFechaLegible(asignacion.fechaCalificacion)}
                 </span>
               )}
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-line bg-panel2 px-4 py-2.5 font-mono">
+            <div className="flex items-center justify-between rounded-xl border border-line bg-panel2 px-4 py-2.5">
               <span className="text-xs font-semibold text-muted-foreground">
                 Nota final
               </span>
@@ -216,7 +216,7 @@ export function GeneralTab({
             </div>
           </div>
 
-          <div className="space-y-1.5 font-mono min-w-0">
+          <div className="space-y-1.5 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-semibold text-muted-foreground">
                 Observaciones del docente
@@ -266,7 +266,7 @@ export function GeneralTab({
       {/* Equipo de Trabajo (solo si es GRUPAL) */}
       {asignacion.tipo === "GRUPAL" && (
         <section className="rounded-2xl border border-line bg-panel p-6 shadow-xs space-y-4 min-w-0">
-          <div className="flex items-center justify-between gap-2 pb-3 border-b border-line font-mono">
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-line">
             <div className="flex items-center gap-2">
               <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                 Equipo de Trabajo
@@ -296,7 +296,7 @@ export function GeneralTab({
                 return (
                   <li
                     key={miembro.id ?? miembro.username}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-line bg-panel2/60 p-3 font-mono text-xs"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-line bg-panel2/60 p-3 text-xs"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <img
@@ -335,7 +335,7 @@ export function GeneralTab({
               })}
             </ul>
           ) : (
-            <p className="font-mono text-xs text-muted-foreground italic">
+            <p className="text-xs text-muted-foreground italic">
               No se encontraron integrantes asociados al grupo.
             </p>
           )}

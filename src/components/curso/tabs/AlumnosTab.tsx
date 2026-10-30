@@ -64,7 +64,7 @@ export function AlumnosTab({
                 type="button"
                 onClick={onRecargar}
                 disabled={isRecargando || isLoading}
-                className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+                className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
                 title="Actualizar la lista de alumnos"
               >
                 <svg
@@ -87,7 +87,7 @@ export function AlumnosTab({
             <button
               type="button"
               onClick={onOpenInvitarModal}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
               title="Invitar nuevos alumnos al curso"
             >
               <img
@@ -105,7 +105,7 @@ export function AlumnosTab({
       {isLoading && (
         <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cargando nómina de alumnos matriculados...
           </p>
         </div>
@@ -126,7 +126,7 @@ export function AlumnosTab({
             <button
               type="button"
               onClick={onOpenInvitarModal}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-mono text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
             >
               <img
                 src={circleAddIcon}
@@ -153,7 +153,7 @@ export function AlumnosTab({
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+              className="rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none cursor-pointer"
             >
               <option value="todos">Todos los estados ({total})</option>
               <option value="active">Solo activos ({activosCount})</option>
@@ -176,7 +176,7 @@ export function AlumnosTab({
                     setSearchTerm("");
                     setFiltroEstado("todos");
                   }}
-                  className="rounded-xl border border-line bg-panel2 px-5 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                  className="rounded-xl border border-line bg-panel2 px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
                 >
                   Restablecer filtros
                 </button>
@@ -191,13 +191,13 @@ export function AlumnosTab({
             >
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-line bg-panel2 font-mono text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  <tr className="border-b border-line bg-panel2 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                     <th className="py-3.5 px-5">Alumno</th>
                     <th className="py-3.5 px-5">Estado en Curso</th>
                     <th className="py-3.5 px-5">Membresía en GitHub</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-line/70 font-mono text-sm">
+                <tbody className="divide-y divide-line/70 text-sm">
                   {alumnosFiltrados.map((alumno) => (
                     <tr
                       key={alumno.username}

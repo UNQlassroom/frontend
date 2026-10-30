@@ -35,13 +35,13 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
       <div className="w-full max-w-3xl rounded-2xl border border-line bg-panel2 p-7 sm:p-8 shadow-xl flex flex-col max-h-[88vh] animate-rise">
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
               Alumnos inscriptos
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
               {curso.materia}
             </h2>
-            <p className="mt-1 font-mono text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
             </p>
           </div>
@@ -60,7 +60,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="font-mono text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Cargando alumnos del curso...
               </p>
             </div>
@@ -73,7 +73,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
           {!isLoading && !error && alumnosData && (
             <div>
               <div className="flex items-center justify-between mb-4 px-1">
-                <span className="font-mono text-sm text-muted-foreground font-medium">
+                <span className="text-sm text-muted-foreground font-medium">
                   Total: {alumnosData.alumnos.length}{" "}
                   {alumnosData.alumnos.length === 1 ? "alumno" : "alumnos"}
                 </span>
@@ -82,7 +82,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                   type="button"
                   onClick={() => recargarAlumnos(curso.id)}
                   disabled={isRecargando || isLoading}
-                  className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel px-4 py-2 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
+                  className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
                   title="Actualizar la lista de alumnos"
                 >
                   <svg
@@ -104,7 +104,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
 
               {alumnosData.alumnos.length === 0 ? (
                 <div className="rounded-xl border border-line bg-panel p-8 text-center">
-                  <p className="font-mono text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     No hay alumnos inscriptos en este curso todavía.
                   </p>
                 </div>
@@ -133,7 +133,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                             href={`https://github.com/${alumno.username}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-mono text-base font-semibold text-foreground hover:underline truncate block"
+                            className="text-base font-semibold text-foreground hover:underline truncate block"
                             title={`Ver perfil de @${alumno.username}`}
                           >
                             @{alumno.username}
@@ -141,7 +141,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 font-mono text-xs sm:text-sm shrink-0">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm shrink-0">
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 font-medium ${
                             alumno.state === "active"

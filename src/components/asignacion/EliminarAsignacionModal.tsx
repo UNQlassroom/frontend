@@ -47,7 +47,7 @@ export function EliminarAsignacionModal({
         {/* Encabezado */}
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-destructive font-semibold">
+            <p className="text-xs uppercase tracking-[0.2em] text-destructive font-semibold">
               Eliminar Asignación
             </p>
             <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -73,7 +73,7 @@ export function EliminarAsignacionModal({
           <>
             {/* Cuerpo del Modal unificado y directo */}
             <div className="mt-5">
-              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 font-mono text-sm leading-relaxed text-muted-foreground">
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm leading-relaxed text-muted-foreground">
                 <p>
                   <span className="font-semibold text-destructive">
                     ⚠️ Acción irreversible:
@@ -94,7 +94,7 @@ export function EliminarAsignacionModal({
                 type="button"
                 onClick={handleClose}
                 disabled={isLoading}
-                className="rounded-xl border border-line bg-panel px-5 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-xl border border-line bg-panel px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancelar
               </button>
@@ -102,7 +102,7 @@ export function EliminarAsignacionModal({
                 type="button"
                 onClick={handleConfirm}
                 disabled={isLoading}
-                className="inline-flex items-center gap-2 rounded-xl bg-destructive px-5 py-2.5 font-mono text-sm font-semibold text-white hover:bg-destructive/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+                className="inline-flex items-center gap-2 rounded-xl bg-destructive px-5 py-2.5 text-sm font-semibold text-white hover:bg-destructive/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
               >
                 {isLoading ? (
                   <>

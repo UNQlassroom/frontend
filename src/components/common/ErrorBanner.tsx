@@ -24,7 +24,7 @@ export function ErrorBanner({
           {title}
         </h2>
       )}
-      <p className="font-mono text-sm text-destructive mb-3 font-medium">
+      <p className="text-sm text-destructive mb-3 font-medium">
         {message}
       </p>
       {(onRetry || children) && (
@@ -34,7 +34,7 @@ export function ErrorBanner({
             <button
               type="button"
               onClick={onRetry}
-              className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              className="rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
             >
               {retryText}
             </button>

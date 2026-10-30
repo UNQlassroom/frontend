@@ -66,7 +66,7 @@ export const CursoDetalleDocente = () => {
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cargando detalle del curso...
           </p>
         </div>
@@ -86,7 +86,7 @@ export const CursoDetalleDocente = () => {
         >
           <Link
             to="/home"
-            className="rounded-lg border border-line bg-panel px-4 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+            className="rounded-lg border border-line bg-panel px-4 py-2 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
           >
             ← Volver a Cursos
           </Link>
@@ -103,7 +103,7 @@ export const CursoDetalleDocente = () => {
       <div>
         <Link
           to="/home"
-          className="inline-flex items-center gap-2 font-mono text-sm text-muted-foreground hover:text-foreground transition-colors group"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
         >
           <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
           <span>Volver a Cursos</span>
@@ -120,18 +120,18 @@ export const CursoDetalleDocente = () => {
 
             {/* Metadatos Académicos: Materia, Comisión, Semestre */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 font-mono text-sm font-semibold text-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
                 <span className="text-muted-foreground font-normal">Comisión:</span>
                 <span>{curso.comision}</span>
               </span>
 
-              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 font-mono text-sm font-semibold text-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
                 <span className="text-muted-foreground font-normal">Semestre:</span>
                 <span>{curso.semestre}° Semestre</span>
               </span>
 
               {curso.descripcion && (
-                <p className="font-mono text-sm text-muted-foreground mt-1.5 block w-full leading-relaxed">
+                <p className="text-sm text-muted-foreground mt-1.5 block w-full leading-relaxed">
                   {curso.descripcion}
                 </p>
               )}
@@ -148,7 +148,7 @@ export const CursoDetalleDocente = () => {
             <button
               type="button"
               onClick={() => handleTabChange("alumnos")}
-              className={`inline-flex items-center gap-2.5 py-3.5 px-5 font-mono text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
+              className={`inline-flex items-center gap-2.5 py-3.5 px-5 text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
                 activeTab === "alumnos"
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
@@ -170,7 +170,7 @@ export const CursoDetalleDocente = () => {
             <button
               type="button"
               onClick={() => handleTabChange("asignaciones")}
-              className={`inline-flex items-center gap-2 py-3.5 px-5 font-mono text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
+              className={`inline-flex items-center gap-2 py-3.5 px-5 text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
                 activeTab === "asignaciones"
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
@@ -183,7 +183,7 @@ export const CursoDetalleDocente = () => {
             <button
               type="button"
               onClick={() => handleTabChange("correcciones")}
-              className={`inline-flex items-center gap-2 py-3.5 px-5 font-mono text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
+              className={`inline-flex items-center gap-2 py-3.5 px-5 text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
                 activeTab === "correcciones"
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
@@ -196,7 +196,7 @@ export const CursoDetalleDocente = () => {
             <button
               type="button"
               onClick={() => handleTabChange("metricas")}
-              className={`inline-flex items-center gap-2 py-3.5 px-5 font-mono text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
+              className={`inline-flex items-center gap-2 py-3.5 px-5 text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
                 activeTab === "metricas"
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"

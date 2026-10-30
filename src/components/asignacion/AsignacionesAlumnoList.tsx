@@ -52,7 +52,7 @@ export function AsignacionesAlumnoList({
     return (
       <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="font-mono text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Cargando tus asignaciones y notas...
         </p>
       </div>
@@ -131,7 +131,7 @@ export function AsignacionesAlumnoList({
         <select
           value={filtro}
           onChange={(e) => setFiltro(e.target.value as EstadoEntrega | "todas")}
-          className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+          className="rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none cursor-pointer"
         >
           <option value="todas">Todas las entregas ({conteo.todas})</option>
           <option value="pendiente">Solo pendientes ({conteo.pendiente})</option>
@@ -153,7 +153,7 @@ export function AsignacionesAlumnoList({
                 setSearchTerm("");
                 setFiltro("todas");
               }}
-              className="rounded-xl border border-line bg-panel2 px-5 py-2.5 font-mono text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+              className="rounded-xl border border-line bg-panel2 px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
             >
               Restablecer filtros
             </button>
@@ -183,7 +183,7 @@ export function AsignacionesAlumnoList({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-2 flex-1 min-w-0">
                     {/* Fila superior de metadatos: Badges, Grupo y Fechas (estilo Docente) */}
-                    <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-0.5 font-semibold text-foreground">
                         {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                       </span>
@@ -257,14 +257,14 @@ export function AsignacionesAlumnoList({
 
                     {/* Descripción truncada */}
                     {asig.descripcion && (
-                      <p className="font-mono text-sm text-muted-foreground leading-relaxed max-w-3xl line-clamp-2">
+                      <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl line-clamp-2">
                         {asig.descripcion}
                       </p>
                     )}
                   </div>
 
                   {/* Panel Lateral Resumen: Solo Calificación */}
-                  <div className="flex flex-col items-center justify-center self-start sm:self-center shrink-0 rounded-xl border border-line bg-panel2 px-5 py-3.5 min-w-32.5 text-center font-mono">
+                  <div className="flex flex-col items-center justify-center self-start sm:self-center shrink-0 rounded-xl border border-line bg-panel2 px-5 py-3.5 min-w-32.5 text-center">
                     <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
                       Calificación
                     </span>

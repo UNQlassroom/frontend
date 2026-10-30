@@ -13,6 +13,7 @@ interface CorreccionesAlumnoTabProps {
 }
 
 export function CorreccionesAlumnoTab({
+  repoUrl,
   correccionGrupo,
   isLoading,
   error,
@@ -25,6 +26,11 @@ export function CorreccionesAlumnoTab({
     [correccionGrupo?.issues]
   );
   const cantIssues = issues.length;
+
+  const repoFinalUrl = correccionGrupo?.repoHtmlUrl || repoUrl;
+  const repoFinalNombre =
+    correccionGrupo?.repoNombre ||
+    (repoFinalUrl ? repoFinalUrl.split("/").filter(Boolean).pop() : null);
 
   const issuesFiltrados = useMemo(() => {
     return issues.filter((issue) => {
@@ -43,29 +49,49 @@ export function CorreccionesAlumnoTab({
 
   return (
     <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-4 animate-rise">
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-line">
-        <div className="flex items-center gap-2 font-mono text-sm font-bold text-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-line">
+        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
           <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80" />
           <span>Correcciones del docente en GitHub</span>
           <span className="rounded-full bg-line/60 px-2.5 py-0.5 text-xs text-muted-foreground font-semibold">
             {cantIssues}
           </span>
         </div>
+
+        {repoFinalUrl && (
+          <a
+            href={repoFinalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+            title={repoFinalUrl}
+          >
+            <img
+              src={githubIcon}
+              alt="GitHub"
+              className="w-4 h-4 opacity-80"
+            />
+            <span className="truncate max-w-[220px]">
+              {repoFinalNombre || "Repositorio"}
+            </span>
+            <span className="text-xs text-muted-foreground">↗</span>
+          </a>
+        )}
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12 gap-2.5">
           <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="font-mono text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             Consultando correcciones en GitHub...
           </span>
         </div>
       ) : error ? (
-        <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-center font-mono text-sm text-destructive">
+        <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-center text-sm text-destructive">
           <span>{error}</span>
         </div>
       ) : cantIssues === 0 ? (
-        <div className="p-8 rounded-xl border border-line/60 bg-panel2/40 text-center font-mono text-sm text-muted-foreground space-y-1">
+        <div className="p-8 rounded-xl border border-line/60 bg-panel2/40 text-center text-sm text-muted-foreground space-y-1">
           <p className="font-semibold text-foreground">
             Sin correcciones abiertas
           </p>
@@ -87,7 +113,7 @@ export function CorreccionesAlumnoTab({
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="rounded-xl border border-line bg-background px-3.5 py-2 font-mono text-sm text-foreground focus:outline-none cursor-pointer"
+              className="rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none cursor-pointer"
             >
               <option value="todos">Todos los estados</option>
               <option value="PENDIENTE">Pendientes</option>
@@ -97,7 +123,7 @@ export function CorreccionesAlumnoTab({
           </PanelFilterBar>
 
           {issuesFiltrados.length === 0 ? (
-            <div className="p-8 rounded-xl border border-line/60 bg-panel2/40 text-center font-mono text-sm text-muted-foreground space-y-3">
+            <div className="p-8 rounded-xl border border-line/60 bg-panel2/40 text-center text-sm text-muted-foreground space-y-3">
               <p className="text-xs text-muted-foreground">
                 No hay correcciones que coincidan con la búsqueda o el filtro seleccionado.
               </p>
@@ -113,7 +139,7 @@ export function CorreccionesAlumnoTab({
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden font-mono text-sm">
+            <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden text-sm">
               {issuesFiltrados.map((issue) => (
                 <div
                   key={issue.numero}
@@ -135,7 +161,7 @@ export function CorreccionesAlumnoTab({
                       <IssueEstadoBadge estado={issue.estado as EstadoIssue} />
                       {issue.tieneCommitsPosteriores && (
                         <span
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                           title="Tus commits en el repositorio son posteriores a la apertura de este issue"
                         >
                           <span>⚡ Commits posteriores detectados</span>
