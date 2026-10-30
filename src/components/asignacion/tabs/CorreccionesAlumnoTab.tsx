@@ -13,6 +13,7 @@ interface CorreccionesAlumnoTabProps {
 }
 
 export function CorreccionesAlumnoTab({
+  repoUrl,
   correccionGrupo,
   isLoading,
   error,
@@ -25,6 +26,11 @@ export function CorreccionesAlumnoTab({
     [correccionGrupo?.issues]
   );
   const cantIssues = issues.length;
+
+  const repoFinalUrl = correccionGrupo?.repoHtmlUrl || repoUrl;
+  const repoFinalNombre =
+    correccionGrupo?.repoNombre ||
+    (repoFinalUrl ? repoFinalUrl.split("/").filter(Boolean).pop() : null);
 
   const issuesFiltrados = useMemo(() => {
     return issues.filter((issue) => {
@@ -43,7 +49,7 @@ export function CorreccionesAlumnoTab({
 
   return (
     <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-4 animate-rise">
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-line">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-line">
         <div className="flex items-center gap-2 text-sm font-bold text-foreground">
           <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80" />
           <span>Correcciones del docente en GitHub</span>
@@ -51,6 +57,26 @@ export function CorreccionesAlumnoTab({
             {cantIssues}
           </span>
         </div>
+
+        {repoFinalUrl && (
+          <a
+            href={repoFinalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+            title={repoFinalUrl}
+          >
+            <img
+              src={githubIcon}
+              alt="GitHub"
+              className="w-4 h-4 opacity-80"
+            />
+            <span className="truncate max-w-[220px]">
+              {repoFinalNombre || "Repositorio"}
+            </span>
+            <span className="text-xs text-muted-foreground">↗</span>
+          </a>
+        )}
       </div>
 
       {isLoading ? (

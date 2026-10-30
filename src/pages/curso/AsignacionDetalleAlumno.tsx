@@ -364,7 +364,7 @@ export const AsignacionDetalleAlumno = () => {
                         <span className="text-foreground font-semibold">
                           Abrí una terminal
                         </span>{" "}
-                        (Git Bash, PowerShell o terminal de VS Code) en la carpeta
+                        en la carpeta
                         donde guardás tus proyectos.
                       </li>
                       <li>

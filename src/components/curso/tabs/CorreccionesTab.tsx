@@ -599,9 +599,31 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                 </span>
                               )}
                               <span>•</span>
-                              <span className="text-foreground font-medium truncate max-w-xs sm:max-w-md">
-                                {grupo.repoNombre}
-                              </span>
+                              {grupo.repoHtmlUrl ? (
+                                <a
+                                  href={grupo.repoHtmlUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
+                                  title={grupo.repoHtmlUrl}
+                                >
+                                  <img
+                                    src={githubIcon}
+                                    alt="GitHub"
+                                    className="w-4 h-4 opacity-80"
+                                  />
+                                  <span className="truncate max-w-[220px]">
+                                    {grupo.repoNombre}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    ↗
+                                  </span>
+                                </a>
+                              ) : (
+                                <span className="text-foreground font-medium truncate max-w-xs sm:max-w-md">
+                                  {grupo.repoNombre}
+                                </span>
+                              )}
                             </div>
                           </div>
 

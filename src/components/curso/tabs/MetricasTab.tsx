@@ -25,6 +25,9 @@ interface ItemMetrica {
   repoNombre: string;
   repoUrl: string;
   alumnoUsername: string;
+  grupoNombre?: string | null;
+  integrantes: string[];
+  esGrupal: boolean;
   estadoCI: "success" | "failure" | "pending" | "sin_ci";
   ultimoCommit: string;
   commitHash: string;
@@ -165,6 +168,9 @@ export function MetricasTab({
               (grupo.integrantes.length > 0
                 ? grupo.integrantes.map((u) => u.username).join(", ")
                 : "Sin asignar"),
+            grupoNombre: grupo.nombre,
+            integrantes: grupo.integrantes.map((u) => u.username),
+            esGrupal: asig.tipo === "GRUPAL",
             estadoCI: ["success", "failure", "pending", "sin_ci"].includes(
               estadoValido
             )
@@ -202,6 +208,11 @@ export function MetricasTab({
         item.alumnoUsername
           .toLowerCase()
           .includes(busqueda.toLowerCase().trim()) ||
+        item.integrantes.some((u) =>
+          u.toLowerCase().includes(busqueda.toLowerCase().trim())
+        ) ||
+        (item.grupoNombre &&
+          item.grupoNombre.toLowerCase().includes(busqueda.toLowerCase().trim())) ||
         item.ultimoCommit.toLowerCase().includes(busqueda.toLowerCase().trim());
 
       if (!matchBusqueda) return false;
@@ -446,8 +457,14 @@ export function MetricasTab({
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-line bg-panel2 text-xs uppercase tracking-wider text-muted-foreground">
+                      <th className="py-3.5 px-4.5">
+                        {asignacionActual
+                          ? asignacionActual.tipo === "GRUPAL"
+                            ? "Grupo / Integrantes"
+                            : "Alumno"
+                          : "Alumno / Grupo"}
+                      </th>
                       <th className="py-3.5 px-4.5">Repositorio</th>
-                      <th className="py-3.5 px-4.5">Alumno / Grupo</th>
                       <th className="py-3.5 px-4.5">Pipeline CI/CD</th>
                       <th className="py-3.5 px-4.5">Último Commit</th>
                       <th className="py-3.5 px-4.5">Rama</th>
@@ -460,6 +477,36 @@ export function MetricasTab({
                         key={item.id}
                         className="hover:bg-line/20 transition-colors group"
                       >
+                        {/* Alumno o Grupo */}
+                        <td className="py-4 px-4.5">
+                          <div className="space-y-0.5">
+                            {item.esGrupal && item.grupoNombre && (
+                              <p className="font-semibold text-foreground text-sm">
+                                {item.grupoNombre}
+                              </p>
+                            )}
+                            <div className="flex flex-wrap gap-1.5">
+                              {item.integrantes.length > 0 ? (
+                                item.integrantes.map((username) => (
+                                  <a
+                                    key={username}
+                                    href={`https://github.com/${username}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                                  >
+                                    @{username}
+                                  </a>
+                                ))
+                              ) : (
+                                <span className="text-xs text-muted-foreground">
+                                  {item.alumnoUsername}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
                         {/* Repositorio */}
                         <td className="py-4 px-4.5">
                           <a
@@ -479,13 +526,6 @@ export function MetricasTab({
                               ↗
                             </span>
                           </a>
-                        </td>
-
-                        {/* Alumno o Grupo */}
-                        <td className="py-4 px-4.5 whitespace-nowrap">
-                          <span className="font-medium text-foreground">
-                            {item.alumnoUsername}
-                          </span>
                         </td>
 
                         {/* Pipeline CI/CD */}

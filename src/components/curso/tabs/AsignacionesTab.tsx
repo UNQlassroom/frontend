@@ -595,7 +595,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                       ? "Grupo / Integrantes"
                                       : "Alumno"}
                                   </th>
-                                  <th className="py-3 px-4">Repositorio GitHub</th>
+                                  <th className="py-3 px-4">Repositorio</th>
                                   <th className="py-3 px-4">Estado / Entrega</th>
                                   <th className="py-3 px-4 text-right">Acción</th>
                                 </tr>
