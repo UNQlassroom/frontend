@@ -24,13 +24,10 @@ export function CursoCardAlumno({ curso }: Props) {
           </span>
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3">
           <h3 className="font-display text-2xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
             {curso.materia}
           </h3>
-          <span className="text-base text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-            →
-          </span>
         </div>
         <p className="mt-1.5 text-sm text-muted-foreground">
           Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}

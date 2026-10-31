@@ -670,7 +670,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                           No generado (error)
                                         </span>
                                       ) : (
-                                        <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 italic text-xs">
+                                        <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 text-xs">
                                           <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
                                           <span>Creando en GitHub...</span>
                                         </span>
@@ -725,7 +725,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                             grupo,
                                           })
                                         }
-                                        className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-xs sm:text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
                                         title={
                                           asig.estado === "CREANDO"
                                             ? "Esperá a que finalice la creación de repositorios para calificar"

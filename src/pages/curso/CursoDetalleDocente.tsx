@@ -88,7 +88,7 @@ export const CursoDetalleDocente = () => {
             to="/home"
             className="rounded-lg border border-line bg-panel px-4 py-2 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
           >
-            ← Volver a Cursos
+            Volver a Cursos
           </Link>
         </ErrorBanner>
       </main>
@@ -103,9 +103,8 @@ export const CursoDetalleDocente = () => {
       <div>
         <Link
           to="/home"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
           <span>Volver a Cursos</span>
         </Link>
       </div>

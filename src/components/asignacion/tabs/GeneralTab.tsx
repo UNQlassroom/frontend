@@ -104,6 +104,7 @@ export function GeneralTab({
                       className="w-4 h-4 opacity-80"
                     />
                     <span>Ver en GitHub</span>
+                    <span className="text-muted-foreground text-[11px]">↗</span>
                   </a>
                 </div>
               )}

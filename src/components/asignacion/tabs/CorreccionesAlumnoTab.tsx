@@ -28,9 +28,9 @@ export function CorreccionesAlumnoTab({
   const cantIssues = issues.length;
 
   const repoFinalUrl = correccionGrupo?.repoHtmlUrl || repoUrl;
-  const repoFinalNombre =
-    correccionGrupo?.repoNombre ||
-    (repoFinalUrl ? repoFinalUrl.split("/").filter(Boolean).pop() : null);
+  const repoIssuesUrl = repoFinalUrl
+    ? `${repoFinalUrl.replace(/\/$/, "")}/issues`
+    : null;
 
   const issuesFiltrados = useMemo(() => {
     return issues.filter((issue) => {
@@ -58,22 +58,20 @@ export function CorreccionesAlumnoTab({
           </span>
         </div>
 
-        {repoFinalUrl && (
+        {repoIssuesUrl && (
           <a
-            href={repoFinalUrl}
+            href={repoIssuesUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
-            title={repoFinalUrl}
+            title="Ver todos en GitHub"
           >
             <img
               src={githubIcon}
               alt="GitHub"
               className="w-4 h-4 opacity-80"
             />
-            <span className="truncate max-w-[220px]">
-              {repoFinalNombre || "Repositorio"}
-            </span>
+            <span>Ver todos en GitHub</span>
             <span className="text-xs text-muted-foreground">↗</span>
           </a>
         )}
