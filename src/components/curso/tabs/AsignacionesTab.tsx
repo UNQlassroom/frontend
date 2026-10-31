@@ -597,7 +597,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                   </th>
                                   <th className="py-3 px-4">Repositorio</th>
                                   <th className="py-3 px-4">Estado / Entrega</th>
-                                  <th className="py-3 px-4 text-right">Acción</th>
+                                  <th className="py-3 px-4">Acción</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-line/60">
@@ -710,7 +710,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                     </td>
 
                                     {/* Acción / Calificar */}
-                                    <td className="py-3.5 px-4 text-right">
+                                    <td className="py-3.5 px-4">
                                       <button
                                         type="button"
                                         disabled={
