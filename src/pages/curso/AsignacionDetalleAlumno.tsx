@@ -141,7 +141,7 @@ export const AsignacionDetalleAlumno = () => {
             to={`/cursos/${cursoId}`}
             className="rounded-lg border border-line bg-panel px-4 py-2 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
           >
-            ← Volver al Curso
+            Volver al Curso
           </Link>
         </ErrorBanner>
       </main>
@@ -167,9 +167,6 @@ export const AsignacionDetalleAlumno = () => {
           to={`/cursos/${cursoId}`}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
         >
-          <span className="group-hover:-translate-x-0.5 transition-transform">
-            ←
-          </span>
           <span>Volver al Curso</span>
         </Link>
 
