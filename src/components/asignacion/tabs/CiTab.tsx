@@ -304,8 +304,7 @@ export function CiTab({
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               GitHub Actions está ejecutando las pruebas para tu último commit.
-              Podés actualizar la asignación en unos instantes para ver el
-              resultado.
+              El resultado se actualizará automáticamente cuando finalice.
             </p>
           </div>
         </div>

@@ -41,7 +41,6 @@ export const CursoDetalleDocente = () => {
     isRecargando: isRecargandoAlumnos,
     error: errorAlumnos,
     cargarAlumnos,
-    recargarAlumnos,
   } = useAlumnos();
 
   useEffect(() => {
@@ -216,7 +215,6 @@ export const CursoDetalleDocente = () => {
               isRecargando={isRecargandoAlumnos}
               error={errorAlumnos}
               onRetry={() => cursoId && cargarAlumnos(cursoId)}
-              onRecargar={() => cursoId && recargarAlumnos(cursoId)}
               onOpenInvitarModal={() => setOpenInvitarModal(true)}
             />
           )}

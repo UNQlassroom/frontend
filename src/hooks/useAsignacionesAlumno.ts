@@ -9,6 +9,7 @@ import {
   entregarAsignacion,
 } from "@/services";
 import { useAuth } from "./useAuth";
+import { useSseListener } from "./useSseListener";
 
 export interface EstadisticasProgresoAlumno {
   totalAsignaciones: number;
@@ -150,6 +151,29 @@ export function useAsignacionesAlumno(cursoId?: number) {
       ignore = true;
     };
   }, [cursoId, username]);
+
+  // Refresco silencioso en tiempo real mediante SSE
+  useSseListener(
+    [
+      "ASIGNACION_ACTUALIZADA",
+      "PUSH_RECIBIDO",
+      "CI_ACTUALIZADO",
+      "ENTREGA_REALIZADA",
+    ],
+    (event) => {
+      if (!cursoId || (event.cursoId !== null && event.cursoId !== cursoId)) {
+        return;
+      }
+      obtenerAsignaciones(cursoId)
+        .then((response) => {
+          const mapeadas = mapAsignacionesDTO(response.data, username);
+          setAsignaciones(mapeadas);
+        })
+        .catch(() => {
+          // Ignorar errores en refresco silencioso por SSE
+        });
+    }
+  );
 
   const entregar = useCallback(
     async (asignacionId: number): Promise<boolean> => {

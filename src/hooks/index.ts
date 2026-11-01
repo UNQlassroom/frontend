@@ -4,3 +4,4 @@ export * from "./useCursoDetalle";
 export * from "./useAsignacionesAlumno";
 export * from "./useAsignacionDetalleAlumno";
 export * from "./useAuth";
+export * from "./useSseListener";

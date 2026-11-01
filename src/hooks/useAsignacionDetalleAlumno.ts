@@ -17,6 +17,7 @@ import {
 } from "@/services";
 import { useAuth } from "./useAuth";
 import { mapAsignacionesDTO } from "./useAsignacionesAlumno";
+import { useSseListener } from "./useSseListener";
 
 export type SeccionDetalle = "general" | "tecnico" | "correcciones";
 
@@ -77,6 +78,44 @@ export function useAsignacionDetalleAlumno(
       setIsLoadingCorrecciones(false);
     }
   }, [cursoId, asignacionId]);
+
+  const refrescarCorreccionesSilencioso = useCallback(async () => {
+    if (!cursoId || !asignacionId) return;
+    try {
+      const res = await obtenerCorrecciones(cursoId, asignacionId);
+      setCorreccionGrupo(res.data[0] || null);
+      setErrorCorrecciones(null);
+    } catch {
+      // Ignorar errores en refresco silencioso por SSE
+    }
+  }, [cursoId, asignacionId]);
+
+  const refrescarAsignacionSilencioso = useCallback(
+    async (conservarDiagnostico = true) => {
+      if (!cursoId || !asignacionId) return;
+      try {
+        const asigResponse = await obtenerAsignacionPorId(cursoId, asignacionId);
+        const mapeadas = mapAsignacionesDTO([asigResponse.data], username);
+        setAsignacion(() => {
+          const nueva = mapeadas[0] ?? null;
+          if (!nueva) return null;
+          if (!conservarDiagnostico || !diagnosticoCI) {
+            return nueva;
+          }
+          return {
+            ...nueva,
+            estadoCI: diagnosticoCI.estadoCI ?? nueva.estadoCI,
+            ciEtapaFallida: diagnosticoCI.etapaFallida ?? nueva.ciEtapaFallida,
+            ciLogError: diagnosticoCI.logError ?? nueva.ciLogError,
+            ciRunUrl: diagnosticoCI.runUrl ?? nueva.ciRunUrl,
+          };
+        });
+      } catch {
+        // Ignorar errores en refresco silencioso por SSE
+      }
+    },
+    [cursoId, asignacionId, username, diagnosticoCI]
+  );
 
   // Carga Lazy de Diagnóstico de CI + Unificación de estado
   const cargarDiagnostico = useCallback(
@@ -183,6 +222,65 @@ export function useAsignacionDetalleAlumno(
     cargarMetricas,
     cargarLinter,
   ]);
+
+  // Suscripción a eventos SSE para actualizar el detalle en tiempo real
+  useSseListener(
+    [
+      "ASIGNACION_ACTUALIZADA",
+      "PUSH_RECIBIDO",
+      "CI_ACTUALIZADO",
+      "METRICAS_CI_ACTUALIZADAS",
+      "LINTER_ACTUALIZADO",
+      "ENTREGA_REALIZADA",
+      "ISSUE_ACTUALIZADO",
+    ],
+    (event) => {
+      if (!cursoId || !asignacionId) return;
+      if (event.cursoId !== null && event.cursoId !== cursoId) return;
+      if (event.asignacionId !== null && event.asignacionId !== asignacionId) return;
+
+      switch (event.type) {
+        case "ASIGNACION_ACTUALIZADA":
+        case "ENTREGA_REALIZADA":
+          void refrescarAsignacionSilencioso(true);
+          break;
+
+        case "PUSH_RECIBIDO":
+          void refrescarAsignacionSilencioso(true);
+          void refrescarCorreccionesSilencioso();
+          break;
+
+        case "CI_ACTUALIZADO":
+          void refrescarAsignacionSilencioso(false);
+          if (seccionActiva === "tecnico" && subSeccionTecnica === "ci") {
+            void cargarDiagnostico(true);
+          } else {
+            setDiagnosticoCI(null);
+          }
+          break;
+
+        case "METRICAS_CI_ACTUALIZADAS":
+          if (seccionActiva === "tecnico" && subSeccionTecnica === "cobertura") {
+            void cargarMetricas(true);
+          } else {
+            setMetricasCI(null);
+          }
+          break;
+
+        case "LINTER_ACTUALIZADO":
+          if (seccionActiva === "tecnico" && subSeccionTecnica === "git") {
+            void cargarLinter(true);
+          } else {
+            setReporteLinter(null);
+          }
+          break;
+
+        case "ISSUE_ACTUALIZADO":
+          void refrescarCorreccionesSilencioso();
+          break;
+      }
+    }
+  );
 
   const cargarDetalle = useCallback(
     async (esRecarga = false) => {

@@ -11,7 +11,6 @@ export interface AlumnosTabProps {
   isRecargando?: boolean;
   error: string | null;
   onRetry: () => void;
-  onRecargar?: () => void;
   onOpenInvitarModal: () => void;
 }
 
@@ -21,7 +20,6 @@ export function AlumnosTab({
   isRecargando = false,
   error,
   onRetry,
-  onRecargar,
   onOpenInvitarModal,
 }: AlumnosTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,46 +56,19 @@ export function AlumnosTab({
         title="Panel de Alumnos"
         description="Listado de alumnos y estado de membresía en la organización."
         actions={
-          <>
-            {onRecargar && (
-              <button
-                type="button"
-                onClick={onRecargar}
-                disabled={isRecargando || isLoading}
-                className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-                title="Actualizar la lista de alumnos"
-              >
-                <svg
-                  className={`w-4 h-4 ${
-                    isRecargando ? "animate-spin text-primary" : "text-muted-foreground"
-                  }`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                </svg>
-                <span>{isRecargando ? "Actualizando..." : "Actualizar alumnos"}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={onOpenInvitarModal}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-              title="Invitar nuevos alumnos al curso"
-            >
-              <img
-                src={circleAddIcon}
-                alt="Invitar"
-                className="w-4 h-4 brightness-0 invert"
-              />
-              <span>Invitar alumnos</span>
-            </button>
-          </>
+          <button
+            type="button"
+            onClick={onOpenInvitarModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+            title="Invitar nuevos alumnos al curso"
+          >
+            <img
+              src={circleAddIcon}
+              alt="Invitar"
+              className="w-4 h-4 brightness-0 invert"
+            />
+            <span>Invitar alumnos</span>
+          </button>
         }
       />
 

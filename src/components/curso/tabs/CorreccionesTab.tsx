@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useSseListener } from "@/hooks";
 import type {
   CursoResponseDTO,
   CorreccionGrupoResponseDTO,
@@ -125,29 +126,40 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     [asignaciones, selectedAsignacionId]
   );
 
-  const hayAsignacionesCreando = useMemo(
-    () => asignaciones.some((a) => a.estado === "CREANDO"),
-    [asignaciones]
+  // Refresco silencioso ante eventos SSE
+  useSseListener(
+    ["ASIGNACION_ACTUALIZADA", "PUSH_RECIBIDO", "ISSUE_ACTUALIZADO"],
+    (event) => {
+      if (event.cursoId !== null && event.cursoId !== curso.id) {
+        return;
+      }
+      if (event.type === "ASIGNACION_ACTUALIZADA") {
+        obtenerAsignaciones(curso.id)
+          .then((res) => {
+            setAsignaciones(res.data);
+          })
+          .catch(() => {});
+      } else {
+        if (
+          selectedAsignacionId &&
+          (event.asignacionId === null || event.asignacionId === selectedAsignacionId)
+        ) {
+          obtenerCorrecciones(curso.id, selectedAsignacionId)
+            .then((res) => {
+              setCorrecciones(res.data);
+            })
+            .catch(() => {});
+        }
+        if (event.type === "PUSH_RECIBIDO") {
+          obtenerAsignaciones(curso.id)
+            .then((res) => {
+              setAsignaciones(res.data);
+            })
+            .catch(() => {});
+        }
+      }
+    }
   );
-
-  // Polling silencioso mientras existan asignaciones creando sus repositorios en segundo plano
-  useEffect(() => {
-    if (!hayAsignacionesCreando) return;
-
-    const intervalId = window.setInterval(() => {
-      obtenerAsignaciones(curso.id)
-        .then((res) => {
-          setAsignaciones(res.data);
-        })
-        .catch(() => {
-          // Ignorar errores puntuales de polling silencioso
-        });
-    }, 8000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [curso.id, hayAsignacionesCreando]);
 
   useEffect(() => {
     if (!selectedAsignacionId) return;
@@ -287,46 +299,12 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     setFiltroEstado((prev) => (prev === estadoTarget ? "todos" : estadoTarget));
   };
 
-  const isActualizando = isRecargando || isLoadingCorrecciones;
-
   return (
     <div className="space-y-6 animate-rise">
       {/* Encabezado del panel de Correcciones */}
       <PanelHeader
         title="Panel de Correcciones"
         description="Seguimiento de correcciones por entrega y estado de commits posteriores de los alumnos."
-        actions={
-          selectedAsignacionId ? (
-            <button
-              type="button"
-              onClick={() => cargarCorrecciones(selectedAsignacionId)}
-              disabled={isActualizando || isLoadingAsignaciones}
-              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-              title="Actualizar el estado de las correcciones"
-            >
-              <svg
-                className={`w-4 h-4 ${
-                  isActualizando
-                    ? "animate-spin text-primary"
-                    : "text-muted-foreground"
-                }`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-              </svg>
-              <span>
-                {isActualizando
-                  ? "Actualizando..."
-                  : "Actualizar correcciones"}
-              </span>
-            </button>
-          ) : null
-        }
       />
 
       {/* Loading inicial de asignaciones */}
