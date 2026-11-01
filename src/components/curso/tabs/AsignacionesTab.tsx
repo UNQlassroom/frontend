@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAuth } from "@/hooks";
+import { useAuth, useSseListener } from "@/hooks";
 import type {
   AlumnoResponseDTO,
   AsignacionResponseDTO,
@@ -154,29 +154,27 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
     };
   }, [curso.id]);
 
-  const hayAsignacionesCreando = useMemo(
-    () => asignaciones.some((a) => a.estado === "CREANDO"),
-    [asignaciones]
-  );
-
-  // Polling silencioso mientras existan asignaciones creando sus repositorios en segundo plano
-  useEffect(() => {
-    if (!hayAsignacionesCreando) return;
-
-    const intervalId = window.setInterval(() => {
+  // Refresco silencioso ante eventos SSE
+  useSseListener(
+    [
+      "ASIGNACION_ACTUALIZADA",
+      "PUSH_RECIBIDO",
+      "CI_ACTUALIZADO",
+      "ENTREGA_REALIZADA",
+    ],
+    (event) => {
+      if (event.cursoId !== null && event.cursoId !== curso.id) {
+        return;
+      }
       obtenerAsignaciones(curso.id)
         .then((res) => {
           setAsignaciones(res.data);
         })
         .catch(() => {
-          // Ignorar errores puntuales de polling silencioso
+          // Ignorar errores puntuales en refresco silencioso por SSE
         });
-    }, 8000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [curso.id, hayAsignacionesCreando]);
+    }
+  );
 
   const toggleExpand = (asigId: number) => {
     setExpandedAsigId((prev) => (prev === asigId ? null : asigId));
@@ -224,8 +222,6 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
     });
   }, [asignaciones, busqueda, filtroTipo]);
 
-  const isActualizando = isRecargando || isLoading;
-
   return (
     <div className="space-y-6 animate-rise">
       {/* Encabezado del Panel de Asignaciones */}
@@ -233,44 +229,19 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
         title="Panel de Asignaciones"
         description="Crea y administra asignaciones individuales o grupales integradas con GitHub y seguimiento de entregas."
         actions={
-          <>
-            <button
-              type="button"
-              onClick={cargarAsignaciones}
-              disabled={isActualizando}
-              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-              title="Actualizar asignaciones del curso"
-            >
-              <svg
-                className={`w-4 h-4 ${
-                  isActualizando ? "animate-spin text-primary" : "text-muted-foreground"
-                }`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-              </svg>
-              <span>{isActualizando ? "Actualizando..." : "Actualizar asignaciones"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-              title="Crear una nueva asignación"
-            >
-              <img
-                src={circleAddIcon}
-                alt="Crear"
-                className="w-4 h-4 brightness-0 invert"
-              />
-              <span>Crear asignación</span>
-            </button>
-          </>
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+            title="Crear una nueva asignación"
+          >
+            <img
+              src={circleAddIcon}
+              alt="Crear"
+              className="w-4 h-4 brightness-0 invert"
+            />
+            <span>Crear asignación</span>
+          </button>
         }
       />
 

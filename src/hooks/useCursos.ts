@@ -4,6 +4,7 @@ import type {
   CursoResponseDTO,
   CrearCursoFormData,
 } from "@/types";
+import { useSseListener } from "./useSseListener";
 
 export const useCursos = () => {
   const [cursos, setCursos] = useState<CursoResponseDTO[]>([]);
@@ -50,6 +51,17 @@ export const useCursos = () => {
       isMounted = false;
     };
   }, []);
+
+  // Refresco silencioso de cursos ante activación de membresía o actualización de asignación
+  useSseListener(["MIEMBRO_ACTIVADO", "ASIGNACION_ACTUALIZADA"], () => {
+    obtenerCursos()
+      .then((response) => {
+        setCursos(response.data);
+      })
+      .catch(() => {
+        // Ignorar errores en refresco silencioso por SSE
+      });
+  });
 
   const crearNuevoCurso = async (formData: CrearCursoFormData): Promise<CursoResponseDTO | null> => {
     setIsLoading(true);

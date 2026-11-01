@@ -150,8 +150,6 @@ export const AsignacionDetalleAlumno = () => {
 
   const badge = getBadgeEstadoEntrega(asignacion.estadoEntrega);
   const isVencida = esFechaLimiteVencida(asignacion.fechaLimite);
-  const isActualizando =
-    isRecargando || isLoadingCorrecciones || isLoadingTecnico;
   const cantIssues = correccionGrupo?.issues?.length ?? 0;
   const fechaEntregaVisible =
     asignacion.fechaEntregadaFormatted ||
@@ -161,39 +159,14 @@ export const AsignacionDetalleAlumno = () => {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 flex-1 w-full space-y-6 animate-rise">
-      {/* Barra superior: Retorno al curso y botón de actualización */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Barra superior: Retorno al curso */}
+      <div>
         <Link
           to={`/cursos/${cursoId}`}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
         >
           <span>Volver al Curso</span>
         </Link>
-
-        <button
-          type="button"
-          onClick={() => void cargarDetalle(true)}
-          disabled={isActualizando}
-          className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-          title="Actualizar estado de la asignación y correcciones"
-        >
-          <svg
-            className={`w-4 h-4 ${
-              isActualizando ? "animate-spin text-primary" : "text-muted-foreground"
-            }`}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-          </svg>
-          <span>
-            {isActualizando ? "Actualizando..." : "Actualizar asignación"}
-          </span>
-        </button>
       </div>
 
       {/* Encabezado Principal de la Asignación */}

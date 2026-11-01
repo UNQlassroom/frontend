@@ -1,4 +1,5 @@
 import { useState, useEffect, type SubmitEvent } from "react";
+import { useSseListener } from "@/hooks";
 import { toast } from "react-toastify";
 import {
   crearAsignacion,
@@ -83,6 +84,22 @@ export function CrearAsignacionModal({
       ignore = true;
     };
   }, [open]);
+
+  // Refresco silencioso de templates en tiempo real si el modal está abierto
+  useSseListener("TEMPLATES_ACTUALIZADOS", () => {
+    if (!open) return;
+    listarTemplates()
+      .then((res) => {
+        setTemplates(res.data);
+        setTemplateRepoName((prev) => {
+          if (res.data.some((t) => t.name === prev)) {
+            return prev;
+          }
+          return res.data[0]?.name || "";
+        });
+      })
+      .catch(() => {});
+  });
 
   const handleClose = () => {
     setTitulo("");

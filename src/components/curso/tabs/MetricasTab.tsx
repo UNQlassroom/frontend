@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useSseListener } from "@/hooks";
 import type {
   AlumnoResponseDTO,
   AsignacionResponseDTO,
@@ -116,29 +117,25 @@ export function MetricasTab({
     [asignaciones, selectedAsignacionId]
   );
 
-  const hayAsignacionesCreando = useMemo(
-    () => asignaciones.some((a) => a.estado === "CREANDO"),
-    [asignaciones]
-  );
-
-  // Polling silencioso mientras existan asignaciones creando sus repositorios en segundo plano
-  useEffect(() => {
-    if (!hayAsignacionesCreando) return;
-
-    const intervalId = window.setInterval(() => {
+  // Refresco silencioso ante eventos SSE
+  useSseListener(
+    [
+      "ASIGNACION_ACTUALIZADA",
+      "PUSH_RECIBIDO",
+      "CI_ACTUALIZADO",
+      "ENTREGA_REALIZADA",
+    ],
+    (event) => {
+      if (event.cursoId !== null && event.cursoId !== curso.id) {
+        return;
+      }
       obtenerAsignaciones(curso.id)
-        .then((res) => {
-          setAsignaciones(res.data);
+        .then((response) => {
+          setAsignaciones(response.data);
         })
-        .catch(() => {
-          // Ignorar errores puntuales de polling silencioso
-        });
-    }, 8000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [curso.id, hayAsignacionesCreando]);
+        .catch(() => {});
+    }
+  );
 
   // Extraer repositorios filtrados por la asignación seleccionada
   const datosItems: ItemMetrica[] = useMemo(() => {
@@ -225,38 +222,12 @@ export function MetricasTab({
     setFiltroEstado((prev) => (prev === estadoTarget ? "todos" : estadoTarget));
   };
 
-  const isActualizando = isRecargando || isLoading;
-
   return (
     <div className="space-y-6 animate-rise">
-      {/* Encabezado del panel de métricas con botón de actualización */}
+      {/* Encabezado del panel de métricas */}
       <PanelHeader
         title="Panel de Métricas de Repositorios (CI/CD)"
         description="Monitoreo en tiempo real de los pipelines de GitHub Actions, fechas y actividad de commits de las asignaciones."
-        actions={
-          <button
-            type="button"
-            onClick={cargarDatos}
-            disabled={isActualizando}
-            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
-            title="Consultar datos actualizados de la base de datos y GitHub"
-          >
-            <svg
-              className={`w-4 h-4 ${
-                isActualizando ? "animate-spin text-primary" : "text-muted-foreground"
-              }`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-            <span>{isActualizando ? "Actualizando..." : "Actualizar métricas"}</span>
-          </button>
-        }
       />
 
       {/* Estado: Cargando */}

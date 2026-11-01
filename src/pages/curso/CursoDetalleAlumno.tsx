@@ -54,8 +54,6 @@ export const CursoDetalleAlumno = () => {
     );
   }
 
-  const isActualizando = isRecargandoAsignaciones || isLoadingAsignaciones;
-
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 flex-1 w-full space-y-8 animate-rise">
       {/* Navegación de retorno (Breadcrumbs) */}
@@ -113,28 +111,6 @@ export const CursoDetalleAlumno = () => {
         <PanelHeader
           title="Panel de Asignaciones"
           description="Seleccioná una asignación para ver en detalle su consigna, el estado técnico de tu repositorio, entregas y devoluciones."
-          actions={
-            <button
-              type="button"
-              onClick={cargarAsignaciones}
-              disabled={isActualizando}
-              className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
-              title="Actualizar asignaciones"
-            >
-              <svg
-                className={`w-4 h-4 ${isActualizando ? "animate-spin text-primary" : "text-muted-foreground"}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-              </svg>
-              <span>{isActualizando ? "Actualizando..." : "Actualizar asignaciones"}</span>
-            </button>
-          }
         />
 
         <AsignacionesAlumnoList

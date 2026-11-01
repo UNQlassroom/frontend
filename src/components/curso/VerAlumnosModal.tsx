@@ -16,7 +16,6 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
     isRecargando,
     error,
     cargarAlumnos,
-    recargarAlumnos,
     limpiar,
   } = useAlumnos();
 
@@ -77,29 +76,6 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                   Total: {alumnosData.alumnos.length}{" "}
                   {alumnosData.alumnos.length === 1 ? "alumno" : "alumnos"}
                 </span>
-
-                <button
-                  type="button"
-                  onClick={() => recargarAlumnos(curso.id)}
-                  disabled={isRecargando || isLoading}
-                  className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs"
-                  title="Actualizar la lista de alumnos"
-                >
-                  <svg
-                    className={`w-4 h-4 ${
-                      isRecargando ? "animate-spin text-primary" : "text-muted-foreground"
-                    }`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                  </svg>
-                  <span>{isRecargando ? "Actualizando..." : "Actualizar alumnos"}</span>
-                </button>
               </div>
 
               {alumnosData.alumnos.length === 0 ? (
