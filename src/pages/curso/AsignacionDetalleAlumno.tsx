@@ -129,7 +129,7 @@ export const AsignacionDetalleAlumno = () => {
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
         <ErrorBanner
           className="max-w-lg mx-auto p-8"
-          title="No se pudo cargar la asignación"
+          title="Ocurrió un error al cargar la asignación"
           message={
             error ||
             "La asignación solicitada no existe o no se encuentra disponible."

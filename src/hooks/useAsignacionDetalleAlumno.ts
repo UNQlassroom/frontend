@@ -320,7 +320,7 @@ export function useAsignacionDetalleAlumno(
           };
         });
       } catch {
-        setError("No se pudo cargar el detalle de la asignación.");
+        setError("No se pudo cargar el detalle de la asignación");
       } finally {
         setIsLoading(false);
       }
@@ -366,7 +366,7 @@ export function useAsignacionDetalleAlumno(
       })
       .catch(() => {
         if (isMounted) {
-          setError("No se pudo cargar el detalle de la asignación.");
+          setError("No se pudo cargar el detalle de la asignación");
         }
       })
       .finally(() => {
