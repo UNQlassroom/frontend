@@ -54,11 +54,7 @@ export function MetricasTab({
     setIsRecargando(true);
     setError(null);
     try {
-      // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
-      const [response] = await Promise.all([
-        obtenerAsignaciones(curso.id),
-        new Promise((resolve) => setTimeout(resolve, 600)),
-      ]);
+      const response = await obtenerAsignaciones(curso.id);
       setAsignaciones(response.data);
       if (response.data.length > 0) {
         setSelectedAsignacionId((prev) => {

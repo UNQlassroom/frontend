@@ -109,11 +109,7 @@ export function useAsignacionesAlumno(cursoId?: number) {
     setIsRecargando(true);
     setError(null);
     try {
-      // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
-      const [response] = await Promise.all([
-        obtenerAsignaciones(cursoId),
-        new Promise((resolve) => setTimeout(resolve, 600)),
-      ]);
+      const response = await obtenerAsignaciones(cursoId);
       const mapeadas = mapAsignacionesDTO(response.data, username);
       setAsignaciones(mapeadas);
     } catch {

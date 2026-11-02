@@ -305,10 +305,6 @@ export function useAsignacionDetalleAlumno(
           else if (subSeccionTecnica === "git") tareas.push(cargarLinter(true));
         }
 
-        if (esRecarga) {
-          tareas.push(new Promise((resolve) => setTimeout(resolve, 600)));
-        }
-
         const [asigResponse] = (await Promise.all(tareas)) as [
           Awaited<ReturnType<typeof obtenerAsignacionPorId>>,
           ...unknown[]

@@ -31,11 +31,7 @@ export const useAlumnos = () => {
     setIsRecargando(true);
     setError(null);
     try {
-      // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
-      const [response] = await Promise.all([
-        obtenerAlumnos(cursoId),
-        new Promise((resolve) => setTimeout(resolve, 600)),
-      ]);
+      const response = await obtenerAlumnos(cursoId);
       setAlumnosData(response.data);
       return response.data;
     } catch {

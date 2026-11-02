@@ -89,11 +89,9 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
       setIsRecargando(true);
       setError(null);
       try {
-        // Garantizamos un tiempo mínimo de 600ms para que la animación de recarga sea perceptible
         const [asigRes, corrRes] = await Promise.all([
           obtenerAsignaciones(curso.id),
           obtenerCorrecciones(curso.id, asignacionId),
-          new Promise((resolve) => setTimeout(resolve, 600)),
         ]);
         setAsignaciones(asigRes.data);
         setCorrecciones(corrRes.data);
