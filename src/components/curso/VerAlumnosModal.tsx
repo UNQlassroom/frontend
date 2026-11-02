@@ -13,8 +13,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
   const {
     alumnosData,
     isLoading,
-    isRecargando,
-    error,
+        error,
     cargarAlumnos,
     limpiar,
   } = useAlumnos();
@@ -86,9 +85,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                 </div>
               ) : (
                 <div
-                  className={`space-y-3 max-h-[55vh] overflow-y-auto pr-1 transition-all duration-300 ${
-                    isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
-                  }`}
+                  className="space-y-3 max-h-[55vh] overflow-y-auto pr-1"
                 >
                   {alumnosData.alumnos.map((alumno) => (
                     <div

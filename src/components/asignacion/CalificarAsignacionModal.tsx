@@ -1,5 +1,6 @@
 import { useState, type SubmitEvent } from "react";
 import { calificarAsignacion } from "@/services";
+import { formatFechaLegible } from "@/utils";
 import type {
   AsignacionResponseDTO,
   GrupoAsignacionResponseDTO,
@@ -100,15 +101,7 @@ function CalificarAsignacionContent({
                   {grupo.fechaEntregada && (
                     <span className="text-muted-foreground font-normal">
                       (
-                      {new Date(grupo.fechaEntregada).toLocaleDateString(
-                        "es-AR",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
+                      {formatFechaLegible(grupo.fechaEntregada)}
                       )
                     </span>
                   )}

@@ -23,3 +23,23 @@ export const getGitHubNewIssueUrl = (
   const query = params.toString();
   return query ? `${base}?${query}` : base;
 };
+
+/**
+ * Resuelve la URL adecuada hacia un commit específico o a la lista de commits en GitHub.
+ */
+export const getGitHubCommitUrl = (
+  repoUrl?: string | null,
+  commitShaOrMsg?: string | null,
+  advertenciasGit?: { commitSha?: string }[]
+): string | null => {
+  if (!repoUrl) return null;
+  const shaCandidate = commitShaOrMsg?.trim();
+  if (shaCandidate && /^[0-9a-f]{7,40}$/i.test(shaCandidate)) {
+    return `${repoUrl}/commit/${shaCandidate}`;
+  }
+  const shaAdvertencia = advertenciasGit?.[0]?.commitSha;
+  if (shaAdvertencia) {
+    return `${repoUrl}/commit/${shaAdvertencia}`;
+  }
+  return `${repoUrl}/commits`;
+};

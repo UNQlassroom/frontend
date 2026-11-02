@@ -32,7 +32,6 @@ export function useAsignacionDetalleAlumno(
 
   const [asignacion, setAsignacion] = useState<AsignacionAlumnoDTO | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const [correccionGrupo, setCorreccionGrupo] =
@@ -65,30 +64,31 @@ export function useAsignacionDetalleAlumno(
 
   const grupoId = asignacion?.grupoId;
 
-  const cargarCorrecciones = useCallback(async () => {
-    if (!cursoId || !asignacionId) return;
-    setIsLoadingCorrecciones(true);
-    setErrorCorrecciones(null);
-    try {
-      const res = await obtenerCorrecciones(cursoId, asignacionId);
-      setCorreccionGrupo(res.data[0] || null);
-    } catch {
-      setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
-    } finally {
-      setIsLoadingCorrecciones(false);
-    }
-  }, [cursoId, asignacionId]);
-
-  const refrescarCorreccionesSilencioso = useCallback(async () => {
-    if (!cursoId || !asignacionId) return;
-    try {
-      const res = await obtenerCorrecciones(cursoId, asignacionId);
-      setCorreccionGrupo(res.data[0] || null);
-      setErrorCorrecciones(null);
-    } catch {
-      // Ignorar errores en refresco silencioso por SSE
-    }
-  }, [cursoId, asignacionId]);
+  const cargarCorrecciones = useCallback(
+    async (silencioso = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!silencioso) {
+        setIsLoadingCorrecciones(true);
+        setErrorCorrecciones(null);
+      }
+      try {
+        const res = await obtenerCorrecciones(cursoId, asignacionId);
+        setCorreccionGrupo(res.data[0] || null);
+        if (silencioso) {
+          setErrorCorrecciones(null);
+        }
+      } catch {
+        if (!silencioso) {
+          setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
+        }
+      } finally {
+        if (!silencioso) {
+          setIsLoadingCorrecciones(false);
+        }
+      }
+    },
+    [cursoId, asignacionId]
+  );
 
   const refrescarAsignacionSilencioso = useCallback(
     async (conservarDiagnostico = true) => {
@@ -247,7 +247,7 @@ export function useAsignacionDetalleAlumno(
 
         case "PUSH_RECIBIDO":
           void refrescarAsignacionSilencioso(true);
-          void refrescarCorreccionesSilencioso();
+          void cargarCorrecciones(true);
           break;
 
         case "CI_ACTUALIZADO":
@@ -276,20 +276,16 @@ export function useAsignacionDetalleAlumno(
           break;
 
         case "ISSUE_ACTUALIZADO":
-          void refrescarCorreccionesSilencioso();
+          void cargarCorrecciones(true);
           break;
       }
     }
   );
 
   const cargarDetalle = useCallback(
-    async (esRecarga = false) => {
+    async () => {
       if (!cursoId || !asignacionId) return;
-      if (esRecarga) {
-        setIsRecargando(true);
-      } else {
-        setIsLoading(true);
-      }
+      setIsLoading(true);
       setError(null);
 
       try {
@@ -324,10 +320,9 @@ export function useAsignacionDetalleAlumno(
           };
         });
       } catch {
-        setError("No se pudo cargar el detalle de la asignación.");
+        setError("No se pudo cargar el detalle de la asignación");
       } finally {
         setIsLoading(false);
-        setIsRecargando(false);
       }
     },
     [
@@ -371,7 +366,7 @@ export function useAsignacionDetalleAlumno(
       })
       .catch(() => {
         if (isMounted) {
-          setError("No se pudo cargar el detalle de la asignación.");
+          setError("No se pudo cargar el detalle de la asignación");
         }
       })
       .finally(() => {
@@ -410,7 +405,6 @@ export function useAsignacionDetalleAlumno(
     asignacion,
     username,
     isLoading,
-    isRecargando,
     error,
     correccionGrupo,
     isLoadingCorrecciones,

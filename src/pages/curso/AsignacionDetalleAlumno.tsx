@@ -60,7 +60,6 @@ export const AsignacionDetalleAlumno = () => {
     asignacion,
     username,
     isLoading,
-    isRecargando,
     error,
     correccionGrupo,
     isLoadingCorrecciones,
@@ -130,12 +129,12 @@ export const AsignacionDetalleAlumno = () => {
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
         <ErrorBanner
           className="max-w-lg mx-auto p-8"
-          title="No se pudo cargar la asignación"
+          title="Ocurrió un error al cargar la asignación"
           message={
             error ||
             "La asignación solicitada no existe o no se encuentra disponible."
           }
-          onRetry={() => void cargarDetalle(false)}
+          onRetry={() => void cargarDetalle()}
         >
           <Link
             to={`/cursos/${cursoId}`}
@@ -372,11 +371,7 @@ export const AsignacionDetalleAlumno = () => {
       </header>
 
       {/* Navegación lateral (Sidebar) + Contenido de la sección activa */}
-      <div
-        className={`flex flex-col md:flex-row gap-6 items-start transition-all duration-300 ${
-          isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
-        }`}
-      >
+      <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Sidebar de Navegación */}
         <aside className="w-full md:w-72 shrink-0 rounded-2xl border border-line bg-panel p-3 shadow-xs">
           <nav

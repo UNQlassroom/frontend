@@ -13,6 +13,9 @@ import type {
   ReporteLinterResponseDTO,
 } from "@/types";
 
+const buildGrupoQuery = (grupoId?: number): string =>
+  grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+
 export const asignacionService = {
   /**
    * Envía la petición POST /cursos/{cursoId}/asignaciones
@@ -25,8 +28,7 @@ export const asignacionService = {
   ): Promise<ApiResponse<AsignacionResponseDTO>> => {
     return post<AsignacionResponseDTO, CrearAsignacionRequestDTO>(
       `/cursos/${cursoId}/asignaciones`,
-      data,
-      { timeout: 60000 }
+      data
     );
   },
 
@@ -38,22 +40,19 @@ export const asignacionService = {
   obtenerAsignaciones: (
     cursoId: number
   ): Promise<ApiResponse<AsignacionResponseDTO[]>> => {
-    return get<AsignacionResponseDTO[]>(`/cursos/${cursoId}/asignaciones`, {
-      timeout: 60000,
-    });
+    return get<AsignacionResponseDTO[]>(`/cursos/${cursoId}/asignaciones`);
   },
 
   /**
    * Envía la petición GET /cursos/{cursoId}/asignaciones/{asignacionId}
-   * Obtiene el detalle de la asignación refrescando la info de GitHub
+   * Obtiene el detalle de la asignación.
    */
   obtenerAsignacionPorId: (
     cursoId: number,
     asignacionId: number
   ): Promise<ApiResponse<AsignacionResponseDTO>> => {
     return get<AsignacionResponseDTO>(
-      `/cursos/${cursoId}/asignaciones/${asignacionId}`,
-      { timeout: 60000 }
+      `/cursos/${cursoId}/asignaciones/${asignacionId}`
     );
   },
 
@@ -67,8 +66,7 @@ export const asignacionService = {
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<AsignacionResponseDTO>> => {
-    const query =
-      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    const query = buildGrupoQuery(grupoId);
     return post<AsignacionResponseDTO, undefined>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}/entregar${query}`,
       undefined
@@ -94,15 +92,13 @@ export const asignacionService = {
    * Envía la petición GET /cursos/{cursoId}/asignaciones/{asignacionId}/correcciones
    * Docente: Obtiene los grupos con sus issues calculados (PENDIENTE, ACTUALIZADO, RESUELTO).
    * Alumno: Obtiene únicamente su grupo con sus issues calculados.
-   * Timeout extendido (90s) para consultar los issues y commits de GitHub de todos los repositorios.
    */
   obtenerCorrecciones: (
     cursoId: number,
     asignacionId: number
   ): Promise<ApiResponse<CorreccionGrupoResponseDTO[]>> => {
     return get<CorreccionGrupoResponseDTO[]>(
-      `/cursos/${cursoId}/asignaciones/${asignacionId}/correcciones`,
-      { timeout: 90000 }
+      `/cursos/${cursoId}/asignaciones/${asignacionId}/correcciones`
     );
   },
 
@@ -115,8 +111,7 @@ export const asignacionService = {
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<DiagnosticoCIResponseDTO>> => {
-    const query =
-      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    const query = buildGrupoQuery(grupoId);
     return get<DiagnosticoCIResponseDTO>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}/diagnostico-ci${query}`
     );
@@ -131,8 +126,7 @@ export const asignacionService = {
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<MetricasCIResponseDTO>> => {
-    const query =
-      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    const query = buildGrupoQuery(grupoId);
     return get<MetricasCIResponseDTO>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}/metricas${query}`
     );
@@ -147,8 +141,7 @@ export const asignacionService = {
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<ReporteLinterResponseDTO>> => {
-    const query =
-      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    const query = buildGrupoQuery(grupoId);
     return get<ReporteLinterResponseDTO>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}/linter${query}`
     );
@@ -159,7 +152,7 @@ export const asignacionService = {
    * Lista los repositorios plantillas disponibles en la organización
    */
   listarTemplates: (): Promise<ApiResponse<TemplateRepoResponseDTO[]>> => {
-    return get<TemplateRepoResponseDTO[]>("/templates", { timeout: 30000 });
+    return get<TemplateRepoResponseDTO[]>("/templates");
   },
 
   /**
@@ -183,8 +176,7 @@ export const asignacionService = {
     asignacionId: number
   ): Promise<ApiResponse<void>> => {
     return deleteRequest<void>(
-      `/cursos/${cursoId}/asignaciones/${asignacionId}`,
-      { timeout: 30000 }
+      `/cursos/${cursoId}/asignaciones/${asignacionId}`
     );
   },
 

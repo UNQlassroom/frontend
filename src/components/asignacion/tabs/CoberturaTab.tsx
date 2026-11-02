@@ -1,5 +1,5 @@
 import type { AsignacionAlumnoDTO, MetricasCIResponseDTO } from "@/types";
-import { formatFechaLegible, obtenerPrimerLineaCommit } from "@/utils";
+import { formatFechaLegible, obtenerPrimerLineaCommit, getGitHubCommitUrl } from "@/utils";
 
 export interface CoberturaTabProps {
   asignacion: AsignacionAlumnoDTO;
@@ -49,17 +49,11 @@ export function CoberturaTab({
     asignacion.advertenciasGit?.[0]?.commitSha ||
     null;
 
-  const commitUrl = (() => {
-    if (!asignacion.repoUrl || !commitSha) return null;
-    if (/^[0-9a-f]{7,40}$/i.test(commitSha)) {
-      return `${asignacion.repoUrl}/commit/${commitSha}`;
-    }
-    const shaAdvertencia = asignacion.advertenciasGit?.[0]?.commitSha;
-    if (shaAdvertencia) {
-      return `${asignacion.repoUrl}/commit/${shaAdvertencia}`;
-    }
-    return `${asignacion.repoUrl}/commits`;
-  })();
+  const commitUrl = getGitHubCommitUrl(
+    asignacion.repoUrl,
+    commitSha,
+    asignacion.advertenciasGit
+  );
 
   const nombreCommit = asignacion.ultimoCommit
     ? obtenerPrimerLineaCommit(asignacion.ultimoCommit)

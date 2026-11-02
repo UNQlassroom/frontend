@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { crearCurso, obtenerCursos } from "@/services";
 import type {
   CursoResponseDTO,
@@ -12,43 +12,34 @@ export const useCursos = () => {
   const [error, setError] = useState<string | null>(null);
   const [successCurso, setSuccessCurso] = useState<CursoResponseDTO | null>(null);
 
-  const cargarCursos = () => {
+  const cargarCursos = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    obtenerCursos()
-      .then((response) => {
-        setCursos(response.data);
-      })
-      .catch(() => {
-        setError("No se pudieron cargar los cursos del servidor.");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+    try {
+      const response = await obtenerCursos();
+      setCursos(response.data);
+    } catch {
+      setError("No se pudieron cargar los cursos del servidor.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-
+    let ignore = false;
     obtenerCursos()
       .then((response) => {
-        if (isMounted) {
-          setCursos(response.data);
-        }
+        if (!ignore) setCursos(response.data);
       })
       .catch(() => {
-        if (isMounted) {
-          setError("No se pudieron cargar los cursos del servidor.");
-        }
+        if (!ignore) setError("No se pudieron cargar los cursos del servidor.");
       })
       .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (!ignore) setIsLoading(false);
       });
 
     return () => {
-      isMounted = false;
+      ignore = true;
     };
   }, []);
 

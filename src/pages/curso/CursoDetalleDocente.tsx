@@ -38,8 +38,7 @@ export const CursoDetalleDocente = () => {
   const {
     alumnosData,
     isLoading: isLoadingAlumnos,
-    isRecargando: isRecargandoAlumnos,
-    error: errorAlumnos,
+        error: errorAlumnos,
     cargarAlumnos,
   } = useAlumnos();
 
@@ -209,10 +208,8 @@ export const CursoDetalleDocente = () => {
         <div className="pt-2">
           {activeTab === "alumnos" && (
             <AlumnosTab
-              curso={curso}
               alumnos={alumnos}
               isLoading={isLoadingAlumnos}
-              isRecargando={isRecargandoAlumnos}
               error={errorAlumnos}
               onRetry={() => cursoId && cargarAlumnos(cursoId)}
               onOpenInvitarModal={() => setOpenInvitarModal(true)}

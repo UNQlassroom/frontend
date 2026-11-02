@@ -7,20 +7,6 @@ export const useCursoDetalle = (cursoId: number | undefined) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCurso = useCallback(
-    async (id: number) => {
-      try {
-        const response = await obtenerCursoPorId(id);
-        setCurso(response.data);
-      } catch {
-        setError("El curso solicitado no existe o no se encuentra disponible.");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
   const cargarCurso = useCallback(async () => {
     if (!cursoId || isNaN(cursoId)) {
       setError("Identificador de curso inválido.");
@@ -29,34 +15,34 @@ export const useCursoDetalle = (cursoId: number | undefined) => {
     }
     setIsLoading(true);
     setError(null);
-    await fetchCurso(cursoId);
-  }, [cursoId, fetchCurso]);
+    try {
+      const response = await obtenerCursoPorId(cursoId);
+      setCurso(response.data);
+    } catch {
+      setError("El curso solicitado no existe o no se encuentra disponible.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cursoId]);
 
   useEffect(() => {
     if (!cursoId || isNaN(cursoId)) {
       return;
     }
-    let isMounted = true;
-
+    let ignore = false;
     obtenerCursoPorId(cursoId)
-      .then((response) => {
-        if (isMounted) {
-          setCurso(response.data);
-        }
+      .then((res) => {
+        if (!ignore) setCurso(res.data);
       })
       .catch(() => {
-        if (isMounted) {
-          setError("El curso solicitado no existe o no se encuentra disponible.");
-        }
+        if (!ignore) setError("El curso solicitado no existe o no se encuentra disponible.");
       })
       .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (!ignore) setIsLoading(false);
       });
 
     return () => {
-      isMounted = false;
+      ignore = true;
     };
   }, [cursoId]);
 
