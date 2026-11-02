@@ -11,7 +11,7 @@ import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
 import { IssueEstadoBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import githubIcon from "@/assets/github_favicon.svg";
-import { getGitHubNewIssueUrl, getGitHubIssuesUrl } from "@/utils";
+import { getGitHubNewIssueUrl, getGitHubIssuesUrl, formatFechaLegible } from "@/utils";
 
 export interface CorreccionesTabProps {
   curso: CursoResponseDTO;
@@ -276,22 +276,6 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
       return true;
     });
   }, [correcciones, busqueda, filtroEstado]);
-
-  const formatFecha = (isoString?: string | null) => {
-    if (!isoString) return "-";
-    try {
-      const d = new Date(isoString);
-      return d.toLocaleDateString("es-AR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return isoString;
-    }
-  };
 
   const handleCardClick = (estadoTarget: string) => {
     setFiltroEstado((prev) => (prev === estadoTarget ? "todos" : estadoTarget));
@@ -687,13 +671,13 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     <span>Por @{issue.autor}</span>
                                     <span>•</span>
                                     <span>
-                                      Creada: {formatFecha(issue.fechaCreacion)}
+                                      Creada: {formatFechaLegible(issue.fechaCreacion) || "-"}
                                     </span>
                                     {issue.fechaCierre && (
                                       <>
                                         <span>•</span>
                                         <span>
-                                          Cerrada: {formatFecha(issue.fechaCierre)}
+                                          Cerrada: {formatFechaLegible(issue.fechaCierre) || "-"}
                                         </span>
                                       </>
                                     )}

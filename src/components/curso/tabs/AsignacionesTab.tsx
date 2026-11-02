@@ -19,6 +19,7 @@ import { EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import githubIcon from "@/assets/github_favicon.svg";
+import { formatFechaCorta, formatFechaLegible } from "@/utils";
 
 export interface AsignacionesTabProps {
   curso: CursoResponseDTO;
@@ -383,14 +384,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                               <span className="inline-flex items-center gap-1">
                                 <span>Fecha límite:</span>
                                 <span className="font-semibold text-foreground">
-                                  {new Date(asig.fechaLimite).toLocaleDateString(
-                                    "es-AR",
-                                    {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                    }
-                                  )}
+                                  {formatFechaCorta(asig.fechaLimite)}
                                 </span>
                               </span>
                             </>
@@ -658,14 +652,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                           </span>
                                           {grupo.fechaEntregada && (
                                             <span className="text-xs text-muted-foreground">
-                                              {new Date(
-                                                grupo.fechaEntregada
-                                              ).toLocaleDateString("es-AR", {
-                                                day: "2-digit",
-                                                month: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                              })}
+                                              {formatFechaLegible(grupo.fechaEntregada)}
                                             </span>
                                           )}
                                         </div>

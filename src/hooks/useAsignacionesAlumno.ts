@@ -10,6 +10,7 @@ import {
 } from "@/services";
 import { useAuth } from "./useAuth";
 import { useSseListener } from "./useSseListener";
+import { formatFechaCorta, formatFechaLegible } from "@/utils";
 
 export interface EstadisticasProgresoAlumno {
   totalAsignaciones: number;
@@ -55,13 +56,7 @@ export function mapAsignacionesDTO(
       estado: asig.estado,
       templateRepoName: asig.templateRepoName,
       fechaLimite: asig.fechaLimite,
-      fechaLimiteFormatted: asig.fechaLimite
-        ? new Date(asig.fechaLimite).toLocaleDateString("es-AR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
-        : undefined,
+      fechaLimiteFormatted: asig.fechaLimite ? formatFechaCorta(asig.fechaLimite) ?? undefined : undefined,
       estadoEntrega,
       calificacion,
       observaciones: miGrupo?.observaciones ?? null,
@@ -82,15 +77,7 @@ export function mapAsignacionesDTO(
       fechaUltimoCommit: repo?.fechaUltimoCommit,
       entregada: estaEntregada,
       fechaEntregada: fechaEntregada,
-      fechaEntregadaFormatted: fechaEntregada
-        ? new Date(fechaEntregada).toLocaleDateString("es-AR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : undefined,
+      fechaEntregadaFormatted: fechaEntregada ? formatFechaLegible(fechaEntregada) ?? undefined : undefined,
     };
   });
 }

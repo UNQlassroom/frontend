@@ -13,6 +13,9 @@ import type {
   ReporteLinterResponseDTO,
 } from "@/types";
 
+const buildGrupoQuery = (grupoId?: number): string =>
+  grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+
 export const asignacionService = {
   /**
    * Envía la petición POST /cursos/{cursoId}/asignaciones
@@ -67,8 +70,7 @@ export const asignacionService = {
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<AsignacionResponseDTO>> => {
-    const query =
-      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    const query = buildGrupoQuery(grupoId);
     return post<AsignacionResponseDTO, undefined>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}/entregar${query}`,
       undefined
@@ -115,8 +117,7 @@ export const asignacionService = {
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<DiagnosticoCIResponseDTO>> => {
-    const query =
-      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    const query = buildGrupoQuery(grupoId);
     return get<DiagnosticoCIResponseDTO>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}/diagnostico-ci${query}`
     );
@@ -131,8 +132,7 @@ export const asignacionService = {
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<MetricasCIResponseDTO>> => {
-    const query =
-      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    const query = buildGrupoQuery(grupoId);
     return get<MetricasCIResponseDTO>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}/metricas${query}`
     );
@@ -147,8 +147,7 @@ export const asignacionService = {
     asignacionId: number,
     grupoId?: number
   ): Promise<ApiResponse<ReporteLinterResponseDTO>> => {
-    const query =
-      grupoId !== undefined && grupoId !== null ? `?grupo=${grupoId}` : "";
+    const query = buildGrupoQuery(grupoId);
     return get<ReporteLinterResponseDTO>(
       `/cursos/${cursoId}/asignaciones/${asignacionId}/linter${query}`
     );

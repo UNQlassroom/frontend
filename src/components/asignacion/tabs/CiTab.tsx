@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { AsignacionAlumnoDTO, DiagnosticoCIResponseDTO } from "@/types";
 import { CIStatusBadge } from "@/components/common";
-import { formatearFechaCommit, obtenerPrimerLineaCommit } from "@/utils";
+import { formatearFechaCommit, obtenerPrimerLineaCommit, getGitHubCommitUrl } from "@/utils";
 import githubIcon from "@/assets/github_favicon.svg";
 
 export interface CiTabProps {
@@ -32,18 +32,11 @@ export function CiTab({
     asignacion.ciRunUrl ??
     (asignacion.repoUrl ? `${asignacion.repoUrl}/actions` : null);
 
-  const commitUrl = (() => {
-    if (!asignacion.repoUrl) return null;
-    const ultimoCommit = asignacion.ultimoCommit?.trim();
-    if (ultimoCommit && /^[0-9a-f]{7,40}$/i.test(ultimoCommit)) {
-      return `${asignacion.repoUrl}/commit/${ultimoCommit}`;
-    }
-    const shaAdvertencia = asignacion.advertenciasGit?.[0]?.commitSha;
-    if (shaAdvertencia) {
-      return `${asignacion.repoUrl}/commit/${shaAdvertencia}`;
-    }
-    return `${asignacion.repoUrl}/commits`;
-  })();
+  const commitUrl = getGitHubCommitUrl(
+    asignacion.repoUrl,
+    asignacion.ultimoCommit,
+    asignacion.advertenciasGit
+  );
 
   const esFallo = estadoCI === "failure";
   const esExitoso = estadoCI === "success";

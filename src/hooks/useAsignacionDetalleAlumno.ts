@@ -64,30 +64,31 @@ export function useAsignacionDetalleAlumno(
 
   const grupoId = asignacion?.grupoId;
 
-  const cargarCorrecciones = useCallback(async () => {
-    if (!cursoId || !asignacionId) return;
-    setIsLoadingCorrecciones(true);
-    setErrorCorrecciones(null);
-    try {
-      const res = await obtenerCorrecciones(cursoId, asignacionId);
-      setCorreccionGrupo(res.data[0] || null);
-    } catch {
-      setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
-    } finally {
-      setIsLoadingCorrecciones(false);
-    }
-  }, [cursoId, asignacionId]);
-
-  const refrescarCorreccionesSilencioso = useCallback(async () => {
-    if (!cursoId || !asignacionId) return;
-    try {
-      const res = await obtenerCorrecciones(cursoId, asignacionId);
-      setCorreccionGrupo(res.data[0] || null);
-      setErrorCorrecciones(null);
-    } catch {
-      // Ignorar errores en refresco silencioso por SSE
-    }
-  }, [cursoId, asignacionId]);
+  const cargarCorrecciones = useCallback(
+    async (silencioso = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!silencioso) {
+        setIsLoadingCorrecciones(true);
+        setErrorCorrecciones(null);
+      }
+      try {
+        const res = await obtenerCorrecciones(cursoId, asignacionId);
+        setCorreccionGrupo(res.data[0] || null);
+        if (silencioso) {
+          setErrorCorrecciones(null);
+        }
+      } catch {
+        if (!silencioso) {
+          setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
+        }
+      } finally {
+        if (!silencioso) {
+          setIsLoadingCorrecciones(false);
+        }
+      }
+    },
+    [cursoId, asignacionId]
+  );
 
   const refrescarAsignacionSilencioso = useCallback(
     async (conservarDiagnostico = true) => {
@@ -246,7 +247,7 @@ export function useAsignacionDetalleAlumno(
 
         case "PUSH_RECIBIDO":
           void refrescarAsignacionSilencioso(true);
-          void refrescarCorreccionesSilencioso();
+          void cargarCorrecciones(true);
           break;
 
         case "CI_ACTUALIZADO":
@@ -275,7 +276,7 @@ export function useAsignacionDetalleAlumno(
           break;
 
         case "ISSUE_ACTUALIZADO":
-          void refrescarCorreccionesSilencioso();
+          void cargarCorrecciones(true);
           break;
       }
     }

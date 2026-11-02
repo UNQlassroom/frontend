@@ -1,4 +1,4 @@
-import { useState, useEffect, type SubmitEvent } from "react";
+import { useState, useEffect, useCallback, type SubmitEvent } from "react";
 import { useSseListener } from "@/hooks";
 import { toast } from "react-toastify";
 import {
@@ -53,6 +53,16 @@ export function CrearAsignacionModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const actualizarTemplates = useCallback((nuevosTemplates: TemplateRepoResponseDTO[]) => {
+    setTemplates(nuevosTemplates);
+    setTemplateRepoName((prev) => {
+      if (nuevosTemplates.some((t) => t.name === prev)) {
+        return prev;
+      }
+      return nuevosTemplates[0]?.name || "";
+    });
+  }, []);
+
   useEffect(() => {
     if (!open) return;
 
@@ -60,12 +70,7 @@ export function CrearAsignacionModal({
     listarTemplates()
       .then((res) => {
         if (!ignore) {
-          setTemplates(res.data);
-          if (res.data.length > 0) {
-            setTemplateRepoName(res.data[0].name);
-          } else {
-            setTemplateRepoName("");
-          }
+          actualizarTemplates(res.data);
         }
       })
       .catch(() => {
@@ -83,20 +88,14 @@ export function CrearAsignacionModal({
     return () => {
       ignore = true;
     };
-  }, [open]);
+  }, [open, actualizarTemplates]);
 
   // Refresco silencioso de templates en tiempo real si el modal está abierto
   useSseListener("TEMPLATES_ACTUALIZADOS", () => {
     if (!open) return;
     listarTemplates()
       .then((res) => {
-        setTemplates(res.data);
-        setTemplateRepoName((prev) => {
-          if (res.data.some((t) => t.name === prev)) {
-            return prev;
-          }
-          return res.data[0]?.name || "";
-        });
+        actualizarTemplates(res.data);
       })
       .catch(() => {});
   });

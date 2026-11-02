@@ -29,7 +29,7 @@ export function formatearFechaCommit(fechaIso?: string | null): string {
 }
 
 /**
- * Formatea una fecha ISO a formato legible dd/mm/yyyy hh:mm (es-AR).
+ * Formatea una fecha ISO a formato legible dd/mm/aaaa hh:mm (es-AR).
  */
 export function formatFechaLegible(isoDate?: string | null): string | null {
   if (!isoDate) return null;
@@ -42,6 +42,24 @@ export function formatFechaLegible(isoDate?: string | null): string | null {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+    });
+  } catch {
+    return isoDate;
+  }
+}
+
+/**
+ * Formatea una fecha ISO a formato fecha corta dd/mm/aaaa (es-AR).
+ */
+export function formatFechaCorta(isoDate?: string | null): string | null {
+  if (!isoDate) return null;
+  try {
+    const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return isoDate;
+    return date.toLocaleDateString("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   } catch {
     return isoDate;
