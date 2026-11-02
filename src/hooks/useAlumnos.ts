@@ -6,7 +6,6 @@ import { useSseListener } from "./useSseListener";
 export const useAlumnos = () => {
   const [alumnosData, setAlumnosData] = useState<CursoAlumnosResponseDTO | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const cursoIdRef = useRef<number | null>(null);
 
@@ -23,22 +22,6 @@ export const useAlumnos = () => {
       return null;
     } finally {
       setIsLoading(false);
-    }
-  }, []);
-
-  const recargarAlumnos = useCallback(async (cursoId: number): Promise<CursoAlumnosResponseDTO | null> => {
-    cursoIdRef.current = cursoId;
-    setIsRecargando(true);
-    setError(null);
-    try {
-      const response = await obtenerAlumnos(cursoId);
-      setAlumnosData(response.data);
-      return response.data;
-    } catch {
-      setError("No se pudo recargar el listado de alumnos.");
-      return null;
-    } finally {
-      setIsRecargando(false);
     }
   }, []);
 
@@ -68,10 +51,8 @@ export const useAlumnos = () => {
   return {
     alumnosData,
     isLoading,
-    isRecargando,
     error,
     cargarAlumnos,
-    recargarAlumnos,
     limpiar,
   };
 };

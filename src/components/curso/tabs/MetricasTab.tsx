@@ -75,7 +75,6 @@ export function MetricasTab({
 
   useEffect(() => {
     let ignore = false;
-
     obtenerAsignaciones(curso.id)
       .then((response) => {
         if (!ignore) {

@@ -130,7 +130,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
         if (!ignore) {
           setAsignaciones(res.data);
           if (res.data.length > 0) {
-            setExpandedAsigId(res.data[0].id);
+            setExpandedAsigId((prev) => (prev === null ? res.data[0].id : prev));
           }
         }
       })

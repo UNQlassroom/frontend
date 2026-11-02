@@ -5,7 +5,7 @@ import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import { EmptyState, ErrorBanner } from "@/components/common";
 
 export interface AlumnosTabProps {
-  curso: CursoResponseDTO;
+  curso?: CursoResponseDTO;
   alumnos: AlumnoResponseDTO[];
   isLoading: boolean;
   isRecargando?: boolean;
@@ -17,7 +17,6 @@ export interface AlumnosTabProps {
 export function AlumnosTab({
   alumnos,
   isLoading,
-  isRecargando = false,
   error,
   onRetry,
   onOpenInvitarModal,
@@ -155,11 +154,7 @@ export function AlumnosTab({
             />
           ) : (
             /* Tabla detallada de alumnos */
-            <div
-              className={`overflow-x-auto rounded-2xl border border-line bg-panel shadow-sm transition-all duration-300 ${
-                isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
-              }`}
-            >
+            <div className="overflow-x-auto rounded-2xl border border-line bg-panel shadow-sm">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-line bg-panel2 text-xs uppercase tracking-wider text-muted-foreground font-semibold">

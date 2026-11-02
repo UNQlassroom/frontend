@@ -32,7 +32,6 @@ export function useAsignacionDetalleAlumno(
 
   const [asignacion, setAsignacion] = useState<AsignacionAlumnoDTO | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const [correccionGrupo, setCorreccionGrupo] =
@@ -283,13 +282,9 @@ export function useAsignacionDetalleAlumno(
   );
 
   const cargarDetalle = useCallback(
-    async (esRecarga = false) => {
+    async () => {
       if (!cursoId || !asignacionId) return;
-      if (esRecarga) {
-        setIsRecargando(true);
-      } else {
-        setIsLoading(true);
-      }
+      setIsLoading(true);
       setError(null);
 
       try {
@@ -327,7 +322,6 @@ export function useAsignacionDetalleAlumno(
         setError("No se pudo cargar el detalle de la asignación.");
       } finally {
         setIsLoading(false);
-        setIsRecargando(false);
       }
     },
     [
@@ -410,7 +404,6 @@ export function useAsignacionDetalleAlumno(
     asignacion,
     username,
     isLoading,
-    isRecargando,
     error,
     correccionGrupo,
     isLoadingCorrecciones,
