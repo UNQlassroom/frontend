@@ -1,3 +1,12 @@
+export type SubSeccionGuiaGit = "conflictos" | "revertir" | "sincronizar" | "ci";
+
+export const subItemsGuiaGit: { id: SubSeccionGuiaGit; label: string }[] = [
+  { id: "conflictos", label: "Resolución de Conflictos" },
+  { id: "revertir", label: "Revertir Commits" },
+  { id: "sincronizar", label: "Sincronizar Ramas" },
+  { id: "ci", label: "Disparar Pipeline CI" },
+];
+
 export interface GuiaPaso {
   numero: number;
   titulo: string;
@@ -11,14 +20,10 @@ export interface GuiaPaso {
   nota?: string;
 }
 
-export type TemaIconoId = "conflictos" | "revertir" | "sincronizar" | "ci";
-
 export interface GuiaTema {
-  id: "conflictos" | "revertir" | "sincronizar" | "ci";
+  id: SubSeccionGuiaGit;
   titulo: string;
   subtitulo: string;
-  tipoIcono: TemaIconoId;
-  badge: string;
   resumen: string;
   cuandoOcurre: string;
   pasos: GuiaPaso[];
@@ -38,8 +43,6 @@ export const GUIA_GIT_TEMAS: GuiaTema[] = [
     id: "conflictos",
     titulo: "Resolución de Conflictos",
     subtitulo: "Cómo solucionar divergencias entre tu código y el repositorio remoto",
-    tipoIcono: "conflictos",
-    badge: "Frecuente",
     resumen:
       "Un conflicto de Git ocurre cuando dos personas (o vos en dos computadoras distintas) modificaron las mismas líneas en un archivo y Git no puede decidir automáticamente qué cambio conservar.",
     cuandoOcurre:
@@ -97,10 +100,8 @@ export const GUIA_GIT_TEMAS: GuiaTema[] = [
   },
   {
     id: "revertir",
-    titulo: "Revertir y Deshacer Commits",
+    titulo: "Revertir Commits",
     subtitulo: "Deshacer cambios de manera segura sin romper el historial del equipo",
-    tipoIcono: "revertir",
-    badge: "Seguridad",
     resumen:
       "Dependiendo de si tu commit ya fue enviado a GitHub (push) o si todavía está solo en tu máquina, la estrategia para deshacerlo es diferente.",
     cuandoOcurre:
@@ -163,10 +164,8 @@ export const GUIA_GIT_TEMAS: GuiaTema[] = [
   },
   {
     id: "sincronizar",
-    titulo: "Sincronizar Ramas y Remoto",
+    titulo: "Sincronizar Ramas",
     subtitulo: "Mantener tu rama al día con el trabajo del equipo sin commits basura",
-    tipoIcono: "sincronizar",
-    badge: "Sincronización",
     resumen:
       "Al trabajar en grupo o en múltiples dispositivos, sincronizar con frecuencia evita dolores de cabeza y conflictos gigantes acumulados al final de la entrega.",
     cuandoOcurre:
@@ -231,10 +230,8 @@ export const GUIA_GIT_TEMAS: GuiaTema[] = [
   },
   {
     id: "ci",
-    titulo: "Disparar Pipeline de CI a Demanda",
+    titulo: "Disparar Pipeline CI",
     subtitulo: "Cómo forzar la reejecución de las pruebas y build de GitHub Actions",
-    tipoIcono: "ci",
-    badge: "CI/CD",
     resumen:
       "A veces las pruebas en GitHub Actions fallan por causas ajenas al código (un timeout transitorio en la descarga de dependencias o un runner ocupado) o necesitás verificar el estado tras reconfigurar el repositorio.",
     cuandoOcurre:
