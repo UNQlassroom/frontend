@@ -4,3 +4,4 @@ export * from "./CiTab";
 export * from "./CoberturaTab";
 export * from "./BuenasPracticasTab";
 export * from "./CorreccionesAlumnoTab";
+export * from "./GuiaGitTab";

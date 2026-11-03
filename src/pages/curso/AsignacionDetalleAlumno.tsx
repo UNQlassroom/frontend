@@ -10,6 +10,14 @@ import {
 } from "@/components/asignacion/tabs/EstadoTecnicoTab";
 import { CorreccionesAlumnoTab } from "@/components/asignacion/tabs/CorreccionesAlumnoTab";
 import {
+  GuiaGitTab,
+  type SubSeccionGuiaGit,
+} from "@/components/asignacion/tabs/GuiaGitTab";
+import {
+  subItemsGuiaGit,
+  InteractiveTooltip,
+} from "@/components/asignacion/guiaGit";
+import {
   esFechaLimiteVencida,
   formatFechaLegible,
   getBadgeEstadoEntrega,
@@ -35,15 +43,27 @@ export const AsignacionDetalleAlumno = () => {
 
   // Leer estado de la URL
   const tabParam = searchParams.get("tab") as SeccionDetalle | null;
-  const subParam = searchParams.get("sub") as SubSeccionTecnica | null;
+  const subParam = searchParams.get("sub");
 
   const seccionActiva: SeccionDetalle =
-    tabParam === "tecnico" || tabParam === "correcciones" ? tabParam : "general";
+    tabParam === "tecnico" ||
+    tabParam === "correcciones" ||
+    tabParam === "guia-git"
+      ? tabParam
+      : "general";
 
   const subSeccionTecnica: SubSeccionTecnica =
     subParam === "cobertura" || subParam === "git" ? subParam : "ci";
 
+  const subSeccionGuiaGit: SubSeccionGuiaGit =
+    subItemsGuiaGit.some((item) => item.id === subParam)
+      ? (subParam as SubSeccionGuiaGit)
+      : subItemsGuiaGit[0].id;
+
   const [menuTecnicoOverride, setMenuTecnicoOverride] = useState<boolean | null>(
+    null
+  );
+  const [menuGuiaGitOverride, setMenuGuiaGitOverride] = useState<boolean | null>(
     null
   );
 
@@ -52,6 +72,11 @@ export const AsignacionDetalleAlumno = () => {
     menuTecnicoOverride !== null
       ? menuTecnicoOverride
       : seccionActiva === "tecnico";
+
+  const menuGuiaGitAbierto =
+    menuGuiaGitOverride !== null
+      ? menuGuiaGitOverride
+      : seccionActiva === "guia-git";
 
   const [copied, setCopied] = useState(false);
   const [modalReentregaOpen, setModalReentregaOpen] = useState(false);
@@ -103,10 +128,15 @@ export const AsignacionDetalleAlumno = () => {
     }
   };
 
-  const navegarSeccion = (tab: SeccionDetalle, sub?: SubSeccionTecnica) => {
+  const navegarSeccion = (
+    tab: SeccionDetalle,
+    sub?: SubSeccionTecnica | SubSeccionGuiaGit
+  ) => {
     const params: Record<string, string> = { tab };
     if (tab === "tecnico") {
-      params.sub = sub || subSeccionTecnica;
+      params.sub = (sub as SubSeccionTecnica) || subSeccionTecnica;
+    } else if (tab === "guia-git") {
+      params.sub = (sub as SubSeccionGuiaGit) || subSeccionGuiaGit;
     }
     setSearchParams(params, { replace: true });
   };
@@ -248,10 +278,18 @@ export const AsignacionDetalleAlumno = () => {
                   <span className="text-muted-foreground text-xs">↗</span>
                 </a>
 
-                <button
-                  type="button"
+                {/* Botón integrado: un solo recuadro continuo donde '?' es solo un circulito adentro */}
+                <div
                   onClick={() => handleCopyClone(asignacion.repoUrl!)}
-                  className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-2xs ${
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleCopyClone(asignacion.repoUrl!);
+                    }
+                  }}
+                  className={`inline-flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-2xs select-none ${
                     copied
                       ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
                       : "border-line bg-panel2 text-foreground hover:bg-line/40"
@@ -261,7 +299,7 @@ export const AsignacionDetalleAlumno = () => {
                   {copied ? (
                     <>
                       <svg
-                        className="w-4 h-4 text-emerald-500"
+                        className="w-4 h-4 text-emerald-500 shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -278,7 +316,7 @@ export const AsignacionDetalleAlumno = () => {
                   ) : (
                     <>
                       <svg
-                        className="w-4 h-4 text-muted-foreground"
+                        className="w-4 h-4 text-muted-foreground shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -293,70 +331,64 @@ export const AsignacionDetalleAlumno = () => {
                       <span>git clone</span>
                     </>
                   )}
-                </button>
 
-                {/* Tooltip: ¿Cómo clonar el repositorio? */}
-                <div className="relative group/help inline-flex items-center">
-                  <button
-                    type="button"
-                    aria-label="¿Cómo clonar este repositorio?"
-                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-line bg-panel2 text-muted-foreground hover:text-foreground hover:bg-line/40 text-sm font-bold transition-colors cursor-help shadow-2xs"
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="inline-flex items-center ml-0.5"
                   >
-                    ?
-                  </button>
+                    <InteractiveTooltip
+                      title="¿Cómo clonar el repositorio?"
+                      position="bottom"
+                      content={
+                        <div className="space-y-2 text-xs">
+                          <p className="text-muted-foreground leading-relaxed">
+                            Clonar descarga una copia completa del trabajo práctico a tu
+                            computadora para que puedas empezar a programar.
+                          </p>
 
-                  <div className="pointer-events-none group-hover/help:pointer-events-auto opacity-0 group-hover/help:opacity-100 group-hover/help:translate-y-0 translate-y-1 transition-all duration-150 absolute top-full mt-2 right-0 w-80 sm:w-92 rounded-xl border border-line bg-panel p-4.5 shadow-xl z-30 text-left text-xs text-foreground">
-                    <div className="flex items-center gap-2 mb-2 pb-2 border-b border-line text-primary font-bold">
-                      <span className="text-base">💡</span>
-                      <span className="text-sm">
-                        ¿Cómo clonar el repositorio?
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                      Clonar descarga una copia completa del trabajo práctico a tu
-                      computadora para que puedas empezar a programar.
-                    </p>
-
-                    <ol className="space-y-2 text-xs text-muted-foreground list-decimal list-inside leading-relaxed">
-                      <li>
-                        <span className="text-foreground font-semibold">
-                          Copiá el comando
-                        </span>{" "}
-                        haciendo clic en{" "}
-                        <span className="text-foreground bg-panel2 px-1.5 py-0.5 rounded border border-line font-medium">
-                          git clone
-                        </span>
-                        .
-                      </li>
-                      <li>
-                        <span className="text-foreground font-semibold">
-                          Abrí una terminal
-                        </span>{" "}
-                        en la carpeta
-                        donde guardás tus proyectos.
-                      </li>
-                      <li>
-                        <span className="text-foreground font-semibold">
-                          Pegá y ejecutá
-                        </span>{" "}
-                        el comando con{" "}
-                        <kbd className="px-1.5 py-0.5 rounded bg-panel2 border border-line text-foreground font-mono text-[11px]">
-                          Enter
-                        </kbd>
-                        :
-                        <div className="mt-1.5 p-2.5 rounded-md bg-background border border-line font-mono text-xs text-primary truncate select-all">
-                          git clone {asignacion.repoUrl}.git
+                          <ol className="space-y-1.5 text-muted-foreground list-decimal list-inside leading-relaxed">
+                            <li>
+                              <span className="text-foreground font-semibold">
+                                Copiá el comando
+                              </span>{" "}
+                              haciendo clic en{" "}
+                              <span className="text-foreground bg-panel2 px-1.5 py-0.5 rounded border border-line font-medium">
+                                git clone
+                              </span>
+                              .
+                            </li>
+                            <li>
+                              <span className="text-foreground font-semibold">
+                                Abrí una terminal
+                              </span>{" "}
+                              en la carpeta donde guardás tus proyectos.
+                            </li>
+                            <li>
+                              <span className="text-foreground font-semibold">
+                                Pegá y ejecutá
+                              </span>{" "}
+                              el comando con{" "}
+                              <kbd className="px-1.5 py-0.5 rounded bg-panel2 border border-line text-foreground font-mono text-[11px]">
+                                Enter
+                              </kbd>
+                              :
+                              <div className="mt-1.5 p-2 rounded-md bg-background border border-line font-mono text-xs text-primary truncate select-all">
+                                git clone {asignacion.repoUrl}.git
+                              </div>
+                            </li>
+                            <li>
+                              <span className="text-foreground font-semibold">
+                                ¡Listo!
+                              </span>{" "}
+                              Se creará la carpeta con los archivos para empezar a
+                              trabajar.
+                            </li>
+                          </ol>
                         </div>
-                      </li>
-                      <li>
-                        <span className="text-foreground font-semibold">
-                          ¡Listo!
-                        </span>{" "}
-                        Se creará la carpeta con los archivos para empezar a
-                        trabajar.
-                      </li>
-                    </ol>
+                      }
+                    />
                   </div>
                 </div>
               </>
@@ -384,6 +416,7 @@ export const AsignacionDetalleAlumno = () => {
               onClick={() => {
                 navegarSeccion("general");
                 setMenuTecnicoOverride(false);
+                setMenuGuiaGitOverride(false);
               }}
               className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
                 seccionActiva === "general"
@@ -394,7 +427,7 @@ export const AsignacionDetalleAlumno = () => {
               <span>General</span>
             </button>
 
-            {/* Opción 2: Estado Técnico + 3 Mini-bars anidados */}
+            {/* Opción 2: Estado Técnico + 3 Sub-items anidados */}
             <div className="space-y-1">
               <button
                 type="button"
@@ -402,6 +435,7 @@ export const AsignacionDetalleAlumno = () => {
                   if (seccionActiva !== "tecnico") {
                     navegarSeccion("tecnico", subSeccionTecnica);
                     setMenuTecnicoOverride(true);
+                    setMenuGuiaGitOverride(false);
                   } else {
                     setMenuTecnicoOverride((prev) =>
                       prev !== null ? !prev : false
@@ -453,6 +487,7 @@ export const AsignacionDetalleAlumno = () => {
               onClick={() => {
                 navegarSeccion("correcciones");
                 setMenuTecnicoOverride(false);
+                setMenuGuiaGitOverride(false);
               }}
               className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
                 seccionActiva === "correcciones"
@@ -471,6 +506,60 @@ export const AsignacionDetalleAlumno = () => {
                 {isLoadingCorrecciones ? "…" : cantIssues}
               </span>
             </button>
+
+            {/* Opción 4: Guía Git + Sub-items anidados (Abstracto como Estado Técnico) */}
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (seccionActiva !== "guia-git") {
+                    navegarSeccion("guia-git", subSeccionGuiaGit);
+                    setMenuGuiaGitOverride(true);
+                    setMenuTecnicoOverride(false);
+                  } else {
+                    setMenuGuiaGitOverride((prev) =>
+                      prev !== null ? !prev : false
+                    );
+                  }
+                }}
+                className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
+                  seccionActiva === "guia-git"
+                    ? "bg-primary text-primary-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-line/40"
+                }`}
+              >
+                <span>Guía Git</span>
+                <span className="text-[11px] opacity-80">
+                  {menuGuiaGitAbierto ? "▾" : "▸"}
+                </span>
+              </button>
+
+              {menuGuiaGitAbierto && (
+                <div className="ml-2.5 pl-2.5 border-l-2 border-line space-y-1 py-1 animate-rise">
+                  {subItemsGuiaGit.map((sub) => {
+                    const isSubActive =
+                      seccionActiva === "guia-git" &&
+                      subSeccionGuiaGit === sub.id;
+                    return (
+                      <button
+                        key={sub.id}
+                        type="button"
+                        onClick={() => {
+                          navegarSeccion("guia-git", sub.id);
+                        }}
+                        className={`flex items-center justify-between gap-2 w-full rounded-lg px-2.5 py-2 text-xs font-semibold text-left transition-colors cursor-pointer ${
+                          isSubActive
+                            ? "bg-line/70 text-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-line/30"
+                        }`}
+                      >
+                        <span className="whitespace-nowrap">{sub.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </nav>
         </aside>
 
@@ -486,6 +575,7 @@ export const AsignacionDetalleAlumno = () => {
               onVerBuenasPracticas={() => {
                 navegarSeccion("tecnico", "git");
                 setMenuTecnicoOverride(true);
+                setMenuGuiaGitOverride(false);
               }}
             />
           )}
@@ -507,6 +597,13 @@ export const AsignacionDetalleAlumno = () => {
               correccionGrupo={correccionGrupo}
               isLoading={isLoadingCorrecciones}
               error={errorCorrecciones}
+            />
+          )}
+
+          {seccionActiva === "guia-git" && (
+            <GuiaGitTab
+              subSeccionActiva={subSeccionGuiaGit}
+              asignacion={asignacion}
             />
           )}
         </div>
