@@ -9,6 +9,7 @@ import {
   type SubSeccionTecnica,
 } from "@/components/asignacion/tabs/EstadoTecnicoTab";
 import { CorreccionesAlumnoTab } from "@/components/asignacion/tabs/CorreccionesAlumnoTab";
+import { GuiaGitTab } from "@/components/asignacion/tabs/GuiaGitTab";
 import {
   esFechaLimiteVencida,
   formatFechaLegible,
@@ -38,7 +39,11 @@ export const AsignacionDetalleAlumno = () => {
   const subParam = searchParams.get("sub") as SubSeccionTecnica | null;
 
   const seccionActiva: SeccionDetalle =
-    tabParam === "tecnico" || tabParam === "correcciones" ? tabParam : "general";
+    tabParam === "tecnico" ||
+    tabParam === "correcciones" ||
+    tabParam === "guia-git"
+      ? tabParam
+      : "general";
 
   const subSeccionTecnica: SubSeccionTecnica =
     subParam === "cobertura" || subParam === "git" ? subParam : "ci";
@@ -248,115 +253,130 @@ export const AsignacionDetalleAlumno = () => {
                   <span className="text-muted-foreground text-xs">↗</span>
                 </a>
 
-                <button
-                  type="button"
-                  onClick={() => handleCopyClone(asignacion.repoUrl!)}
-                  className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer shadow-2xs ${
+                {/* Botón integrado: git clone con cuadrito explicativo '?' adentro a la derecha */}
+                <div
+                  className={`inline-flex items-center rounded-xl border transition-colors shadow-2xs ${
                     copied
                       ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                      : "border-line bg-panel2 text-foreground hover:bg-line/40"
+                      : "border-line bg-panel2 text-foreground"
                   }`}
-                  title={`Copiar al portapapeles: git clone ${asignacion.repoUrl}.git`}
                 >
-                  {copied ? (
-                    <>
-                      <svg
-                        className="w-4 h-4 text-emerald-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2.5"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span>¡Copiado!</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        className="w-4 h-4 text-muted-foreground"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <span>git clone</span>
-                    </>
-                  )}
-                </button>
-
-                {/* Tooltip: ¿Cómo clonar el repositorio? */}
-                <div className="relative group/help inline-flex items-center">
                   <button
                     type="button"
-                    aria-label="¿Cómo clonar este repositorio?"
-                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-line bg-panel2 text-muted-foreground hover:text-foreground hover:bg-line/40 text-sm font-bold transition-colors cursor-help shadow-2xs"
+                    onClick={() => handleCopyClone(asignacion.repoUrl!)}
+                    className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold hover:bg-line/30 transition-colors cursor-pointer rounded-l-xl"
+                    title={`Copiar al portapapeles: git clone ${asignacion.repoUrl}.git`}
                   >
-                    ?
+                    {copied ? (
+                      <>
+                        <svg
+                          className="w-4 h-4 text-emerald-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2.5"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span>¡Copiado!</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-4 h-4 text-muted-foreground"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <span>git clone</span>
+                      </>
+                    )}
                   </button>
 
-                  <div className="pointer-events-none group-hover/help:pointer-events-auto opacity-0 group-hover/help:opacity-100 group-hover/help:translate-y-0 translate-y-1 transition-all duration-150 absolute top-full mt-2 right-0 w-80 sm:w-92 rounded-xl border border-line bg-panel p-4.5 shadow-xl z-30 text-left text-xs text-foreground">
-                    <div className="flex items-center gap-2 mb-2 pb-2 border-b border-line text-primary font-bold">
-                      <span className="text-base">💡</span>
-                      <span className="text-sm">
-                        ¿Cómo clonar el repositorio?
-                      </span>
-                    </div>
+                  {/* Cuadrito interior para el '?' con tooltip explicativo */}
+                  <div className="relative group/help flex items-center pr-2 pl-0.5">
+                    <button
+                      type="button"
+                      aria-label="¿Cómo clonar este repositorio?"
+                      className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-md border border-line bg-panel text-muted-foreground hover:text-foreground hover:bg-line/50 text-[11px] font-bold transition-colors cursor-help shadow-2xs"
+                    >
+                      ?
+                    </button>
 
-                    <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                      Clonar descarga una copia completa del trabajo práctico a tu
-                      computadora para que puedas empezar a programar.
-                    </p>
-
-                    <ol className="space-y-2 text-xs text-muted-foreground list-decimal list-inside leading-relaxed">
-                      <li>
-                        <span className="text-foreground font-semibold">
-                          Copiá el comando
-                        </span>{" "}
-                        haciendo clic en{" "}
-                        <span className="text-foreground bg-panel2 px-1.5 py-0.5 rounded border border-line font-medium">
-                          git clone
+                    <div className="pointer-events-none group-hover/help:pointer-events-auto opacity-0 group-hover/help:opacity-100 group-hover/help:translate-y-0 translate-y-1 transition-all duration-150 absolute top-full mt-2 right-0 w-80 sm:w-92 rounded-xl border border-line bg-panel p-4.5 shadow-xl z-30 text-left text-xs text-foreground">
+                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-line text-primary font-bold">
+                        <svg
+                          className="w-4 h-4 text-primary shrink-0"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="4 17 10 11 4 5" />
+                          <line x1="12" y1="19" x2="20" y2="19" />
+                        </svg>
+                        <span className="text-sm">
+                          ¿Cómo clonar el repositorio?
                         </span>
-                        .
-                      </li>
-                      <li>
-                        <span className="text-foreground font-semibold">
-                          Abrí una terminal
-                        </span>{" "}
-                        en la carpeta
-                        donde guardás tus proyectos.
-                      </li>
-                      <li>
-                        <span className="text-foreground font-semibold">
-                          Pegá y ejecutá
-                        </span>{" "}
-                        el comando con{" "}
-                        <kbd className="px-1.5 py-0.5 rounded bg-panel2 border border-line text-foreground font-mono text-[11px]">
-                          Enter
-                        </kbd>
-                        :
-                        <div className="mt-1.5 p-2.5 rounded-md bg-background border border-line font-mono text-xs text-primary truncate select-all">
-                          git clone {asignacion.repoUrl}.git
-                        </div>
-                      </li>
-                      <li>
-                        <span className="text-foreground font-semibold">
-                          ¡Listo!
-                        </span>{" "}
-                        Se creará la carpeta con los archivos para empezar a
-                        trabajar.
-                      </li>
-                    </ol>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                        Clonar descarga una copia completa del trabajo práctico a tu
+                        computadora para que puedas empezar a programar.
+                      </p>
+
+                      <ol className="space-y-2 text-xs text-muted-foreground list-decimal list-inside leading-relaxed">
+                        <li>
+                          <span className="text-foreground font-semibold">
+                            Copiá el comando
+                          </span>{" "}
+                          haciendo clic en{" "}
+                          <span className="text-foreground bg-panel2 px-1.5 py-0.5 rounded border border-line font-medium">
+                            git clone
+                          </span>
+                          .
+                        </li>
+                        <li>
+                          <span className="text-foreground font-semibold">
+                            Abrí una terminal
+                          </span>{" "}
+                          en la carpeta donde guardás tus proyectos.
+                        </li>
+                        <li>
+                          <span className="text-foreground font-semibold">
+                            Pegá y ejecutá
+                          </span>{" "}
+                          el comando con{" "}
+                          <kbd className="px-1.5 py-0.5 rounded bg-panel2 border border-line text-foreground font-mono text-[11px]">
+                            Enter
+                          </kbd>
+                          :
+                          <div className="mt-1.5 p-2.5 rounded-md bg-background border border-line font-mono text-xs text-primary truncate select-all">
+                            git clone {asignacion.repoUrl}.git
+                          </div>
+                        </li>
+                        <li>
+                          <span className="text-foreground font-semibold">
+                            ¡Listo!
+                          </span>{" "}
+                          Se creará la carpeta con los archivos para empezar a
+                          trabajar.
+                        </li>
+                      </ol>
+                    </div>
                   </div>
                 </div>
               </>
@@ -471,6 +491,33 @@ export const AsignacionDetalleAlumno = () => {
                 {isLoadingCorrecciones ? "…" : cantIssues}
               </span>
             </button>
+
+            {/* Opción 4: Guía Git */}
+            <button
+              type="button"
+              onClick={() => {
+                navegarSeccion("guia-git");
+                setMenuTecnicoOverride(false);
+              }}
+              className={`flex items-center justify-between gap-2 w-full rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold text-left transition-colors cursor-pointer ${
+                seccionActiva === "guia-git"
+                  ? "bg-primary text-primary-foreground shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground hover:bg-line/40"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span>Guía Git</span>
+              </div>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                  seccionActiva === "guia-git"
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-line/60 text-muted-foreground"
+                }`}
+              >
+                Ayuda
+              </span>
+            </button>
           </nav>
         </aside>
 
@@ -508,6 +555,10 @@ export const AsignacionDetalleAlumno = () => {
               isLoading={isLoadingCorrecciones}
               error={errorCorrecciones}
             />
+          )}
+
+          {seccionActiva === "guia-git" && (
+            <GuiaGitTab asignacion={asignacion} />
           )}
         </div>
       </div>

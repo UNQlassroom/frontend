@@ -19,7 +19,7 @@ import { useAuth } from "./useAuth";
 import { mapAsignacionesDTO } from "./useAsignacionesAlumno";
 import { useSseListener } from "./useSseListener";
 
-export type SeccionDetalle = "general" | "tecnico" | "correcciones";
+export type SeccionDetalle = "general" | "tecnico" | "correcciones" | "guia-git";
 
 export function useAsignacionDetalleAlumno(
   cursoId?: number,

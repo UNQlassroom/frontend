@@ -5,7 +5,7 @@ export type TipoAsignacion = "INDIVIDUAL" | "GRUPAL";
 
 export type EstadoAsignacion = "CREANDO" | "LISTA" | "ERROR";
 
-export type SeccionDetalle = "general" | "tecnico" | "correcciones";
+export type SeccionDetalle = "general" | "tecnico" | "correcciones" | "guia-git";
 
 export interface CrearGrupoRequestDTO {
   nombre: string;
