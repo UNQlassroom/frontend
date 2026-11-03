@@ -5,6 +5,7 @@ import {
   ComandoCopiable,
   InteractiveTooltip,
 } from "../guiaGit";
+import githubIcon from "@/assets/github_favicon.svg";
 
 export type { SubSeccionGuiaGit };
 
@@ -157,9 +158,9 @@ export function GuiaGitTab({ subSeccionActiva, asignacion }: GuiaGitTabProps) {
 
         {/* Footer de CI si estamos en ese tema */}
         {temaActivo.id === "ci" && actionsUrl && (
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="rounded-xl border border-line bg-panel2/60 p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-0.5">
-              <h4 className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400">
+              <h4 className="text-xs sm:text-sm font-semibold text-foreground">
                 ¿Preferís la interfaz web de GitHub?
               </h4>
               <p className="text-xs text-muted-foreground">
@@ -170,10 +171,15 @@ export function GuiaGitTab({ subSeccionActiva, asignacion }: GuiaGitTabProps) {
               href={actionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:bg-primary/90 transition-colors shadow-2xs shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors shrink-0 shadow-2xs cursor-pointer"
             >
-              <span>Ir a GitHub Actions</span>
-              <span className="text-xs">↗</span>
+              <img
+                src={githubIcon}
+                alt="GitHub"
+                className="w-4 h-4 opacity-80"
+              />
+              <span>GitHub Actions</span>
+              <span className="text-muted-foreground text-xs">↗</span>
             </a>
           </div>
         )}

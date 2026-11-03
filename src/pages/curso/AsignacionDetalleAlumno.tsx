@@ -56,9 +56,9 @@ export const AsignacionDetalleAlumno = () => {
     subParam === "cobertura" || subParam === "git" ? subParam : "ci";
 
   const subSeccionGuiaGit: SubSeccionGuiaGit =
-    subParam === "revertir" || subParam === "sincronizar" || subParam === "ci"
-      ? subParam
-      : "conflictos";
+    subItemsGuiaGit.some((item) => item.id === subParam)
+      ? (subParam as SubSeccionGuiaGit)
+      : subItemsGuiaGit[0].id;
 
   const [menuTecnicoOverride, setMenuTecnicoOverride] = useState<boolean | null>(
     null
@@ -507,7 +507,7 @@ export const AsignacionDetalleAlumno = () => {
               </span>
             </button>
 
-            {/* Opción 4: Guía Git + 4 Sub-items anidados (Abstracto como Estado Técnico) */}
+            {/* Opción 4: Guía Git + Sub-items anidados (Abstracto como Estado Técnico) */}
             <div className="space-y-1">
               <button
                 type="button"
