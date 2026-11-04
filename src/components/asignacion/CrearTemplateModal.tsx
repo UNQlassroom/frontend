@@ -123,6 +123,14 @@ export function CrearTemplateModal({
                   <span>Abrir en GitHub para subir archivos</span>
                 </a>
               </div>
+
+              {/* Recordatorio sobre inyección de dependencias y CI */}
+              <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3.5 text-xs text-muted-foreground flex items-start gap-2.5">
+                <span className="text-sm shrink-0 mt-0.5">ℹ️</span>
+                <p className="leading-relaxed">
+                  <strong className="text-foreground font-semibold">Configuración previa:</strong> Podés subir tu código y hacer todos los cambios que creas necesarios en GitHub. Al <strong>usar esta plantilla al crear una asignación</strong>, la plataforma inyectará automáticamente el CI y las dependencias que hagan falta para habilitar las métricas y correcciones.
+                </p>
+              </div>
             </div>
 
             <div className="pt-2 border-t border-line flex items-center justify-between gap-3">
@@ -186,6 +194,32 @@ export function CrearTemplateModal({
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full rounded-xl border border-line bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
               />
+            </div>
+
+            {/* Advertencia sobre inyección de dependencias y CI */}
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 sm:p-4 text-xs sm:text-sm">
+              <div className="flex items-start gap-2.5">
+                <svg
+                  className="w-4 h-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <div className="space-y-1">
+                  <p className="font-semibold text-amber-700 dark:text-amber-300">
+                    Aviso sobre el uso de la plantilla
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Vas a poder clonar el repositorio y realizar todas las modificaciones o subir el código que creas necesario. La inyección de los flujos de <strong>Integración Continua (CI)</strong> y de las <strong>dependencias faltantes</strong> se realizará automáticamente recién cuando decidas <strong>usar esta plantilla al crear una asignación</strong>, asegurando que quede totalmente configurada para la plataforma antes de que la utilicen los alumnos.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {error && (
