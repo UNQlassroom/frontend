@@ -13,6 +13,7 @@ import type {
   TipoAsignacion,
 } from "@/types";
 import { CrearTemplateModal } from "./CrearTemplateModal";
+import { formatearInputFecha, fechaDDMMAAAAHaciaISO } from "@/utils";
 
 interface CrearAsignacionModalProps {
   open: boolean;
@@ -176,6 +177,17 @@ export function CrearAsignacionModal({
       return;
     }
 
+    if (!fechaLimite.trim()) {
+      setError("La fecha límite de entrega es obligatoria.");
+      return;
+    }
+
+    const fechaLimiteIso = fechaDDMMAAAAHaciaISO(fechaLimite);
+    if (!fechaLimiteIso) {
+      setError("La fecha límite debe tener un formato válido (DD/MM/AAAA).");
+      return;
+    }
+
     let gruposPayload: CrearGrupoRequestDTO[] | undefined = undefined;
 
     if (tipo === "GRUPAL") {
@@ -206,7 +218,7 @@ export function CrearAsignacionModal({
       descripcion: descripcion.trim() || undefined,
       tipo,
       templateRepoName: templateFinal,
-      fechaLimite: fechaLimite ? `${fechaLimite}T23:59:59` : undefined,
+      fechaLimite: `${fechaLimiteIso}T23:59:59`,
       grupos: gruposPayload,
     };
 
@@ -420,12 +432,18 @@ export function CrearAsignacionModal({
                 </label>
                 <input
                   id="asignacion-fecha"
-                  type="date"
+                  type="text"
+                  inputMode="numeric"
                   required
                   disabled={isLoading}
+                  placeholder="DD/MM/AAAA"
+                  maxLength={10}
                   value={fechaLimite}
-                  onChange={(e) => setFechaLimite(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                  onChange={(e) => {
+                    setFechaLimite((prev) => formatearInputFecha(e.target.value, prev));
+                    setError(null);
+                  }}
+                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>

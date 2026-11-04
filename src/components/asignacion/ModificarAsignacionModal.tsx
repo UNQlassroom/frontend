@@ -5,7 +5,12 @@ import type {
   AsignacionResponseDTO,
   ModificarAsignacionRequestDTO,
 } from "@/types";
-import { resolveApiError } from "@/utils";
+import {
+  resolveApiError,
+  formatearInputFecha,
+  fechaDDMMAAAAHaciaISO,
+  fechaISOHaciaDDMMAAAA,
+} from "@/utils";
 
 export interface ModificarAsignacionModalProps {
   open: boolean;
@@ -22,21 +27,6 @@ interface ModificarAsignacionContentProps {
   onSuccess: (asignacionActualizada: AsignacionResponseDTO) => void;
 }
 
-function formatFechaInput(fechaIso?: string | null): string {
-  if (!fechaIso) return "";
-  if (fechaIso.length >= 10 && /^\d{4}-\d{2}-\d{2}/.test(fechaIso)) {
-    return fechaIso.substring(0, 10);
-  }
-  const date = new Date(fechaIso);
-  if (!isNaN(date.getTime())) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-  return "";
-}
-
 function ModificarAsignacionContent({
   onClose,
   cursoId,
@@ -45,7 +35,7 @@ function ModificarAsignacionContent({
 }: ModificarAsignacionContentProps) {
   const [descripcion, setDescripcion] = useState(asignacion.descripcion || "");
   const [fechaLimite, setFechaLimite] = useState(() =>
-    formatFechaInput(asignacion.fechaLimite)
+    fechaISOHaciaDDMMAAAA(asignacion.fechaLimite)
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,12 +56,18 @@ function ModificarAsignacionContent({
       return;
     }
 
+    const fechaIso = fechaDDMMAAAAHaciaISO(fechaClean);
+    if (!fechaIso) {
+      setError("La fecha de entrega debe tener un formato válido (DD/MM/AAAA).");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const payload: ModificarAsignacionRequestDTO = {
         descripcion: descripcion.trim() ? descripcion.trim() : null,
-        fechaLimite: fechaClean ? `${fechaClean}T23:59:59` : null,
+        fechaLimite: `${fechaIso}T23:59:59`,
       };
 
       const response = await modificarAsignacion(
@@ -129,6 +125,9 @@ function ModificarAsignacionContent({
               >
                 Título
               </label>
+              <span className="text-xs text-muted-foreground/80 italic">
+                No modificable
+              </span>
             </div>
             <input
               id="modificar-titulo"
@@ -140,27 +139,31 @@ function ModificarAsignacionContent({
             />
           </div>
 
-          {/* Campos Tipo y Repositorio Template en dos columnas (Solo Lectura) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Campo Tipo (Solo Lectura) */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label
                   htmlFor="modificar-tipo"
                   className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
-                  Tipo de asignación
+                  Modalidad
                 </label>
+                <span className="text-xs text-muted-foreground/80 italic">
+                  No modificable
+                </span>
               </div>
               <input
                 id="modificar-tipo"
                 type="text"
                 readOnly
                 disabled
-                value={asignacion.tipo === "GRUPAL" ? "Grupal" : "Individual"}
+                value={asignacion.tipo === "INDIVIDUAL" ? "Individual" : "Grupal"}
                 className="w-full rounded-xl border border-line bg-line/20 px-3.5 py-2.5 text-sm text-muted-foreground cursor-not-allowed select-none opacity-85"
               />
             </div>
 
+            {/* Campo Repositorio Plantilla (Solo Lectura) */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label
@@ -169,6 +172,9 @@ function ModificarAsignacionContent({
                 >
                   Repositorio Plantilla
                 </label>
+                <span className="text-xs text-muted-foreground/80 italic">
+                  No modificable
+                </span>
               </div>
               <input
                 id="modificar-template"
@@ -191,15 +197,18 @@ function ModificarAsignacionContent({
             </label>
             <input
               id="modificar-fecha"
-              type="date"
+              type="text"
+              inputMode="numeric"
               required
               disabled={isLoading}
+              placeholder="DD/MM/AAAA"
+              maxLength={10}
               value={fechaLimite}
               onChange={(e) => {
-                setFechaLimite(e.target.value);
+                setFechaLimite((prev) => formatearInputFecha(e.target.value, prev));
                 setError(null);
               }}
-              className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer disabled:opacity-50"
+              className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
             />
           </div>
 

@@ -86,3 +86,51 @@ export function esFechaLimiteVencida(fechaLimite?: string | null): boolean {
     return false;
   }
 }
+
+/**
+ * Formatea el texto mientras el usuario escribe una fecha, insertando barras automáticamente (DD/MM/AAAA).
+ */
+export function formatearInputFecha(valor: string, valorAnterior: string = ""): string {
+  if (valor.length < valorAnterior.length) {
+    return valor;
+  }
+  const digits = valor.replace(/\D/g, "").slice(0, 8);
+  if (digits.length === 0) return "";
+  if (digits.length <= 2) return valor.endsWith("/") ? `${digits}/` : digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${valor.endsWith("/") ? `${digits.slice(2)}/` : digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+/**
+ * Convierte una fecha en formato DD/MM/AAAA a formato ISO YYYY-MM-DD.
+ * Valida que los días, meses y años sean coherentes (incluyendo años bisiestos).
+ * Retorna null si la fecha no es válida.
+ */
+export function fechaDDMMAAAAHaciaISO(fecha: string): string | null {
+  const match = fecha.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return null;
+  const [, day, month, year] = match;
+  const d = Number(day);
+  const m = Number(month);
+  const y = Number(year);
+  if (m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2100) return null;
+  const date = new Date(y, m - 1, d);
+  if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) {
+    return null;
+  }
+  return `${year}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+
+/**
+ * Convierte una fecha en formato ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss) a formato legible DD/MM/AAAA para el input.
+ */
+export function fechaISOHaciaDDMMAAAA(fechaIso?: string | null): string {
+  if (!fechaIso) return "";
+  const [fecha] = fechaIso.split("T");
+  if (!fecha) return "";
+  const parts = fecha.split("-");
+  if (parts.length === 3 && parts[0].length === 4) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return "";
+}
