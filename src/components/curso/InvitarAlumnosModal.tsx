@@ -1,7 +1,8 @@
 import { useState } from "react";
+import * as React from "react";
 import { agregarAlumnos } from "@/services";
 import type { CursoResponseDTO } from "@/types";
-import * as React from "react";
+import { isValidGitHubUsername } from "@/utils";
 
 interface InvitarAlumnosModalProps {
   open: boolean;
@@ -28,12 +29,17 @@ export function InvitarAlumnosModal({
     const clean = inputValue.trim().replace(/^@/, "");
     if (!clean) return;
 
-    if (usernames.includes(clean)) {
-      setError(`El usuario @${clean} ya está en la lista.`);
+    if (!isValidGitHubUsername(clean)) {
+      setError("El formato del usuario de GitHub no es válido.");
       return;
     }
 
-    setUsernames((prev) => [...prev, clean]);
+    const exists = usernames.some(
+      (u) => u.toLowerCase() === clean.toLowerCase()
+    );
+    if (!exists) {
+      setUsernames((prev) => [...prev, clean]);
+    }
     setInputValue("");
     setError(null);
   };
@@ -55,9 +61,19 @@ export function InvitarAlumnosModal({
 
     const finalUsernames = [...usernames];
     const pending = inputValue.trim().replace(/^@/, "");
-    if (pending && !finalUsernames.includes(pending)) {
-      finalUsernames.push(pending);
-      setUsernames(finalUsernames);
+    if (pending) {
+      if (!isValidGitHubUsername(pending)) {
+        setError("El formato del usuario de GitHub no es válido.");
+        return;
+      }
+
+      const exists = finalUsernames.some(
+        (u) => u.toLowerCase() === pending.toLowerCase()
+      );
+      if (!exists) {
+        finalUsernames.push(pending);
+        setUsernames(finalUsernames);
+      }
       setInputValue("");
     }
 
@@ -76,8 +92,8 @@ export function InvitarAlumnosModal({
         onSuccess();
       }
     } catch {
-      // El interceptor global de Axios muestra el toast amigable correspondiente (ej: GITHUB_USERS_NOT_FOUND)
-      setError("Ocurrió un error al invitar alumnos.")
+      // El interceptor global de Axios muestra el toast amigable correspondiente (ej: GITHUB_USERS_NOT_FOUND, ALUMNO_DUPLICADO)
+      setError("Ocurrió un error al invitar alumnos.");
     } finally {
       setIsLoading(false);
     }
