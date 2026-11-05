@@ -94,41 +94,89 @@ export function CrearTemplateModal({
         {/* Vista si ya fue creado exitosamente */}
         {templateCreado ? (
           <div className="space-y-5 py-2">
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 space-y-3">
-              <div className="flex items-center gap-2.5">
-                <span className="text-xl">✅</span>
-                <h3 className="font-display text-lg font-bold text-foreground">
-                  {templateCreado.name}
-                </h3>
+            <div className="rounded-2xl border border-line bg-panel/70 p-5 space-y-4 shadow-2xs">
+              {/* Header con icono y nombre */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4.5 12.75l6 6 9-13.5"
+                    />
+                  </svg>
+                </div>
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-display text-lg font-bold text-foreground truncate">
+                      {templateCreado.name}
+                    </h3>
+                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      Plantilla creada
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    El repositorio fue creado exitosamente en la organización de GitHub como plantilla.
+                    Podés abrirlo para clonarlo o comenzar a subir los archivos base del trabajo práctico.
+                  </p>
+                </div>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                El repositorio se creó exitosamente en la organización de GitHub como plantilla.
-                Ya podés abrirlo para clonarlo y subir el código inicial.
-              </p>
 
               {/* Botón destacado con el link de GitHub para subir cosas al repo */}
-              <div className="pt-2">
-                <a
-                  href={templateCreado.htmlUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2.5 w-full rounded-xl border border-line bg-panel text-foreground py-3 px-4 text-sm font-semibold hover:bg-line/40 transition-colors shadow-xs cursor-pointer"
-                  title="Abrir repositorio en GitHub para subir código"
+              <a
+                href={templateCreado.htmlUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2.5 w-full rounded-xl border border-line bg-background hover:bg-line/40 text-foreground py-2.5 px-4 text-sm font-semibold transition-colors shadow-2xs group cursor-pointer"
+                title="Abrir repositorio en GitHub para subir código"
+              >
+                <img
+                  src={githubIcon}
+                  alt="GitHub"
+                  className="w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity"
+                />
+                <span>Abrir en GitHub para subir código inicial</span>
+                <svg
+                  className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors ml-0.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
                 >
-                  <img
-                    src={githubIcon}
-                    alt="GitHub"
-                    className="w-5 h-5 opacity-80"
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
                   />
-                  <span>Abrir en GitHub para subir archivos</span>
-                </a>
-              </div>
+                </svg>
+              </a>
 
               {/* Recordatorio sobre inyección de dependencias y CI */}
-              <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3.5 text-xs text-muted-foreground flex items-start gap-2.5">
-                <span className="text-sm shrink-0 mt-0.5">ℹ️</span>
+              <div className="rounded-xl border border-line bg-panel2/80 p-3.5 text-xs text-muted-foreground flex items-start gap-3">
+                <div className="w-5 h-5 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                  <svg
+                    className="w-3.5 h-3.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
                 <p className="leading-relaxed">
-                  <strong className="text-foreground font-semibold">Configuración previa:</strong> Podés subir tu código y hacer todos los cambios que creas necesarios en GitHub. Al <strong>usar esta plantilla al crear una asignación</strong>, la plataforma inyectará automáticamente el CI y las dependencias que hagan falta para habilitar las métricas y correcciones.
+                  <strong className="text-foreground font-semibold">Configuración automática:</strong> Subí tu código inicial con tranquilidad. Al <strong>usar esta plantilla al crear una asignación</strong>, la plataforma inyectará automáticamente los flujos de Integración Continua (CI) y las dependencias requeridas para las métricas y correcciones.
                 </p>
               </div>
             </div>

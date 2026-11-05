@@ -5,12 +5,9 @@ import type {
   AsignacionResponseDTO,
   ModificarAsignacionRequestDTO,
 } from "@/types";
-import {
-  resolveApiError,
-  formatearInputFecha,
-  fechaDDMMAAAAHaciaISO,
-  fechaISOHaciaDDMMAAAA,
-} from "@/utils";
+import { format } from "date-fns";
+import { resolveApiError, esFechaLimiteVencida } from "@/utils";
+import { DatePicker } from "@/components/ui";
 
 export interface ModificarAsignacionModalProps {
   open: boolean;
@@ -27,6 +24,18 @@ interface ModificarAsignacionContentProps {
   onSuccess: (asignacionActualizada: AsignacionResponseDTO) => void;
 }
 
+function parseFechaLimite(fechaIso?: string | null): Date | undefined {
+  if (!fechaIso) return undefined;
+  const [fecha] = fechaIso.split("T");
+  if (!fecha) return undefined;
+  const parts = fecha.split("-").map(Number);
+  const y = parts[0];
+  const m = parts[1];
+  const d = parts[2];
+  if (!y || !m || !d) return undefined;
+  return new Date(y, m - 1, d);
+}
+
 function ModificarAsignacionContent({
   onClose,
   cursoId,
@@ -34,8 +43,8 @@ function ModificarAsignacionContent({
   onSuccess,
 }: ModificarAsignacionContentProps) {
   const [descripcion, setDescripcion] = useState(asignacion.descripcion || "");
-  const [fechaLimite, setFechaLimite] = useState(() =>
-    fechaISOHaciaDDMMAAAA(asignacion.fechaLimite)
+  const [fechaLimite, setFechaLimite] = useState<Date | undefined>(() =>
+    parseFechaLimite(asignacion.fechaLimite)
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,17 +59,18 @@ function ModificarAsignacionContent({
     e.preventDefault();
     setError(null);
 
-    const fechaClean = fechaLimite.trim();
-    if (!fechaClean) {
+    if (!fechaLimite) {
       setError("La fecha de entrega es obligatoria.");
       return;
     }
 
-    const fechaIso = fechaDDMMAAAAHaciaISO(fechaClean);
-    if (!fechaIso) {
-      setError("La fecha de entrega debe tener un formato válido (DD/MM/AAAA).");
+    const fechaIso = format(fechaLimite, "yyyy-MM-dd");
+    if (esFechaLimiteVencida(fechaIso)) {
+      setError("La fecha límite no puede ser anterior a la fecha actual.");
       return;
     }
+
+
 
     setIsLoading(true);
 
@@ -187,7 +197,7 @@ function ModificarAsignacionContent({
             </div>
           </div>
 
-          {/* Campo Fecha Límite de Entrega (Modificable, mismo input y comportamiento que Crear Asignación) */}
+                    {/* Campo Fecha Límite de Entrega (Modificable) */}
           <div>
             <label
               htmlFor="modificar-fecha"
@@ -195,20 +205,16 @@ function ModificarAsignacionContent({
             >
               Fecha límite de entrega
             </label>
-            <input
+            <DatePicker
               id="modificar-fecha"
-              type="text"
-              inputMode="numeric"
-              required
-              disabled={isLoading}
-              placeholder="DD/MM/AAAA"
-              maxLength={10}
               value={fechaLimite}
-              onChange={(e) => {
-                setFechaLimite((prev) => formatearInputFecha(e.target.value, prev));
+              onChange={(date) => {
+                setFechaLimite(date);
                 setError(null);
               }}
-              className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+              placeholder="Seleccionar fecha de entrega..."
+              disabled={isLoading}
+              error={Boolean(error && !fechaLimite)}
             />
           </div>
 

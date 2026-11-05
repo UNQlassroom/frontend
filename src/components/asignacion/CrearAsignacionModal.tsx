@@ -13,7 +13,9 @@ import type {
   TipoAsignacion,
 } from "@/types";
 import { CrearTemplateModal } from "./CrearTemplateModal";
-import { formatearInputFecha, fechaDDMMAAAAHaciaISO } from "@/utils";
+import { format } from "date-fns";
+import { esFechaLimiteVencida } from "@/utils";
+import { DatePicker } from "@/components/ui";
 
 interface CrearAsignacionModalProps {
   open: boolean;
@@ -39,7 +41,7 @@ export function CrearAsignacionModal({
   const [descripcion, setDescripcion] = useState("");
   const [tipo, setTipo] = useState<TipoAsignacion>("INDIVIDUAL");
   const [templateRepoName, setTemplateRepoName] = useState("");
-  const [fechaLimite, setFechaLimite] = useState("");
+  const [fechaLimite, setFechaLimite] = useState<Date | undefined>(undefined);
 
   // Grupos para tipo GRUPAL
   const [grupos, setGrupos] = useState<GrupoFormState[]>([
@@ -106,7 +108,7 @@ export function CrearAsignacionModal({
     setDescripcion("");
     setTipo("INDIVIDUAL");
     setTemplateRepoName(templates[0]?.name || "");
-    setFechaLimite("");
+    setFechaLimite(undefined);
     setGrupos([{ nombre: "Grupo 1", integrantesUsernames: [] }]);
     setError(null);
     setIsLoadingTemplates(true);
@@ -177,16 +179,18 @@ export function CrearAsignacionModal({
       return;
     }
 
-    if (!fechaLimite.trim()) {
+    if (!fechaLimite) {
       setError("La fecha límite de entrega es obligatoria.");
       return;
     }
 
-    const fechaLimiteIso = fechaDDMMAAAAHaciaISO(fechaLimite);
-    if (!fechaLimiteIso) {
-      setError("La fecha límite debe tener un formato válido (DD/MM/AAAA).");
+    const fechaLimiteIso = format(fechaLimite, "yyyy-MM-dd");
+    if (esFechaLimiteVencida(fechaLimiteIso)) {
+      setError("La fecha límite no puede ser anterior a la fecha actual.");
       return;
     }
+
+
 
     let gruposPayload: CrearGrupoRequestDTO[] | undefined = undefined;
 
@@ -423,27 +427,23 @@ export function CrearAsignacionModal({
                 )}
               </div>
 
-              <div>
+                            <div>
                 <label
                   htmlFor="asignacion-fecha"
                   className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
                   Fecha límite de entrega *
                 </label>
-                <input
+                <DatePicker
                   id="asignacion-fecha"
-                  type="text"
-                  inputMode="numeric"
-                  required
-                  disabled={isLoading}
-                  placeholder="DD/MM/AAAA"
-                  maxLength={10}
                   value={fechaLimite}
-                  onChange={(e) => {
-                    setFechaLimite((prev) => formatearInputFecha(e.target.value, prev));
+                  onChange={(date) => {
+                    setFechaLimite(date);
                     setError(null);
                   }}
-                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Seleccionar fecha de entrega..."
+                  disabled={isLoading}
+                  error={Boolean(error && !fechaLimite)}
                 />
               </div>
             </div>

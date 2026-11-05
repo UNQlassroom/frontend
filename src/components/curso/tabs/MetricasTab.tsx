@@ -221,7 +221,7 @@ export function MetricasTab({
     <div className="space-y-6 animate-rise">
       {/* Encabezado del panel de métricas */}
       <PanelHeader
-        title="Panel de Métricas de Repositorios (CI/CD)"
+        title="Panel de Métricas de Repositorios"
         description="Monitoreo en tiempo real de los pipelines de GitHub Actions, fechas y actividad de commits de las asignaciones."
       />
 
@@ -331,10 +331,9 @@ export function MetricasTab({
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
                 {/* Total Repositorios */}
                 <KpiCard
-                  label="Total Monitoreados"
+                  label="Total Repositorios"
                   value={total}
-                  unit="repos"
-                  subtext={`Curso: ${curso.materia}`}
+                  unit={total === 1 ? "repo" : "repos"}
                   variant="default"
                   isSelected={filtroEstado === "todos"}
                   onClick={() => handleCardClick("todos")}
@@ -352,7 +351,7 @@ export function MetricasTab({
                 <KpiCard
                   label="Sin CI"
                   value={sinCiCount}
-                  subtext={`${sinCiPct}% del total`}
+                  subtext={`${sinCiPct}% de los repos`}
                   variant="neutral"
                   isSelected={filtroEstado === "sin_ci"}
                   onClick={() => handleCardClick("sin_ci")}
@@ -361,7 +360,7 @@ export function MetricasTab({
 
                 {/* Pending */}
                 <KpiCard
-                  label="CI En Ejecución"
+                  label="En Ejecución"
                   value={pendingCount}
                   subtext={`${pendingPct}% del total`}
                   variant="amber"
@@ -372,7 +371,7 @@ export function MetricasTab({
 
                 {/* CI Passing */}
                 <KpiCard
-                  label="CI Exitosos"
+                  label="Exitosos"
                   value={passingCount}
                   subtext={`${passingPct}% del total`}
                   variant="emerald"
@@ -383,7 +382,7 @@ export function MetricasTab({
 
                 {/* CI Failing */}
                 <KpiCard
-                  label="CI Fallidos"
+                  label="Fallidos"
                   value={failingCount}
                   subtext={`${failingPct}% del total`}
                   variant="rose"
