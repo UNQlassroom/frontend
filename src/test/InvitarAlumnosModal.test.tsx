@@ -112,6 +112,9 @@ describe("InvitarAlumnosModal", () => {
 
   test("Caso alumno duplicado: manejo de error y notificación toast clara", async () => {
     // Arrange
+    const backendMessage =
+      "Los siguientes alumnos ya están inscriptos en el curso: juanperez";
+
     mockAdapter.mockRejectedValueOnce(
       new AxiosError(
         "Request failed with status code 409",
@@ -125,7 +128,7 @@ describe("InvitarAlumnosModal", () => {
           config: {} as InternalAxiosRequestConfig,
           data: {
             errorCode: "ALUMNO_DUPLICADO",
-            message: "Uno o más alumnos ya se encuentran inscriptos en el curso.",
+            message: backendMessage,
           },
         }
       )
@@ -149,11 +152,9 @@ describe("InvitarAlumnosModal", () => {
 
     // Assert
     const divError = await screen.findByTestId("error-message");
-    expect(divError).toHaveTextContent(
-      "Ocurrió un error al invitar alumnos."
-    );
+    expect(divError).toHaveTextContent(backendMessage);
     expect(toast.warning).toHaveBeenCalledWith(
-      "Uno o más alumnos ya se encuentran inscriptos en el curso.",
+      backendMessage,
       expect.objectContaining({
         toastId: "api_err_ALUMNO_DUPLICADO",
       })
@@ -163,6 +164,9 @@ describe("InvitarAlumnosModal", () => {
 
   test("Caso usuario GitHub inexistente: manejo de error de API y feedback al usuario", async () => {
     // Arrange
+    const backendMessage =
+      "Los siguientes usuarios no existen en GitHub: usuario-inexistente";
+
     mockAdapter.mockRejectedValueOnce(
       new AxiosError(
         "Request failed with status code 400",
@@ -176,7 +180,7 @@ describe("InvitarAlumnosModal", () => {
           config: {} as InternalAxiosRequestConfig,
           data: {
             errorCode: "GITHUB_USERS_NOT_FOUND",
-            message: "Uno o más usuarios indicados no existen en GitHub.",
+            message: backendMessage,
           },
         }
       )
@@ -200,11 +204,9 @@ describe("InvitarAlumnosModal", () => {
 
     // Assert
     const divError = await screen.findByTestId("error-message");
-    expect(divError).toHaveTextContent(
-      "Ocurrió un error al invitar alumnos."
-    );
+    expect(divError).toHaveTextContent(backendMessage);
     expect(toast.warning).toHaveBeenCalledWith(
-      "Uno o más usuarios indicados no existen en GitHub.",
+      backendMessage,
       expect.objectContaining({
         toastId: "api_err_GITHUB_USERS_NOT_FOUND",
       })

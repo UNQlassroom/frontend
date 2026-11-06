@@ -2,7 +2,7 @@ import { useState } from "react";
 import * as React from "react";
 import { agregarAlumnos } from "@/services";
 import type { CursoResponseDTO } from "@/types";
-import { isValidGitHubUsername } from "@/utils";
+import { isValidGitHubUsername, resolveApiError } from "@/utils";
 
 interface InvitarAlumnosModalProps {
   open: boolean;
@@ -91,9 +91,10 @@ export function InvitarAlumnosModal({
       if (onSuccess) {
         onSuccess();
       }
-    } catch {
+    } catch (err: unknown) {
       // El interceptor global de Axios muestra el toast amigable correspondiente (ej: GITHUB_USERS_NOT_FOUND, ALUMNO_DUPLICADO)
-      setError("Ocurrió un error al invitar alumnos.");
+      const resolved = resolveApiError(err);
+      setError(resolved?.message || "Ocurrió un error al invitar alumnos.");
     } finally {
       setIsLoading(false);
     }

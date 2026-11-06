@@ -46,10 +46,13 @@ export const resolveApiError = (error: unknown): ResolvedApiError | null => {
   const errorCode = data?.errorCode || undefined;
   const dict = errorCode ? ERROR_MESSAGES[errorCode] : undefined;
 
+  const resolvedMessage = dict?.preferBackendMessage
+    ? data?.message || dict.message
+    : dict?.message || data?.message;
+
   return {
     message:
-      dict?.message ||
-      data?.message ||
+      resolvedMessage ||
       "Ocurrió un error inesperado al procesar la solicitud.",
     severity: dict?.severity || (status >= 500 ? "error" : "warning"),
     errorCode,
