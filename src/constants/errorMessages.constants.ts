@@ -3,6 +3,7 @@ import type { ErrorSeverity } from "@/types";
 export interface ErrorDefinition {
   message: string;
   severity: ErrorSeverity;
+  preferBackendMessage?: boolean;
 }
 
 export const BACKEND_ERROR_CODES = {
@@ -30,6 +31,7 @@ export const BACKEND_ERROR_CODES = {
   GRUPO_ID_REQUERIDO_PARA_DOCENTE: "GRUPO_ID_REQUERIDO_PARA_DOCENTE",
   ALUMNO_EN_MULTIPLES_GRUPOS: "ALUMNO_EN_MULTIPLES_GRUPOS",
   ALUMNOS_NO_INSCRIPTOS: "ALUMNOS_NO_INSCRIPTOS",
+  ALUMNO_DUPLICADO: "ALUMNO_DUPLICADO",
   USUARIO_NO_PERTENECE_A_GRUPO: "USUARIO_NO_PERTENECE_A_GRUPO",
   ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES: "ASIGNACION_CON_ENTREGAS_O_CALIFICACIONES",
   ASIGNACION_NO_LISTA: "ASIGNACION_NO_LISTA",
@@ -159,6 +161,12 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   [BACKEND_ERROR_CODES.ALUMNOS_NO_INSCRIPTOS]: {
     message: "Hay alumnos seleccionados que no están inscriptos en el curso.",
     severity: "warning",
+    preferBackendMessage: true,
+  },
+  [BACKEND_ERROR_CODES.ALUMNO_DUPLICADO]: {
+    message: "Uno o más alumnos ya se encuentran inscriptos en el curso.",
+    severity: "warning",
+    preferBackendMessage: true,
   },
   [BACKEND_ERROR_CODES.USUARIO_NO_PERTENECE_A_GRUPO]: {
     message: "No pertenecés al grupo correspondiente para realizar esta acción.",
@@ -263,6 +271,7 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   [BACKEND_ERROR_CODES.GITHUB_USERS_NOT_FOUND]: {
     message: "Uno o más usuarios indicados no existen en GitHub.",
     severity: "warning",
+    preferBackendMessage: true,
   },
   [BACKEND_ERROR_CODES.GITHUB_VALIDATION_ERROR]: {
     message: "Parámetros inválidos para la operación en GitHub.",

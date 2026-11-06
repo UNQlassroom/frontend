@@ -1,6 +1,13 @@
 export const GITHUB_ORGANIZATION: string =
   import.meta.env.VITE_GITHUB_ORGANIZATION || "UNQlassroom-cursos";
 
+export const GITHUB_USERNAME_REGEX =
+  /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
+
+export const isValidGitHubUsername = (username: string): boolean => {
+  return GITHUB_USERNAME_REGEX.test(username);
+};
+
 export const getGitHubRepoUrl = (repoName: string): string => {
   return `https://github.com/${GITHUB_ORGANIZATION}/${repoName}`;
 };

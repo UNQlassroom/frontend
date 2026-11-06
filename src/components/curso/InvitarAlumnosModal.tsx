@@ -1,7 +1,8 @@
 import { useState } from "react";
+import * as React from "react";
 import { agregarAlumnos } from "@/services";
 import type { CursoResponseDTO } from "@/types";
-import * as React from "react";
+import { isValidGitHubUsername, resolveApiError } from "@/utils";
 
 interface InvitarAlumnosModalProps {
   open: boolean;
@@ -28,12 +29,17 @@ export function InvitarAlumnosModal({
     const clean = inputValue.trim().replace(/^@/, "");
     if (!clean) return;
 
-    if (usernames.includes(clean)) {
-      setError(`El usuario @${clean} ya está en la lista.`);
+    if (!isValidGitHubUsername(clean)) {
+      setError("El formato del usuario de GitHub no es válido.");
       return;
     }
 
-    setUsernames((prev) => [...prev, clean]);
+    const exists = usernames.some(
+      (u) => u.toLowerCase() === clean.toLowerCase()
+    );
+    if (!exists) {
+      setUsernames((prev) => [...prev, clean]);
+    }
     setInputValue("");
     setError(null);
   };
@@ -55,9 +61,19 @@ export function InvitarAlumnosModal({
 
     const finalUsernames = [...usernames];
     const pending = inputValue.trim().replace(/^@/, "");
-    if (pending && !finalUsernames.includes(pending)) {
-      finalUsernames.push(pending);
-      setUsernames(finalUsernames);
+    if (pending) {
+      if (!isValidGitHubUsername(pending)) {
+        setError("El formato del usuario de GitHub no es válido.");
+        return;
+      }
+
+      const exists = finalUsernames.some(
+        (u) => u.toLowerCase() === pending.toLowerCase()
+      );
+      if (!exists) {
+        finalUsernames.push(pending);
+        setUsernames(finalUsernames);
+      }
       setInputValue("");
     }
 
@@ -75,9 +91,10 @@ export function InvitarAlumnosModal({
       if (onSuccess) {
         onSuccess();
       }
-    } catch {
-      // El interceptor global de Axios muestra el toast amigable correspondiente (ej: GITHUB_USERS_NOT_FOUND)
-      setError("Ocurrió un error al invitar alumnos.")
+    } catch (err: unknown) {
+      // El interceptor global de Axios muestra el toast amigable correspondiente (ej: GITHUB_USERS_NOT_FOUND, ALUMNO_DUPLICADO)
+      const resolved = resolveApiError(err);
+      setError(resolved?.message || "Ocurrió un error al invitar alumnos.");
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +136,7 @@ export function InvitarAlumnosModal({
 
         {/* Formulario */}
         {success ? (
-          <div className="py-8 text-center space-y-4">
+          <div data-testid="success-feedback" className="py-8 text-center space-y-4">
             <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center mx-auto text-2xl font-bold">
               ✓
             </div>
@@ -142,7 +159,7 @@ export function InvitarAlumnosModal({
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="py-5 space-y-5">
+          <form data-testid="invitar-form" onSubmit={handleSubmit} className="py-5 space-y-5">
             <div>
               <label
                 htmlFor="github-username-input"
@@ -156,6 +173,7 @@ export function InvitarAlumnosModal({
                 {usernames.map((u) => (
                   <span
                     key={u}
+                    data-testid={`username-chip-${u}`}
                     className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-foreground animate-rise"
                   >
                     <span>@{u}</span>
@@ -172,6 +190,7 @@ export function InvitarAlumnosModal({
 
                 <input
                   id="github-username-input"
+                  data-testid="username-input"
                   type="text"
                   value={inputValue}
                   onChange={(e) => {
@@ -195,7 +214,7 @@ export function InvitarAlumnosModal({
             </div>
 
             {error && (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5">
+              <div data-testid="error-message" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5">
                 <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
@@ -217,6 +236,7 @@ export function InvitarAlumnosModal({
                 </button>
                 <button
                   type="submit"
+                  data-testid="submit-button"
                   disabled={isLoading || (usernames.length === 0 && !inputValue.trim())}
                   className="rounded-xl bg-primary px-6 py-2.5 text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
                 >
