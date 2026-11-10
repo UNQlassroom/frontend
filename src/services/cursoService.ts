@@ -16,10 +16,11 @@ export const cursoService = {
   },
 
   /**
-   * Envía la petición GET http://localhost:8080/cursos
+   * Envía la petición GET http://localhost:8080/cursos (o GET /cursos?archivados=true)
    */
-  obtenerCursos: (): Promise<ApiResponse<CursoResponseDTO[]>> => {
-    return get<CursoResponseDTO[]>("/cursos");
+  obtenerCursos: (archivados?: boolean): Promise<ApiResponse<CursoResponseDTO[]>> => {
+    const config = archivados !== undefined ? { params: { archivados } } : {};
+    return get<CursoResponseDTO[]>("/cursos", config);
   },
 
   /**
@@ -27,6 +28,13 @@ export const cursoService = {
    */
   obtenerCursoPorId: (id: number): Promise<ApiResponse<CursoResponseDTO>> => {
     return get<CursoResponseDTO>(`/cursos/${id}`);
+  },
+
+  /**
+   * Envía la petición POST http://localhost:8080/cursos/{id}/archivar
+   */
+  archivarCurso: (id: number): Promise<ApiResponse<CursoResponseDTO>> => {
+    return post<CursoResponseDTO>(`/cursos/${id}/archivar`);
   },
 
   /**
@@ -54,6 +62,7 @@ export const {
   crearCurso,
   obtenerCursos,
   obtenerCursoPorId,
+  archivarCurso,
   obtenerAlumnos,
   agregarAlumnos,
 } = cursoService;

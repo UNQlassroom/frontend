@@ -10,6 +10,7 @@ export const BACKEND_ERROR_CODES = {
   // Cursos
   CURSO_DUPLICADO: "CURSO_DUPLICADO",
   CURSO_NOT_FOUND: "CURSO_NOT_FOUND",
+  CURSO_ARCHIVADO: "CURSO_ARCHIVADO",
   CURSO_SIN_GITHUB_REPO_ASOCIADO: "CURSO_SIN_GITHUB_REPO_ASOCIADO",
   NOMBRE_MATERIA_VACIO: "NOMBRE_MATERIA_VACIO",
   ANIO_CURSO_INVALIDO: "ANIO_CURSO_INVALIDO",
@@ -83,6 +84,11 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   [BACKEND_ERROR_CODES.CURSO_NOT_FOUND]: {
     message: "El curso solicitado no existe.",
     severity: "error",
+  },
+  [BACKEND_ERROR_CODES.CURSO_ARCHIVADO]: {
+    message: "El curso ya se encuentra archivado.",
+    severity: "warning",
+    preferBackendMessage: true,
   },
   [BACKEND_ERROR_CODES.CURSO_SIN_GITHUB_REPO_ASOCIADO]: {
     message: "El curso no tiene un repositorio de GitHub asociado.",
@@ -181,8 +187,9 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
     severity: "warning",
   },
   [BACKEND_ERROR_CODES.ASIGNACION_EN_CREACION]: {
-    message: "No se puede eliminar la asignación mientras sus repositorios se están creando.",
+    message: "No se puede completar la operación mientras hay asignaciones cuyos repositorios se están creando en GitHub.",
     severity: "warning",
+    preferBackendMessage: true,
   },
 
   // Permisos y Usuarios

@@ -15,6 +15,7 @@ export interface AlumnosTabProps {
 }
 
 export function AlumnosTab({
+  curso,
   alumnos,
   isLoading,
   error,
@@ -23,6 +24,8 @@ export function AlumnosTab({
 }: AlumnosTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
+
+  const esArchivado = Boolean(curso?.archivado);
 
   // Métricas y conteos
   const total = alumnos.length;
@@ -55,19 +58,21 @@ export function AlumnosTab({
         title="Panel de Alumnos"
         description="Listado de alumnos y estado de membresía en la organización."
         actions={
-          <button
-            type="button"
-            onClick={onOpenInvitarModal}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-            title="Invitar nuevos alumnos al curso"
-          >
-            <img
-              src={circleAddIcon}
-              alt="Invitar"
-              className="w-4 h-4 brightness-0 invert"
-            />
-            <span>Invitar alumnos</span>
-          </button>
+          !esArchivado ? (
+            <button
+              type="button"
+              onClick={onOpenInvitarModal}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              title="Invitar nuevos alumnos al curso"
+            >
+              <img
+                src={circleAddIcon}
+                alt="Invitar"
+                className="w-4 h-4 brightness-0 invert"
+              />
+              <span>Invitar alumnos</span>
+            </button>
+          ) : undefined
         }
       />
 
@@ -91,20 +96,26 @@ export function AlumnosTab({
         <EmptyState
           icon="👥"
           title="No hay alumnos en este curso"
-          description="Aún no se han añadido alumnos a este curso. Invítalos usando sus usuarios de GitHub para que puedan acceder a las asignaciones."
+          description={
+            esArchivado
+              ? "Este curso fue archivado sin alumnos registrados."
+              : "Aún no se han añadido alumnos a este curso. Invítalos usando sus usuarios de GitHub para que puedan acceder a las asignaciones."
+          }
           action={
-            <button
-              type="button"
-              onClick={onOpenInvitarModal}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-            >
-              <img
-                src={circleAddIcon}
-                alt="Invitar"
-                className="w-3.5 h-3.5 brightness-0 invert"
-              />
-              <span>Invitar alumnos</span>
-            </button>
+            !esArchivado ? (
+              <button
+                type="button"
+                onClick={onOpenInvitarModal}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              >
+                <img
+                  src={circleAddIcon}
+                  alt="Invitar"
+                  className="w-3.5 h-3.5 brightness-0 invert"
+                />
+                <span>Invitar alumnos</span>
+              </button>
+            ) : undefined
           }
         />
       )}

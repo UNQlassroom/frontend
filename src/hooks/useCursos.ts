@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { crearCurso, obtenerCursos } from "@/services";
+import { crearCurso, obtenerCursos, archivarCurso } from "@/services";
 import type {
   CursoResponseDTO,
   CrearCursoFormData,
 } from "@/types";
 import { useSseListener } from "./useSseListener";
 
-export const useCursos = () => {
+export const useCursos = (archivados: boolean = false) => {
   const [cursos, setCursos] = useState<CursoResponseDTO[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,23 +16,33 @@ export const useCursos = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await obtenerCursos();
+      const response = await obtenerCursos(archivados ? true : undefined);
       setCursos(response.data);
     } catch {
-      setError("No se pudieron cargar los cursos del servidor.");
+      setError(
+        archivados
+          ? "No se pudieron cargar los cursos archivados del servidor."
+          : "No se pudieron cargar los cursos del servidor."
+      );
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [archivados]);
 
   useEffect(() => {
     let ignore = false;
-    obtenerCursos()
+    obtenerCursos(archivados ? true : undefined)
       .then((response) => {
         if (!ignore) setCursos(response.data);
       })
       .catch(() => {
-        if (!ignore) setError("No se pudieron cargar los cursos del servidor.");
+        if (!ignore) {
+          setError(
+            archivados
+              ? "No se pudieron cargar los cursos archivados del servidor."
+              : "No se pudieron cargar los cursos del servidor."
+          );
+        }
       })
       .finally(() => {
         if (!ignore) setIsLoading(false);
@@ -41,11 +51,11 @@ export const useCursos = () => {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [archivados]);
 
   // Refresco silencioso de cursos ante activación de membresía o actualización de asignación
   useSseListener(["MIEMBRO_ACTIVADO", "ASIGNACION_ACTUALIZADA"], () => {
-    obtenerCursos()
+    obtenerCursos(archivados ? true : undefined)
       .then((response) => {
         setCursos(response.data);
       })
@@ -84,6 +94,21 @@ export const useCursos = () => {
     }
   };
 
+  const archivarCursoExistente = async (cursoId: number): Promise<CursoResponseDTO | null> => {
+    try {
+      const response = await archivarCurso(cursoId);
+      setCursos((prev) => prev.filter((c) => c.id !== cursoId));
+      return response.data;
+    } catch {
+      // El interceptor global de Axios notifica el error mediante Toast
+      return null;
+    }
+  };
+
+  const removerCursoDeLista = useCallback((cursoId: number) => {
+    setCursos((prev) => prev.filter((c) => c.id !== cursoId));
+  }, []);
+
   const limpiarEstado = () => {
     setError(null);
     setSuccessCurso(null);
@@ -95,6 +120,8 @@ export const useCursos = () => {
     error,
     successCurso,
     crearNuevoCurso,
+    archivarCursoExistente,
+    removerCursoDeLista,
     cargarCursos,
     limpiarEstado,
   };
