@@ -50,6 +50,8 @@ export function MetricasTab({
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");
 
+  const esArchivado = Boolean(curso.archivado);
+
   const cargarDatos = useCallback(async () => {
     setIsRecargando(true);
     setError(null);
@@ -245,7 +247,11 @@ export function MetricasTab({
         <EmptyState
           icon="📋"
           title="No hay asignaciones en este curso"
-          description='Para poder monitorear repositorios, primero debes crear al menos una asignación desde la pestaña "Asignaciones".'
+          description={
+            esArchivado
+              ? "Este curso fue archivado sin asignaciones registradas."
+              : 'Para poder monitorear repositorios, primero debes crear al menos una asignación desde la pestaña "Asignaciones".'
+          }
         />
       )}
 

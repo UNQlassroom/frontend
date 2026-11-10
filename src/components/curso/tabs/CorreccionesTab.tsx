@@ -35,6 +35,8 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
 
+  const esArchivado = Boolean(curso.archivado);
+
   // Cargar asignaciones del curso al montar o ante reintento manual
   const cargarAsignaciones = useCallback(async () => {
     setIsLoadingAsignaciones(true);
@@ -309,7 +311,11 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
         <EmptyState
           icon="📋"
           title="No hay asignaciones en este curso"
-          description='Para poder gestionar correcciones, primero debes crear al menos una asignación desde la pestaña "Asignaciones".'
+          description={
+            esArchivado
+              ? "Este curso fue archivado sin asignaciones registradas."
+              : 'Para poder gestionar correcciones, primero debes crear al menos una asignación desde la pestaña "Asignaciones".'
+          }
         />
       )}
 
@@ -607,16 +613,18 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               </span>
                             </a>
 
-                            <a
-                              href={newIssueUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
-                              title="Crear una nueva corrección en el repositorio de GitHub"
-                            >
-                              <span>+ Crear corrección</span>
-                              <span className="text-xs">↗</span>
-                            </a>
+                            {!esArchivado && (
+                              <a
+                                href={newIssueUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-xs"
+                                title="Crear una nueva corrección en el repositorio de GitHub"
+                              >
+                                <span>+ Crear corrección</span>
+                                <span className="text-xs">↗</span>
+                              </a>
+                            )}
                           </div>
                         </div>
 
@@ -624,16 +632,20 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                         {grupo.issues.length === 0 ? (
                           <div className="p-4 sm:p-5 rounded-xl border border-line/60 bg-panel2/40 text-center text-sm text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-3">
                             <span>
-                              Aún no se crearon correcciones en este repositorio.
+                              {esArchivado
+                                ? "No se registraron correcciones en este repositorio."
+                                : "Aún no se crearon correcciones en este repositorio."}
                             </span>
-                            <a
-                              href={newIssueUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline font-semibold text-sm inline-flex items-center gap-1"
-                            >
-                              Crear la primera corrección ↗
-                            </a>
+                            {!esArchivado && (
+                              <a
+                                href={newIssueUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline font-semibold text-sm inline-flex items-center gap-1"
+                              >
+                                Crear la primera corrección ↗
+                              </a>
+                            )}
                           </div>
                         ) : (
                           <div className="divide-y divide-line/60 rounded-xl border border-line bg-panel2/30 overflow-hidden text-sm">
