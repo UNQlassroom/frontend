@@ -49,7 +49,7 @@ export const BACKEND_ERROR_CODES = {
   SIN_PERMISO_ENTREGA: "SIN_PERMISO_ENTREGA",
   SIN_PERMISO_ENTREGA_OTRO_GRUPO: "SIN_PERMISO_ENTREGA_OTRO_GRUPO",
 
-  // Integración GitHub
+  // Integración GitHub y Templates
   GITHUB_REPO_ALREADY_EXISTS: "GITHUB_REPO_ALREADY_EXISTS",
   GITHUB_RATE_LIMIT_EXCEEDED: "GITHUB_RATE_LIMIT_EXCEEDED",
   GITHUB_SERVICE_UNAVAILABLE: "GITHUB_SERVICE_UNAVAILABLE",
@@ -63,6 +63,10 @@ export const BACKEND_ERROR_CODES = {
   GITHUB_USERS_NOT_FOUND: "GITHUB_USERS_NOT_FOUND",
   GITHUB_VALIDATION_ERROR: "GITHUB_VALIDATION_ERROR",
   GITHUB_API_ERROR: "GITHUB_API_ERROR",
+  URL_REPOSITORIO_INVALIDA: "URL_REPOSITORIO_INVALIDA",
+  REPOSITORIO_EXTERNO_NOT_FOUND_OR_PRIVATE: "REPOSITORIO_EXTERNO_NOT_FOUND_OR_PRIVATE",
+  REPOSITORIO_EXTERNO_ES_PRIVADO: "REPOSITORIO_EXTERNO_ES_PRIVADO",
+  LIMITE_ARCHIVOS_TEMPLATE_EXCEDIDO: "LIMITE_ARCHIVOS_TEMPLATE_EXCEDIDO",
 
   // Framework / Sistema
   VALIDATION_ERROR: "VALIDATION_ERROR",
@@ -227,7 +231,7 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
     severity: "error",
   },
 
-  // Integración GitHub
+  // Integración GitHub y Templates
   [BACKEND_ERROR_CODES.GITHUB_REPO_ALREADY_EXISTS]: {
     message: "Ya existe un repositorio con ese nombre en GitHub.",
     severity: "warning",
@@ -280,6 +284,22 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   [BACKEND_ERROR_CODES.GITHUB_API_ERROR]: {
     message: "Error inesperado al comunicarse con GitHub.",
     severity: "error",
+  },
+  [BACKEND_ERROR_CODES.URL_REPOSITORIO_INVALIDA]: {
+    message: "Debe ingresar una URL completa de GitHub (ej. https://github.com/usuario/repo).",
+    severity: "warning",
+  },
+  [BACKEND_ERROR_CODES.REPOSITORIO_EXTERNO_NOT_FOUND_OR_PRIVATE]: {
+    message: "El repositorio no fue encontrado o es privado.",
+    severity: "warning",
+  },
+  [BACKEND_ERROR_CODES.REPOSITORIO_EXTERNO_ES_PRIVADO]: {
+    message: "El repositorio es privado. Solo se permite importar repositorios públicos.",
+    severity: "warning",
+  },
+  [BACKEND_ERROR_CODES.LIMITE_ARCHIVOS_TEMPLATE_EXCEDIDO]: {
+    message: "El repositorio contiene demasiados archivos (máx. 300).",
+    severity: "warning",
   },
 
   // Framework / Sistema

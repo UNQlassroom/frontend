@@ -66,7 +66,7 @@ export function CrearTemplateModal({
       const parsed = parsearRepoPersonal(repoClean);
       if (!parsed) {
         setError(
-          "Ingresá una URL válida de un repositorio de GitHub (ej: https://github.com/usuario/mi-repo)."
+          "Debe ingresar una URL completa de GitHub (ej. https://github.com/usuario/repo)."
         );
         return;
       }
@@ -93,24 +93,10 @@ export function CrearTemplateModal({
       handleClose();
     } catch (err: unknown) {
       const resolved = resolveApiError(err);
-      if (resolved?.status === 400) {
-        setError(
-          resolved.message ||
-            "Campo de nombre en blanco o formato de repositorio a importar inválido."
-        );
-      } else if (resolved?.status === 403) {
-        setError("Acceso exclusivo para docentes.");
-      } else if (resolved?.status === 500 || resolved?.errorCode?.includes("GITHUB")) {
-        setError(
-          resolved.message ||
-            "El repositorio origen es privado, no existe o falló la replicación. Solo se permite importar repositorios públicos."
-        );
-      } else {
-        setError(
-          resolved?.message ||
-            "Ocurrió un error inesperado al procesar el repositorio plantilla. Intentá nuevamente."
-        );
-      }
+      setError(
+        resolved?.message ||
+          "Ocurrió un error inesperado al procesar el repositorio plantilla. Intentá nuevamente."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -118,9 +104,9 @@ export function CrearTemplateModal({
 
   return (
     <div className="fixed inset-0 z-60 grid place-items-center bg-background/80 p-4">
-      <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-line bg-panel2 p-6 sm:p-7 shadow-2xl flex flex-col space-y-5 animate-rise">
-        {/* Header */}
-        <div className="flex items-start justify-between pb-3.5 border-b border-line">
+      <div className="w-full max-w-xl max-h-[90vh] rounded-2xl border border-line bg-panel2 shadow-2xl flex flex-col animate-rise overflow-hidden">
+        {/* Header fijo */}
+        <div className="flex items-start justify-between p-6 pb-4 border-b border-line shrink-0">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
               GitHub Template
@@ -140,8 +126,11 @@ export function CrearTemplateModal({
           </button>
         </div>
 
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Formulario con scroll independiente y suave */}
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 pt-4 space-y-4 overflow-y-auto overscroll-contain flex-1"
+        >
           {/* Campo opcional para clonar repo */}
           <div>
             <label
@@ -241,7 +230,8 @@ export function CrearTemplateModal({
             </div>
           )}
 
-          <div className="pt-3 border-t border-line flex items-center justify-end gap-3">
+          {/* Footer con botones */}
+          <div className="pt-3 border-t border-line flex items-center justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={handleClose}
