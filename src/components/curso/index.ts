@@ -4,3 +4,4 @@ export * from "./CursoCardDocente";
 export * from "./CrearCursoModal";
 export * from "./InvitarAlumnosModal";
 export * from "./VerAlumnosModal";
+export * from "./ArchivarCursoModal";
