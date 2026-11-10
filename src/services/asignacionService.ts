@@ -157,15 +157,14 @@ export const asignacionService = {
 
   /**
    * Envía la petición POST /templates
-   * Crea o importa un nuevo repositorio plantilla en la organización con blindaje automático
+   * Crea o importa un nuevo repositorio plantilla en la organización
    */
   crearTemplate: (
     data: CrearTemplateRepoRequestDTO
   ): Promise<ApiResponse<TemplateRepoResponseDTO>> => {
     return post<TemplateRepoResponseDTO, CrearTemplateRepoRequestDTO>(
       "/templates",
-      data,
-      { timeout: 60000 }
+      data
     );
   },
 

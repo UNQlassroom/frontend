@@ -582,7 +582,6 @@ export function CrearAsignacionModal({
       <CrearTemplateModal
         open={isCrearTemplateOpen}
         onClose={() => setIsCrearTemplateOpen(false)}
-        cursoId={cursoId}
         onSuccess={handleTemplateCreado}
       />
     </>
