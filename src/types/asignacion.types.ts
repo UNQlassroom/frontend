@@ -132,11 +132,17 @@ export interface TemplateRepoResponseDTO {
   fullName: string;
   htmlUrl: string;
   description: string | null;
+  id?: number;
+  githubRepoId?: number | null;
+  lastCommitSha?: string | null;
+  templateAprobado?: boolean;
 }
 
 export interface CrearTemplateRepoRequestDTO {
   name: string;
   description?: string;
+  repoAImportar?: string;
+
 }
 
 // Estados y DTOs para Issues y Correcciones

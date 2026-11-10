@@ -50,3 +50,50 @@ export const getGitHubCommitUrl = (
   }
   return `${repoUrl}/commits`;
 };
+
+export interface InfoRepoPersonal {
+  nombreSugerido: string;
+  urlNormalizada: string;
+}
+
+/**
+ * Parsea una entrada de repositorio de GitHub:
+ * - `usuario/repositorio` (ej: `danistep/ejercicio-1`)
+ * - `https://github.com/usuario/repositorio` (con o sin `.git`)
+ * - `git@github.com:usuario/repositorio.git`
+ * - `repositorio` a secas (si es del propio docente)
+ * Devuelve el nombre sugerido para el repo y la representación normalizada.
+ */
+export function parsearRepoPersonal(input: string): InfoRepoPersonal | null {
+  const trimmed = input.trim().replace(/\.git$/i, "").replace(/\/+$/, "");
+  if (!trimmed) return null;
+
+  // 1. SSH: git@github.com:owner/repo
+  const sshMatch = trimmed.match(/^git@github\.com:([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/i);
+  if (sshMatch) {
+    return {
+      nombreSugerido: sshMatch[2],
+      urlNormalizada: `https://github.com/${sshMatch[1]}/${sshMatch[2]}`,
+    };
+  }
+
+  // 2. HTTPS o Slug con usuario: https://github.com/owner/repo o github.com/owner/repo o owner/repo
+  const sinProtocolo = trimmed.replace(/^https?:\/\//i, "");
+  const httpsMatch = sinProtocolo.match(/^(?:github\.com\/)?([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/i);
+  if (httpsMatch) {
+    return {
+      nombreSugerido: httpsMatch[2],
+      urlNormalizada: `https://github.com/${httpsMatch[1]}/${httpsMatch[2]}`,
+    };
+  }
+
+  // 3. Repositorio a secas (del propio docente logueado, sin barra): ej "mi-repo-tp"
+  if (/^[a-zA-Z0-9_.-]+$/.test(trimmed)) {
+    return {
+      nombreSugerido: trimmed,
+      urlNormalizada: trimmed,
+    };
+  }
+
+  return null;
+}

@@ -1,11 +1,13 @@
 import { useState, type SubmitEvent } from "react";
 import { crearTemplate } from "@/services";
-import type { TemplateRepoResponseDTO } from "@/types";
+import type { TemplateRepoResponseDTO, CrearTemplateRepoRequestDTO } from "@/types";
+import { parsearRepoPersonal, resolveApiError } from "@/utils";
 import githubIcon from "@/assets/github_favicon.svg";
 
 export interface CrearTemplateModalProps {
   open: boolean;
   onClose: () => void;
+  cursoId?: number;
   onSuccess: (nuevoTemplate: TemplateRepoResponseDTO) => void;
 }
 
@@ -14,21 +16,37 @@ export function CrearTemplateModal({
   onClose,
   onSuccess,
 }: CrearTemplateModalProps) {
+  const [repoAImportar, setRepoAImportar] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [templateCreado, setTemplateCreado] = useState<TemplateRepoResponseDTO | null>(null);
+  const [fueClonado, setFueClonado] = useState(false);
 
   if (!open) return null;
 
   const handleClose = () => {
+    setRepoAImportar("");
     setName("");
     setDescription("");
     setError(null);
     setTemplateCreado(null);
+    setFueClonado(false);
     setIsLoading(false);
     onClose();
+  };
+
+  const handleRepoChange = (val: string) => {
+    setRepoAImportar(val);
+    setError(null);
+
+    const parsed = parsearRepoPersonal(val);
+    if (parsed) {
+      // Auto-sugiere el nombre de destino pero el profesor puede seguir editándolo libremente
+      setName(parsed.nombreSugerido);
+    }
   };
 
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
@@ -37,25 +55,60 @@ export function CrearTemplateModal({
 
     const nameClean = name.trim();
     if (!nameClean) {
-      setError("El nombre del repositorio plantilla es obligatorio.");
+      setError("Por favor, ingresá un nombre válido para el template.");
       return;
     }
 
-    // Validación básica de nombre de repositorio en GitHub (sin espacios)
+    // Validación de caracteres del nombre de repositorio en GitHub (sin espacios)
     if (!/^[a-zA-Z0-9._-]+$/.test(nameClean)) {
-      setError("El nombre del repositorio solo puede contener letras, números, puntos, guiones y guiones bajos (sin espacios).");
+      setError(
+        "El nombre del repositorio solo puede contener letras, números, puntos, guiones y guiones bajos (sin espacios)."
+      );
       return;
+    }
+
+    const payload: CrearTemplateRepoRequestDTO = {
+      name: nameClean,
+      description: description.trim() || undefined,
+    };
+
+    const repoClean = repoAImportar.trim();
+    if (repoClean) {
+      const parsed = parsearRepoPersonal(repoClean);
+      if (!parsed) {
+        setError(
+          "El formato del repositorio a clonar no es válido. Ingresá 'usuario/repo', 'https://github.com/usuario/repo' o el nombre del repo."
+        );
+        return;
+      }
+      payload.repoAImportar = repoClean;
     }
 
     setIsLoading(true);
     try {
-      const response = await crearTemplate({
-        name: nameClean,
-        description: description.trim() || undefined,
-      });
+      const response = await crearTemplate(payload);
+      setFueClonado(Boolean(repoClean));
       setTemplateCreado(response.data);
-    } catch {
-      setError("Ocurrió un error generando el repositorio.");
+    } catch (err: unknown) {
+      const resolved = resolveApiError(err);
+      if (resolved?.status === 400) {
+        setError(
+          resolved.message ||
+            "Campo de nombre en blanco o formato de repositorio a importar inválido."
+        );
+      } else if (resolved?.status === 403) {
+        setError("Acceso exclusivo para docentes.");
+      } else if (resolved?.status === 500 || resolved?.errorCode?.includes("GITHUB")) {
+        setError(
+          resolved.message ||
+            "El repositorio origen es privado, no existe o falló la replicación. Solo se permite importar repositorios públicos."
+        );
+      } else {
+        setError(
+          resolved?.message ||
+            "Ocurrió un error inesperado al procesar el repositorio plantilla. Intentá nuevamente."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -78,13 +131,18 @@ export function CrearTemplateModal({
               GitHub Template
             </p>
             <h2 className="mt-1 font-display text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              {templateCreado ? "Repositorio plantilla creado" : "Crear repositorio plantilla"}
+              {templateCreado
+                ? fueClonado
+                  ? "Repositorio plantilla importado"
+                  : "Repositorio plantilla creado"
+                : "Crear repositorio plantilla"}
             </h2>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-lg p-2 text-sm text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+            disabled={isLoading}
+            className="rounded-lg p-2 text-sm text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
             aria-label="Cerrar modal"
           >
             ✕
@@ -116,33 +174,34 @@ export function CrearTemplateModal({
                 <div className="space-y-1 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-display text-lg font-bold text-foreground truncate">
-                      {templateCreado.name}
+                      {templateCreado.fullName || templateCreado.name}
                     </h3>
                     <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      Plantilla creada
+                      {fueClonado ? "Plantilla importada" : "Plantilla creada"}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    El repositorio fue creado exitosamente en la organización de GitHub como plantilla.
-                    Podés abrirlo para clonarlo o comenzar a subir los archivos base del trabajo práctico.
+                    {fueClonado
+                      ? "El repositorio fue importado exitosamente a la organización de GitHub como plantilla oficial."
+                      : "El repositorio fue creado exitosamente en la organización de GitHub como plantilla. Podés abrirlo para clonarlo o comenzar a subir los archivos base del trabajo práctico."}
                   </p>
                 </div>
               </div>
 
-              {/* Botón destacado con el link de GitHub para subir cosas al repo */}
+              {/* Botón destacado con el link de GitHub para abrir el repo */}
               <a
                 href={templateCreado.htmlUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2.5 w-full rounded-xl border border-line bg-background hover:bg-line/40 text-foreground py-2.5 px-4 text-sm font-semibold transition-colors shadow-2xs group cursor-pointer"
-                title="Abrir repositorio en GitHub para subir código"
+                title="Abrir repositorio en GitHub"
               >
                 <img
                   src={githubIcon}
                   alt="GitHub"
                   className="w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity"
                 />
-                <span>Abrir en GitHub para subir código inicial</span>
+                <span>Ver repositorio en GitHub</span>
                 <svg
                   className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors ml-0.5"
                   fill="none"
@@ -199,8 +258,31 @@ export function CrearTemplateModal({
             </div>
           </div>
         ) : (
-          /* Formulario de creación */
+          /* Formulario limpio y unificado */
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Campo opcional para clonar repo personal */}
+            <div>
+              <label
+                htmlFor="template-repo-importar"
+                className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              >
+                Repositorio público de GitHub a clonar (opcional)
+              </label>
+              <input
+                id="template-repo-importar"
+                type="text"
+                disabled={isLoading}
+                placeholder="ej: usuario/mi-repo-publico"
+                value={repoAImportar}
+                onChange={(e) => handleRepoChange(e.target.value)}
+                className="w-full rounded-xl border border-line bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Si ingresás un repositorio público (ej: <code className="text-xs">usuario/repositorio</code> o <code className="text-xs">mi-repo</code> si es propio), se clonará su contenido. Si lo dejás vacío, se creará un template base en blanco.
+              </p>
+            </div>
+
+            {/* Nombre del template en la organización */}
             <div>
               <label
                 htmlFor="template-name"
@@ -226,6 +308,7 @@ export function CrearTemplateModal({
               </p>
             </div>
 
+            {/* Descripción opcional */}
             <div>
               <label
                 htmlFor="template-description"
@@ -235,7 +318,7 @@ export function CrearTemplateModal({
               </label>
               <textarea
                 id="template-description"
-                rows={3}
+                rows={2}
                 disabled={isLoading}
                 placeholder="Ej: este repositorio tiene como objetivo..."
                 value={description}
@@ -264,11 +347,23 @@ export function CrearTemplateModal({
                     Aviso sobre el uso de la plantilla
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Vas a poder clonar el repositorio y realizar todas las modificaciones o subir el código que creas necesario. La inyección de los flujos de <strong>Integración Continua (CI)</strong> y de las <strong>dependencias faltantes</strong> se realizará automáticamente recién cuando decidas <strong>usar esta plantilla al crear una asignación</strong>, asegurando que quede totalmente configurada para la plataforma antes de que la utilicen los alumnos.
+                    Vas a poder inspeccionar el repositorio y realizar todas las modificaciones o subir el código que creas necesario. La inyección de los flujos de <strong>Integración Continua (CI)</strong> y de las <strong>dependencias faltantes</strong> se realizará automáticamente recién cuando decidas <strong>usar esta plantilla al crear una asignación</strong>, asegurando que quede totalmente configurada para la plataforma antes de que la utilicen los alumnos.
                   </p>
                 </div>
               </div>
             </div>
+
+            {/* Indicador de carga cuando el backend procesa clonación y creación (3 a 8 segundos) */}
+            {isLoading && (
+              <div className="rounded-xl border border-primary/30 bg-primary/10 p-3.5 flex items-center gap-3 animate-pulse">
+                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+                <p className="text-xs sm:text-sm font-medium text-foreground">
+                  {repoAImportar.trim()
+                    ? "Clonando repositorio y aplicando blindaje de calidad UNQlassroom..."
+                    : "Creando repositorio plantilla oficial en GitHub..."}
+                </p>
+              </div>
+            )}
 
             {error && (
               <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3">
@@ -281,16 +376,25 @@ export function CrearTemplateModal({
                 type="button"
                 onClick={handleClose}
                 disabled={isLoading}
-                className="rounded-xl px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                className="rounded-xl px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs disabled:opacity-50"
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs disabled:opacity-50 flex items-center gap-2"
               >
-                {isLoading ? "Creando en GitHub..." : "Crear plantilla"}
+                {isLoading && (
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                )}
+                <span>
+                  {isLoading
+                    ? "Procesando..."
+                    : repoAImportar.trim()
+                    ? "Clonar y crear plantilla"
+                    : "Crear plantilla"}
+                </span>
               </button>
             </div>
           </form>

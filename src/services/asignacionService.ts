@@ -157,16 +157,18 @@ export const asignacionService = {
 
   /**
    * Envía la petición POST /templates
-   * Crea un nuevo repositorio plantilla en la organización
+   * Crea o importa un nuevo repositorio plantilla en la organización con blindaje automático
    */
   crearTemplate: (
     data: CrearTemplateRepoRequestDTO
   ): Promise<ApiResponse<TemplateRepoResponseDTO>> => {
     return post<TemplateRepoResponseDTO, CrearTemplateRepoRequestDTO>(
       "/templates",
-      data
+      data,
+      { timeout: 60000 }
     );
   },
+
   /**
    * Envía la petición DELETE /cursos/{cursoId}/asignaciones/{asignacionId}
    * Dispara la eliminación asincrónica de la asignación y de los repositorios en GitHub.
