@@ -43,6 +43,7 @@ export const BACKEND_ERROR_CODES = {
   ACCESS_DENIED: "ACCESS_DENIED",
   USUARIO_NOT_FOUND: "USUARIO_NOT_FOUND",
   USUARIO_NO_ES_DOCENTE: "USUARIO_NO_ES_DOCENTE",
+  NOMBRE_USUARIO_INVALIDO: "NOMBRE_USUARIO_INVALIDO",
   NO_ES_DOCENTE_DEL_CURSO: "NO_ES_DOCENTE_DEL_CURSO",
   SIN_PERMISO_ACCESO_CURSO: "SIN_PERMISO_ACCESO_CURSO",
   SIN_PERMISO_ACCESO_ASIGNACION: "SIN_PERMISO_ACCESO_ASIGNACION",
@@ -212,6 +213,11 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   [BACKEND_ERROR_CODES.USUARIO_NO_ES_DOCENTE]: {
     message: "Se requieren permisos de docente para esta acción.",
     severity: "error",
+  },
+  [BACKEND_ERROR_CODES.NOMBRE_USUARIO_INVALIDO]: {
+    message: "El nombre y apellido contiene caracteres inválidos o excede el límite de 35 caracteres.",
+    severity: "warning",
+    preferBackendMessage: true,
   },
   [BACKEND_ERROR_CODES.NO_ES_DOCENTE_DEL_CURSO]: {
     message: "Solo el docente a cargo del curso puede realizar esta operación.",

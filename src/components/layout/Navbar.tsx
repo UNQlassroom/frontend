@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks";
 import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
 import { UserMenu } from "./UserMenu";
+import { BienvenidaModal } from "@/components/usuario";
 
 export const Navbar = () => {
   const { user, isAuthenticated, isDocente } = useAuth();
@@ -16,9 +17,11 @@ export const Navbar = () => {
         <img
           src={unqlassroomLogo}
           alt="UNQlassroom Logo"
-          className="w-8 h-8 object-contain"
+          className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
         />
-        <span className="font-suez text-xl tracking-tight">UNQlassroom</span>
+        <span className="font-suez text-2xl sm:text-[1.65rem] tracking-tight">
+          UNQlassroom
+        </span>
       </Link>
 
       {/* Controles de Usuario Autenticado */}
@@ -35,10 +38,13 @@ export const Navbar = () => {
             {isDocente ? "Docente" : "Alumno"}
           </span>
 
-          {/* Submenú desplegable de usuario */}
+          {/* Submenú desplegable de usuario (incluye la opción para modificar nombre) */}
           <UserMenu />
         </div>
       )}
+
+      {/* Modal de bienvenida al iniciar sesión por primera vez */}
+      <BienvenidaModal />
     </header>
   );
 };

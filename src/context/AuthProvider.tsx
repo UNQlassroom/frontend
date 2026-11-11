@@ -35,6 +35,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     sessionStorage.removeItem(STORAGE_KEYS.OAUTH_ES_DOCENTE);
   }, []);
 
+  const actualizarUsuario = useCallback((updatedFields: Partial<Usuario>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated: Usuario = { ...prev, ...updatedFields };
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   useEffect(() => {
     setUnauthorizedHandler(logout);
     return () => {
@@ -57,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAlumno,
         login,
         logout,
+        actualizarUsuario,
       }}
     >
       {children}

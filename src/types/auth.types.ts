@@ -27,3 +27,8 @@ export interface GitHubLoginRequestDTO {
   code: string;
   esDocente: boolean;
 }
+
+export interface ActualizarNombreRequestDTO {
+  nombre: string;
+  apellido: string;
+}
