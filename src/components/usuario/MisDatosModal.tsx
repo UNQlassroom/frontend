@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks";
 import { usuarioService } from "@/services";
@@ -22,25 +22,23 @@ export function MisDatosModal({
   onClose,
   onSuccess,
 }: MisDatosModalProps) {
+  if (!open) return null;
+
+  return <MisDatosModalContent onClose={onClose} onSuccess={onSuccess} />;
+}
+
+function MisDatosModalContent({
+  onClose,
+  onSuccess,
+}: Omit<MisDatosModalProps, "open">) {
   const { user, isDocente, actualizarUsuario } = useAuth();
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
+  const initial = desglosarNombreCompleto(user?.nombreCompleto);
+  const [nombre, setNombre] = useState(initial.nombre);
+  const [apellido, setApellido] = useState(initial.apellido);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (open) {
-      const { nombre: n, apellido: a } = desglosarNombreCompleto(
-        user?.nombreCompleto
-      );
-      setNombre(n);
-      setApellido(a);
-      setError(null);
-      setIsLoading(false);
-    }
-  }, [open, user?.nombreCompleto]);
-
-  if (!open || !user) return null;
+  if (!user) return null;
 
   const trimmedNombre = nombre.trim();
   const trimmedApellido = apellido.trim();

@@ -110,7 +110,7 @@ export const UserMenu = () => {
                 }`}
               >
                 <BookOpen className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>Mis Cursos</span>
+                <span>Mis cursos</span>
               </button>
 
               <button
@@ -123,7 +123,7 @@ export const UserMenu = () => {
                 }`}
               >
                 <Archive className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>Cursos Archivados</span>
+                <span>Cursos archivados</span>
               </button>
             </div>
           )}
