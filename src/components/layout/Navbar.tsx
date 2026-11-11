@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks";
 import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
 import { UserMenu } from "./UserMenu";
+import { BienvenidaModal } from "@/components/usuario";
 
 export const Navbar = () => {
   const { user, isAuthenticated, isDocente } = useAuth();
@@ -35,10 +36,13 @@ export const Navbar = () => {
             {isDocente ? "Docente" : "Alumno"}
           </span>
 
-          {/* Submenú desplegable de usuario */}
+          {/* Submenú desplegable de usuario (incluye la opción para modificar nombre) */}
           <UserMenu />
         </div>
       )}
+
+      {/* Modal de bienvenida al iniciar sesión por primera vez */}
+      <BienvenidaModal />
     </header>
   );
 };
