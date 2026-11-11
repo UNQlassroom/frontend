@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks";
 import { usuarioService } from "@/services";
+import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
 import {
   validarNombreCompleto,
   NOMBRE_MAX_LENGTH,
@@ -17,27 +17,16 @@ export function BienvenidaModal() {
   const [nombre, setNombre] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [dismissed, setDismissed] = useState(() => {
-    return sessionStorage.getItem(BIENVENIDA_STORAGE_KEY) === "true";
-  });
 
   const shouldShow =
-    isAuthenticated &&
-    Boolean(user) &&
-    (!user?.nombreCompleto || user.nombreCompleto.trim() === "") &&
-    !dismissed;
+      isAuthenticated &&
+      Boolean(user) &&
+      (!user?.nombreCompleto || user.nombreCompleto.trim() === "");
 
   if (!shouldShow || !user) return null;
 
-  const handleDismiss = () => {
-    sessionStorage.setItem(BIENVENIDA_STORAGE_KEY, "true");
-    setDismissed(true);
-    toast.info(
-      "Podés ingresar tu nombre y apellido en cualquier momento desde Mis datos en la esquina superior derecha."
-    );
-  };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const validacion = validarNombreCompleto(nombre);
@@ -85,15 +74,19 @@ export function BienvenidaModal() {
         onSubmit={handleSubmit}
         className="w-full max-w-lg rounded-2xl border border-line bg-panel2 p-7 sm:p-8 shadow-2xl animate-rise flex flex-col gap-6"
       >
-        {/* Header */}
-        <div className="flex items-start justify-between pb-3 border-b border-line">
+        {/* Header con Logo y Colores de UNQlassroom */}
+        <div className="flex flex-col items-center text-center pb-4 border-b border-line gap-3">
+          <div className="flex justify-center">
+            <img
+              src={unqlassroomLogo}
+              alt="UNQlassroom Logo"
+              className="w-16 h-16 object-contain rounded-2xl"
+            />
+          </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] font-bold text-emerald-500">
-              Primer inicio de sesión
-            </p>
             <h2
               id="bienvenida-title"
-              className="mt-1 font-display text-2xl font-bold tracking-tight text-foreground"
+              className="font-suez text-2xl sm:text-3xl tracking-tight text-foreground"
             >
               ¡Te damos la bienvenida a UNQlassroom!
             </h2>
@@ -101,10 +94,10 @@ export function BienvenidaModal() {
         </div>
 
         {/* Explicación amigable del requerimiento */}
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed text-center sm:text-left">
           Para que los docentes y tus compañeros puedan identificarte fácilmente
           en los cursos y asignaciones sin confundirte por tu usuario de GitHub (
-          <span className="font-semibold text-foreground">@{user.username}</span>
+          <span className="font-semibold text-emerald-500">@{user.username}</span>
           ), por favor ingresá tu nombre y apellido.
         </p>
 
@@ -142,7 +135,7 @@ export function BienvenidaModal() {
             className={`w-full rounded-xl border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none ${
               error || isExceeded
                 ? "border-destructive focus:border-destructive"
-                : "border-line focus:border-primary"
+                : "border-line focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
             }`}
           />
 
@@ -164,14 +157,6 @@ export function BienvenidaModal() {
         {/* Botones de acción */}
         <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2 border-t border-line">
           <button
-            type="button"
-            onClick={handleDismiss}
-            disabled={isLoading}
-            className="w-full sm:w-auto rounded-xl border border-line bg-panel px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 text-center"
-          >
-            Hacerlo más tarde
-          </button>
-          <button
             type="submit"
             disabled={isLoading || isExceeded}
             className="w-full sm:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
@@ -183,8 +168,7 @@ export function BienvenidaModal() {
               </>
             ) : (
               <>
-                <span>Guardar y comenzar</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Guardar</span>
               </>
             )}
           </button>
