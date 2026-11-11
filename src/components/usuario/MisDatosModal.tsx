@@ -3,7 +3,9 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/hooks";
 import { usuarioService } from "@/services";
 import {
-  validarNombreCompleto,
+  validarNombreYApellido,
+  formatearNombreCompleto,
+  desglosarNombreCompleto,
   NOMBRE_MAX_LENGTH,
   resolveApiError,
   notifyApiError,
@@ -22,12 +24,17 @@ export function MisDatosModal({
 }: MisDatosModalProps) {
   const { user, isDocente, actualizarUsuario } = useAuth();
   const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setNombre(user?.nombreCompleto || "");
+      const { nombre: n, apellido: a } = desglosarNombreCompleto(
+        user?.nombreCompleto
+      );
+      setNombre(n);
+      setApellido(a);
       setError(null);
       setIsLoading(false);
     }
@@ -35,10 +42,19 @@ export function MisDatosModal({
 
   if (!open || !user) return null;
 
+  const trimmedNombre = nombre.trim();
+  const trimmedApellido = apellido.trim();
+
+  const previewLength =
+    trimmedApellido && trimmedNombre
+      ? formatearNombreCompleto(trimmedNombre, trimmedApellido).length
+      : 0;
+  const isExceeded = previewLength > NOMBRE_MAX_LENGTH;
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const validacion = validarNombreCompleto(nombre);
+    const validacion = validarNombreYApellido(nombre, apellido);
     if (!validacion.valido) {
       setError(validacion.error);
       return;
@@ -47,15 +63,22 @@ export function MisDatosModal({
     try {
       setIsLoading(true);
       setError(null);
-      const trimmedNombre = nombre.trim();
+
       const response = await usuarioService.actualizarNombre({
-        nombreCompleto: trimmedNombre,
+        nombre: trimmedNombre,
+        apellido: trimmedApellido,
       });
 
-      const nuevoNombre = response.data.nombreCompleto ?? trimmedNombre;
-      actualizarUsuario({ nombreCompleto: nuevoNombre });
+      const nuevoNombreCompleto =
+        response.data.nombreCompleto ??
+        formatearNombreCompleto(trimmedNombre, trimmedApellido);
+
+      actualizarUsuario({
+        nombreCompleto: nuevoNombreCompleto,
+      });
+
       toast.success("Nombre y apellido actualizado correctamente");
-      onSuccess?.(nuevoNombre);
+      onSuccess?.(nuevoNombreCompleto);
       onClose();
     } catch (err: unknown) {
       const resolved = resolveApiError(err);
@@ -76,8 +99,6 @@ export function MisDatosModal({
     setError(null);
     onClose();
   };
-
-  const isExceeded = nombre.length > NOMBRE_MAX_LENGTH;
 
   return (
     <div
@@ -152,47 +173,67 @@ export function MisDatosModal({
             </p>
           </div>
 
-          {/* Nombre y apellido (Editable) */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="nombre-completo-input"
-                className="text-xs uppercase tracking-wider font-semibold text-foreground"
-              >
-                Nombre y apellido
-              </label>
+          {/* Inputs de Nombre y Apellido */}
+          <div className="space-y-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Nombre/s */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="misdatos-nombre-input"
+                  className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                >
+                  Nombre/s
+                </label>
+                <input
+                  id="misdatos-nombre-input"
+                  type="text"
+                  disabled={isLoading}
+                  autoFocus
+                  maxLength={NOMBRE_MAX_LENGTH}
+                  placeholder="Ingresá tu nombre"
+                  value={nombre}
+                  onChange={(e) => {
+                    setNombre(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
+                />
+              </div>
+
+              {/* Apellido/s */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="misdatos-apellido-input"
+                  className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+                >
+                  Apellido/s
+                </label>
+                <input
+                  id="misdatos-apellido-input"
+                  type="text"
+                  disabled={isLoading}
+                  maxLength={NOMBRE_MAX_LENGTH}
+                  placeholder="Ingresá tu apellido"
+                  value={apellido}
+                  onChange={(e) => {
+                    setApellido(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
+                />
+              </div>
+            </div>
+
+            {/* Contador */}
+            <div className="flex justify-end text-xs pt-0.5">
               <span
-                className={`text-xs tabular-nums font-medium ${
+                className={`tabular-nums font-medium ${
                   isExceeded ? "text-rose-500 font-bold" : "text-muted-foreground"
                 }`}
               >
-                {nombre.length} / {NOMBRE_MAX_LENGTH}
+                {previewLength} / {NOMBRE_MAX_LENGTH}
               </span>
             </div>
-
-            <input
-              id="nombre-completo-input"
-              type="text"
-              disabled={isLoading}
-              autoFocus
-              maxLength={NOMBRE_MAX_LENGTH + 10}
-              placeholder="Ej: Juan Carlos Pérez"
-              value={nombre}
-              onChange={(e) => {
-                setNombre(e.target.value);
-                if (error) setError(null);
-              }}
-              className={`w-full rounded-xl border bg-background px-4 py-2.5 text-base text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none ${
-                error || isExceeded
-                  ? "border-destructive focus:border-destructive"
-                  : "border-line focus:border-primary"
-              }`}
-            />
-
-            <p className="text-xs text-muted-foreground">
-              Este es el nombre visible para docentes y compañeros en cursos y asignaciones.
-              Máximo {NOMBRE_MAX_LENGTH} caracteres.
-            </p>
 
             {error && (
               <div
@@ -217,7 +258,7 @@ export function MisDatosModal({
           </button>
           <button
             type="submit"
-            disabled={isLoading || isExceeded}
+            disabled={isLoading || isExceeded || !trimmedNombre || !trimmedApellido}
             className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
           >
             {isLoading ? (

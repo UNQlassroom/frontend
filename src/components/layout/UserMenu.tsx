@@ -30,6 +30,9 @@ export const UserMenu = () => {
     isHomePath && searchParams.get("archivados") === "true";
   const isMisCursosView = isHomePath && !isCursosArchivadosView;
 
+  const displayName = user.nombreCompleto?.trim() || `@${user.username}`;
+  const hasName = Boolean(user.nombreCompleto?.trim());
+
   return (
     <>
       <Popover open={menuOpen} onOpenChange={setMenuOpen}>
@@ -49,7 +52,7 @@ export const UserMenu = () => {
               }}
             />
             <span className="truncate max-w-[140px] sm:max-w-[180px]">
-              {user.nombreCompleto?.trim() || `@${user.username}`}
+              {displayName}
             </span>
             <ChevronDown
               className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
@@ -70,9 +73,9 @@ export const UserMenu = () => {
               Cuenta conectada
             </p>
             <p className="mt-0.5 text-sm font-bold text-foreground truncate">
-              {user.nombreCompleto?.trim() || `@${user.username}`}
+              {displayName}
             </p>
-            {Boolean(user.nombreCompleto?.trim()) && (
+            {hasName && (
               <p className="text-xs text-muted-foreground truncate">
                 @{user.username}
               </p>

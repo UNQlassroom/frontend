@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks";
 import { usuarioService } from "@/services";
 import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
 import {
-  validarNombreCompleto,
+  validarNombreYApellido,
+  formatearNombreCompleto,
   NOMBRE_MAX_LENGTH,
   resolveApiError,
   notifyApiError,
@@ -13,21 +14,30 @@ import {
 export function BienvenidaModal() {
   const { user, isAuthenticated, actualizarUsuario } = useAuth();
   const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const shouldShow =
-      isAuthenticated &&
-      Boolean(user) &&
-      (!user?.nombreCompleto || user.nombreCompleto.trim() === "");
+    isAuthenticated &&
+    Boolean(user) &&
+    (!user?.nombreCompleto || user.nombreCompleto.trim() === "");
 
   if (!shouldShow || !user) return null;
 
+  const trimmedNombre = nombre.trim();
+  const trimmedApellido = apellido.trim();
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const previewLength =
+    trimmedApellido && trimmedNombre
+      ? formatearNombreCompleto(trimmedNombre, trimmedApellido).length
+      : 0;
+  const isExceeded = previewLength > NOMBRE_MAX_LENGTH;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const validacion = validarNombreCompleto(nombre);
+    const validacion = validarNombreYApellido(nombre, apellido);
     if (!validacion.valido) {
       setError(validacion.error);
       return;
@@ -36,14 +46,21 @@ export function BienvenidaModal() {
     try {
       setIsLoading(true);
       setError(null);
-      const trimmedNombre = nombre.trim();
+
       const response = await usuarioService.actualizarNombre({
-        nombreCompleto: trimmedNombre,
+        nombre: trimmedNombre,
+        apellido: trimmedApellido,
       });
 
-      const nuevoNombre = response.data.nombreCompleto ?? trimmedNombre;
-      actualizarUsuario({ nombreCompleto: nuevoNombre });
-      toast.success(`¡Bienvenido/a a UNQlassroom, ${nuevoNombre}!`);
+      const nuevoNombreCompleto =
+        response.data.nombreCompleto ??
+        formatearNombreCompleto(trimmedNombre, trimmedApellido);
+
+      actualizarUsuario({
+        nombreCompleto: nuevoNombreCompleto,
+      });
+
+      toast.success(`¡Bienvenido/a a UNQlassroom, ${nuevoNombreCompleto}!`);
     } catch (err: unknown) {
       const resolved = resolveApiError(err);
       const msg =
@@ -57,8 +74,6 @@ export function BienvenidaModal() {
       setIsLoading(false);
     }
   };
-
-  const isExceeded = nombre.length > NOMBRE_MAX_LENGTH;
 
   return (
     <div
@@ -77,7 +92,7 @@ export function BienvenidaModal() {
             <img
               src={unqlassroomLogo}
               alt="UNQlassroom Logo"
-              className="w-16 h-16 object-contain rounded-2xl"
+              className="w-16 h-16 object-contain"
             />
           </div>
           <div>
@@ -98,48 +113,69 @@ export function BienvenidaModal() {
           ), por favor ingresá tu nombre y apellido.
         </p>
 
-        {/* Input y contador */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="bienvenida-nombre-input"
-              className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
-            >
-              Nombre y apellido
-            </label>
+        {/* Inputs de Nombre y Apellido */}
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Nombre/s */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="bienvenida-nombre-input"
+                className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              >
+                Nombre/s
+              </label>
+              <input
+                id="bienvenida-nombre-input"
+                data-testid="bienvenida-nombre-input"
+                type="text"
+                disabled={isLoading}
+                autoFocus
+                maxLength={NOMBRE_MAX_LENGTH}
+                placeholder="Ingresá tu nombre"
+                value={nombre}
+                onChange={(e) => {
+                  setNombre(e.target.value);
+                  if (error) setError(null);
+                }}
+                className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
+              />
+            </div>
+
+            {/* Apellido/s */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="bienvenida-apellido-input"
+                className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              >
+                Apellido/s
+              </label>
+              <input
+                id="bienvenida-apellido-input"
+                data-testid="bienvenida-apellido-input"
+                type="text"
+                disabled={isLoading}
+                maxLength={NOMBRE_MAX_LENGTH}
+                placeholder="Ingresá tu apellido"
+                value={apellido}
+                onChange={(e) => {
+                  setApellido(e.target.value);
+                  if (error) setError(null);
+                }}
+                className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
+              />
+            </div>
+          </div>
+
+          {/* Contador */}
+          <div className="flex justify-end text-xs pt-0.5">
             <span
-              className={`text-xs tabular-nums font-medium ${
+              className={`tabular-nums font-medium ${
                 isExceeded ? "text-rose-500 font-bold" : "text-muted-foreground"
               }`}
             >
-              {nombre.length} / {NOMBRE_MAX_LENGTH}
+              {previewLength} / {NOMBRE_MAX_LENGTH}
             </span>
           </div>
-
-          <input
-            id="bienvenida-nombre-input"
-            data-testid="bienvenida-nombre-input"
-            type="text"
-            disabled={isLoading}
-            autoFocus
-            maxLength={NOMBRE_MAX_LENGTH + 10}
-            placeholder="Ej: Juan Carlos Pérez"
-            value={nombre}
-            onChange={(e) => {
-              setNombre(e.target.value);
-              if (error) setError(null);
-            }}
-            className={`w-full rounded-xl border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none ${
-              error || isExceeded
-                ? "border-destructive focus:border-destructive"
-                : "border-line focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-            }`}
-          />
-
-          <p className="text-xs text-muted-foreground">
-            Permite letras, tildes, espacios intermedios, apóstrofes y guiones.
-            Máximo {NOMBRE_MAX_LENGTH} caracteres.
-          </p>
 
           {error && (
             <div
@@ -151,11 +187,11 @@ export function BienvenidaModal() {
           )}
         </div>
 
-        {/* Botones de acción */}
-        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-2 border-t border-line">
+        {/* Botón de acción */}
+        <div className="flex items-center justify-end pt-2 border-t border-line">
           <button
             type="submit"
-            disabled={isLoading || isExceeded}
+            disabled={isLoading || isExceeded || !trimmedNombre || !trimmedApellido}
             className="w-full sm:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
           >
             {isLoading ? (
@@ -164,9 +200,7 @@ export function BienvenidaModal() {
                 <span>Guardando...</span>
               </>
             ) : (
-              <>
-                <span>Guardar</span>
-              </>
+              <span>Guardar</span>
             )}
           </button>
         </div>

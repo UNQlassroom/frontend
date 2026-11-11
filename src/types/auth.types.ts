@@ -29,5 +29,6 @@ export interface GitHubLoginRequestDTO {
 }
 
 export interface ActualizarNombreRequestDTO {
-  nombreCompleto: string;
+  nombre: string;
+  apellido: string;
 }
