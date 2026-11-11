@@ -157,7 +157,7 @@ export const asignacionService = {
 
   /**
    * Envía la petición POST /templates
-   * Crea un nuevo repositorio plantilla en la organización
+   * Crea o importa un nuevo repositorio plantilla en la organización
    */
   crearTemplate: (
     data: CrearTemplateRepoRequestDTO
@@ -167,6 +167,7 @@ export const asignacionService = {
       data
     );
   },
+
   /**
    * Envía la petición DELETE /cursos/{cursoId}/asignaciones/{asignacionId}
    * Dispara la eliminación asincrónica de la asignación y de los repositorios en GitHub.

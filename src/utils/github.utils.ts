@@ -50,3 +50,29 @@ export const getGitHubCommitUrl = (
   }
   return `${repoUrl}/commits`;
 };
+
+export interface InfoRepoPersonal {
+  nombreSugerido: string;
+  urlNormalizada: string;
+}
+
+/**
+ * Parsea una URL de repositorio de GitHub (`https://github.com/usuario/repositorio`, con o sin `.git`).
+ * Devuelve el nombre sugerido para el repo y la URL normalizada.
+ */
+export function parsearRepoPersonal(input: string): InfoRepoPersonal | null {
+  const trimmed = input.trim().replace(/\.git$/i, "").replace(/\/+$/, "");
+  if (!trimmed) return null;
+
+  const httpsMatch = trimmed.match(
+    /^https?:\/\/github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/i
+  );
+  if (httpsMatch) {
+    return {
+      nombreSugerido: httpsMatch[2],
+      urlNormalizada: `https://github.com/${httpsMatch[1]}/${httpsMatch[2]}`,
+    };
+  }
+
+  return null;
+}

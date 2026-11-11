@@ -9,7 +9,7 @@ export type SubSeccionGuiaGit =
 export const subItemsGuiaGit: { id: SubSeccionGuiaGit; label: string }[] = [
   { id: "ramas-pr", label: "Ramas y Pull Requests" },
   { id: "commits", label: "Convenciones de Commits" },
-  { id: "sincronizar", label: "Sincronizar Ramas" },
+  { id: "sincronizar", label: "Sincronización de Ramas" },
   { id: "conflictos", label: "Resolución de Conflictos" },
   { id: "revertir", label: "Revertir Commits" },
   { id: "ci", label: "Disparar Pipeline CI" },
