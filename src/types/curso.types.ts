@@ -19,6 +19,7 @@ export interface CursoResponseDTO {
   comision: number;
   descripcion?: string | null;
   ownerUsername?: string | null;
+  archivado?: boolean;
 }
 
 /**

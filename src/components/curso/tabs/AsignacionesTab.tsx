@@ -41,6 +41,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
 
   const { isDocente } = useAuth();
   const navigate = useNavigate();
+  const esArchivado = Boolean(curso.archivado);
 
   const [asignacionAEliminar, setAsignacionAEliminar] =
     useState<AsignacionResponseDTO | null>(null);
@@ -224,21 +225,27 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
       {/* Encabezado del Panel de Asignaciones */}
       <PanelHeader
         title="Panel de Asignaciones"
-        description="Crea y administra asignaciones individuales o grupales integradas con GitHub y seguimiento de entregas."
+        description={
+          esArchivado
+            ? "Historial de asignaciones individuales y grupales junto con sus repositorios y entregas registradas."
+            : "Crea y administra asignaciones individuales o grupales integradas con GitHub y seguimiento de entregas."
+        }
         actions={
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-            title="Crear una nueva asignación"
-          >
-            <img
-              src={circleAddIcon}
-              alt="Crear"
-              className="w-4 h-4 brightness-0 invert"
-            />
-            <span>Crear asignación</span>
-          </button>
+          !esArchivado ? (
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              title="Crear una nueva asignación"
+            >
+              <img
+                src={circleAddIcon}
+                alt="Crear"
+                className="w-4 h-4 brightness-0 invert"
+              />
+              <span>Crear asignación</span>
+            </button>
+          ) : undefined
         }
       />
 
@@ -260,22 +267,28 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
       {/* Empty state si no hay asignaciones creadas */}
       {!isLoading && !error && asignaciones.length === 0 && (
         <EmptyState
-          icon="📚"
+          icon="📋"
           title="No hay asignaciones en este curso"
-          description="Aún no se han creado asignaciones para este curso. Puedes crear la primera asignación haciendo clic en el botón a continuación."
+          description={
+            esArchivado
+              ? "Este curso fue archivado sin asignaciones registradas."
+              : "Aún no se han creado asignaciones para este curso. Puedes crear la primera asignación haciendo clic en el botón a continuación."
+          }
           action={
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-            >
-              <img
-                src={circleAddIcon}
-                alt="Crear"
-                className="w-3.5 h-3.5 brightness-0 invert"
-              />
-              <span>Crear primera asignación</span>
-            </button>
+            !esArchivado ? (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+              >
+                <img
+                  src={circleAddIcon}
+                  alt="Crear"
+                  className="w-3.5 h-3.5 brightness-0 invert"
+                />
+                <span>Crear primera asignación</span>
+              </button>
+            ) : undefined
           }
         />
       )}
@@ -418,7 +431,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                           </span>
                         </button>
 
-                        {isDocente && (
+                        {isDocente && !esArchivado && (
                           <div className="relative" data-kebab-menu>
                             <button
                               type="button"
@@ -534,7 +547,11 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                       <ErrorBanner
                         title="Ocurrió un error al crear los repositorios en GitHub"
                         message="No se pudieron generar todos los repositorios de esta asignación y se revirtieron los repositorios creados parcialmente. Te recomendamos eliminar esta asignación y volver a crearla."
-                        onRetry={isDocente ? () => setAsignacionAEliminar(asig) : undefined}
+                        onRetry={
+                          isDocente && !esArchivado
+                            ? () => setAsignacionAEliminar(asig)
+                            : undefined
+                        }
                         retryText="Eliminar asignación"
                       />
                     )}
@@ -558,7 +575,9 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                   </th>
                                   <th className="py-3 px-4">Repositorio</th>
                                   <th className="py-3 px-4">Estado / Entrega</th>
-                                  <th className="py-3 px-4">Acción</th>
+                                  {!esArchivado && (
+                                    <th className="py-3 px-4">Acción</th>
+                                  )}
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-line/60">
@@ -663,42 +682,44 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                       )}
                                     </td>
 
-                                    {/* Acción / Calificar */}
-                                    <td className="py-3.5 px-4">
-                                      <button
-                                        type="button"
-                                        disabled={
-                                          asig.estado === "CREANDO" ||
-                                          asig.estado === "ERROR"
-                                        }
-                                        onClick={() =>
-                                          setCalificarModal({
-                                            open: true,
-                                            asignacionId: asig.id,
-                                            asignacionTitulo: asig.titulo,
-                                            grupo,
-                                          })
-                                        }
-                                        className="inline-flex items-center gap-1.5 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
-                                        title={
-                                          asig.estado === "CREANDO"
-                                            ? "Esperá a que finalice la creación de repositorios para calificar"
-                                            : asig.estado === "ERROR"
-                                              ? "No se puede calificar una asignación con error de creación"
-                                              : grupo.calificacion !== null &&
-                                                grupo.calificacion !== undefined
-                                                ? "Editar calificación de este grupo"
-                                                : "Calificar este grupo"
-                                        }
-                                      >
-                                        <span>
-                                          {grupo.calificacion !== null &&
-                                          grupo.calificacion !== undefined
-                                            ? "Editar calificación"
-                                            : "Calificar"}
-                                        </span>
-                                      </button>
-                                    </td>
+                                    {/* Acción / Calificar (solo en cursos activos) */}
+                                    {!esArchivado && (
+                                      <td className="py-3.5 px-4">
+                                        <button
+                                          type="button"
+                                          disabled={
+                                            asig.estado === "CREANDO" ||
+                                            asig.estado === "ERROR"
+                                          }
+                                          onClick={() =>
+                                            setCalificarModal({
+                                              open: true,
+                                              asignacionId: asig.id,
+                                              asignacionTitulo: asig.titulo,
+                                              grupo,
+                                            })
+                                          }
+                                          className="inline-flex items-center gap-1.5 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                          title={
+                                            asig.estado === "CREANDO"
+                                              ? "Esperá a que finalice la creación de repositorios para calificar"
+                                              : asig.estado === "ERROR"
+                                                ? "No se puede calificar una asignación con error de creación"
+                                                : grupo.calificacion !== null &&
+                                                  grupo.calificacion !== undefined
+                                                  ? "Editar calificación de este grupo"
+                                                  : "Calificar este grupo"
+                                          }
+                                        >
+                                          <span>
+                                            {grupo.calificacion !== null &&
+                                            grupo.calificacion !== undefined
+                                              ? "Editar calificación"
+                                              : "Calificar"}
+                                          </span>
+                                        </button>
+                                      </td>
+                                    )}
                                   </tr>
                                 ))}
                               </tbody>
@@ -715,46 +736,47 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
         </>
       )}
 
-      {/* Modal para crear asignación */}
-      <CrearAsignacionModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        cursoId={curso.id}
-        alumnos={alumnos}
-        onSuccess={cargarAsignaciones}
-      />
+      {/* Modales de mutación (solo en cursos activos) */}
+      {!esArchivado && (
+        <>
+          <CrearAsignacionModal
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            cursoId={curso.id}
+            alumnos={alumnos}
+            onSuccess={cargarAsignaciones}
+          />
 
-      {/* Modal para eliminar asignación */}
-      <EliminarAsignacionModal
-        open={Boolean(asignacionAEliminar)}
-        onClose={() => setAsignacionAEliminar(null)}
-        onConfirm={handleConfirmarEliminar}
-        asignacionTitulo={asignacionAEliminar?.titulo || ""}
-        tipo={asignacionAEliminar?.tipo}
-        totalGrupos={asignacionAEliminar?.grupos?.length || 0}
-      />
+          <EliminarAsignacionModal
+            open={Boolean(asignacionAEliminar)}
+            onClose={() => setAsignacionAEliminar(null)}
+            onConfirm={handleConfirmarEliminar}
+            asignacionTitulo={asignacionAEliminar?.titulo || ""}
+            tipo={asignacionAEliminar?.tipo}
+            totalGrupos={asignacionAEliminar?.grupos?.length || 0}
+          />
 
-      {/* Modal para calificar asignación */}
-      <CalificarAsignacionModal
-        open={calificarModal.open}
-        onClose={() =>
-          setCalificarModal((prev) => ({ ...prev, open: false, grupo: null }))
-        }
-        cursoId={curso.id}
-        asignacionId={calificarModal.asignacionId}
-        asignacionTitulo={calificarModal.asignacionTitulo}
-        grupo={calificarModal.grupo}
-        onSuccess={handleCalificacionExitosa}
-      />
+          <CalificarAsignacionModal
+            open={calificarModal.open}
+            onClose={() =>
+              setCalificarModal((prev) => ({ ...prev, open: false, grupo: null }))
+            }
+            cursoId={curso.id}
+            asignacionId={calificarModal.asignacionId}
+            asignacionTitulo={calificarModal.asignacionTitulo}
+            grupo={calificarModal.grupo}
+            onSuccess={handleCalificacionExitosa}
+          />
 
-      {/* Modal para modificar asignación */}
-      <ModificarAsignacionModal
-        open={Boolean(asignacionAEditar)}
-        onClose={() => setAsignacionAEditar(null)}
-        cursoId={curso.id}
-        asignacion={asignacionAEditar}
-        onSuccess={handleModificacionExitosa}
-      />
+          <ModificarAsignacionModal
+            open={Boolean(asignacionAEditar)}
+            onClose={() => setAsignacionAEditar(null)}
+            cursoId={curso.id}
+            asignacion={asignacionAEditar}
+            onSuccess={handleModificacionExitosa}
+          />
+        </>
+      )}
     </div>
   );
 }

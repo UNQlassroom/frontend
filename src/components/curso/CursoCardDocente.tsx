@@ -15,6 +15,8 @@ export function CursoCardDocente({ curso }: Props) {
   const [openAlumnosModal, setOpenAlumnosModal] = useState<boolean>(false);
   const [openInvitarModal, setOpenInvitarModal] = useState<boolean>(false);
 
+  const esArchivado = Boolean(curso.archivado);
+
   const handleCardClick = () => {
     navigate(`/cursos/${curso.id}`);
   };
@@ -27,9 +29,15 @@ export function CursoCardDocente({ curso }: Props) {
       >
         <div>
           <div className="flex items-start justify-between gap-2">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-              Curso activo
-            </span>
+            {esArchivado ? (
+              <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
+                <span>Curso archivado</span>
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                Curso activo
+              </span>
+            )}
           </div>
 
           <div className="mt-3">
@@ -56,18 +64,20 @@ export function CursoCardDocente({ curso }: Props) {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenInvitarModal(true);
-            }}
-            className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
-            title="Invitar alumnos"
-          >
-            <img src={circleAddIcon} alt="Invitar" className="w-4 h-4 opacity-80" />
-            <span>Invitar</span>
-          </button>
+          {!esArchivado && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenInvitarModal(true);
+              }}
+              className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-line bg-panel2 px-4 py-2 text-sm font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+              title="Invitar alumnos"
+            >
+              <img src={circleAddIcon} alt="Invitar" className="w-4 h-4 opacity-80" />
+              <span>Invitar</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -77,11 +87,13 @@ export function CursoCardDocente({ curso }: Props) {
         curso={curso}
       />
 
-      <InvitarAlumnosModal
-        open={openInvitarModal}
-        onClose={() => setOpenInvitarModal(false)}
-        curso={curso}
-      />
+      {!esArchivado && (
+        <InvitarAlumnosModal
+          open={openInvitarModal}
+          onClose={() => setOpenInvitarModal(false)}
+          curso={curso}
+        />
+      )}
     </>
   );
 }
