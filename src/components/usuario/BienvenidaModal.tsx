@@ -10,8 +10,6 @@ import {
   notifyApiError,
 } from "@/utils";
 
-export const BIENVENIDA_STORAGE_KEY = "unqlassroom_bienvenida_dismissed";
-
 export function BienvenidaModal() {
   const { user, isAuthenticated, actualizarUsuario } = useAuth();
   const [nombre, setNombre] = useState("");
@@ -45,7 +43,6 @@ export function BienvenidaModal() {
 
       const nuevoNombre = response.data.nombreCompleto ?? trimmedNombre;
       actualizarUsuario({ nombreCompleto: nuevoNombre });
-      sessionStorage.removeItem(BIENVENIDA_STORAGE_KEY);
       toast.success(`¡Bienvenido/a a UNQlassroom, ${nuevoNombre}!`);
     } catch (err: unknown) {
       const resolved = resolveApiError(err);
