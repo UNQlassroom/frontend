@@ -10,7 +10,8 @@ import type {
 import { obtenerAsignaciones } from "@/services";
 import { CIStatusBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
-import { UserDetail, compararUsuarios, compararGrupos } from "@/components/curso/UserDetail";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios, compararGrupos } from "@/components/curso/ordenamiento";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,

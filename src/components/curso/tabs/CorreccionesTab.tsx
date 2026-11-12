@@ -11,7 +11,8 @@ import type {
 import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
 import { IssueEstadoBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
-import { UserDetail, compararUsuarios, compararGrupos } from "@/components/curso/UserDetail";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios, compararGrupos } from "@/components/curso/ordenamiento";
 import githubIcon from "@/assets/github_favicon.svg";
 import { getGitHubNewIssueUrl, getGitHubIssuesUrl, formatFechaLegible } from "@/utils";
 

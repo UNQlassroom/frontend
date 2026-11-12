@@ -3,7 +3,8 @@ import type { AlumnoResponseDTO, CursoResponseDTO } from "@/types";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import { EmptyState, ErrorBanner } from "@/components/common";
-import { UserDetail, compararUsuarios } from "@/components/curso/UserDetail";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios } from "@/components/curso/ordenamiento";
 
 export interface AlumnosTabProps {
   curso?: CursoResponseDTO;

@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from "react";
 import { useAlumnos } from "@/hooks";
 import { ErrorBanner } from "@/components/common";
-import { UserDetail, compararUsuarios } from "@/components/curso/UserDetail";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios } from "@/components/curso/ordenamiento";
 import type { CursoResponseDTO } from "@/types";
 
 interface VerAlumnosModalProps {
@@ -27,10 +28,11 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
     }
   }, [open, curso.id, cargarAlumnos, limpiar]);
 
+  const listaAlumnos = alumnosData?.alumnos;
   const alumnosOrdenados = useMemo(() => {
-    if (!alumnosData?.alumnos) return [];
-    return [...alumnosData.alumnos].sort(compararUsuarios);
-  }, [alumnosData?.alumnos]);
+    if (!listaAlumnos) return [];
+    return [...listaAlumnos].sort(compararUsuarios);
+  }, [listaAlumnos]);
 
   if (!open) return null;
 
@@ -111,7 +113,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                           username={alumno.username}
                           nombreCompleto={alumno.nombreCompleto}
                           layout="stacked"
-                          nameClassName="text-base"
+                          nameClassName="text-base font-semibold"
                         />
                       </div>
 

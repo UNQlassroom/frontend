@@ -17,7 +17,8 @@ import {
 } from "@/components/asignacion";
 import { EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
-import { UserDetail, compararUsuarios, compararGrupos } from "@/components/curso/UserDetail";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios, compararGrupos } from "@/components/curso/ordenamiento";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import githubIcon from "@/assets/github_favicon.svg";
 import { formatFechaCorta, formatFechaLegible } from "@/utils";
