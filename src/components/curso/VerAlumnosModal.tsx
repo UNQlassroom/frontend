@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAlumnos } from "@/hooks";
 import { ErrorBanner } from "@/components/common";
+import { UserDetail, compararUsuarios } from "@/components/curso/UserDetail";
 import type { CursoResponseDTO } from "@/types";
 
 interface VerAlumnosModalProps {
@@ -13,7 +14,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
   const {
     alumnosData,
     isLoading,
-        error,
+    error,
     cargarAlumnos,
     limpiar,
   } = useAlumnos();
@@ -25,6 +26,11 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
       limpiar();
     }
   }, [open, curso.id, cargarAlumnos, limpiar]);
+
+  const alumnosOrdenados = useMemo(() => {
+    if (!alumnosData?.alumnos) return [];
+    return [...alumnosData.alumnos].sort(compararUsuarios);
+  }, [alumnosData?.alumnos]);
 
   if (!open) return null;
 
@@ -72,12 +78,12 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
             <div>
               <div className="flex items-center justify-between mb-4 px-1">
                 <span className="text-sm text-muted-foreground font-medium">
-                  Total: {alumnosData.alumnos.length}{" "}
-                  {alumnosData.alumnos.length === 1 ? "alumno" : "alumnos"}
+                  Total: {alumnosOrdenados.length}{" "}
+                  {alumnosOrdenados.length === 1 ? "alumno" : "alumnos"}
                 </span>
               </div>
 
-              {alumnosData.alumnos.length === 0 ? (
+              {alumnosOrdenados.length === 0 ? (
                 <div className="rounded-xl border border-line bg-panel p-8 text-center">
                   <p className="text-sm text-muted-foreground">
                     No hay alumnos inscriptos en este curso todavía.
@@ -87,7 +93,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                 <div
                   className="space-y-3 max-h-[55vh] overflow-y-auto pr-1"
                 >
-                  {alumnosData.alumnos.map((alumno) => (
+                  {alumnosOrdenados.map((alumno) => (
                     <div
                       key={alumno.username}
                       className="flex items-center justify-between gap-4 rounded-xl border border-line bg-panel p-4 hover:border-foreground/20 transition-colors"
@@ -101,17 +107,12 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
                             e.currentTarget.style.display = "none";
                           }}
                         />
-                        <div>
-                          <a
-                            href={`https://github.com/${alumno.username}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-base font-semibold text-foreground hover:underline truncate block"
-                            title={`Ver perfil de @${alumno.username}`}
-                          >
-                            @{alumno.username}
-                          </a>
-                        </div>
+                        <UserDetail
+                          username={alumno.username}
+                          nombreCompleto={alumno.nombreCompleto}
+                          layout="stacked"
+                          nameClassName="text-base"
+                        />
                       </div>
 
                       <div className="flex items-center gap-2 text-xs sm:text-sm shrink-0">

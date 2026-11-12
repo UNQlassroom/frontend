@@ -60,6 +60,7 @@ export interface AlumnoResponseDTO {
   username: string;
   role: string;
   state: "active" | "pending" | string;
+  nombreCompleto?: string | null;
 }
 
 /**

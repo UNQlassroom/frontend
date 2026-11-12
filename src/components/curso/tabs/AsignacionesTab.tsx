@@ -17,6 +17,7 @@ import {
 } from "@/components/asignacion";
 import { EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
+import { UserDetail, compararUsuarios, compararGrupos } from "@/components/curso/UserDetail";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import githubIcon from "@/assets/github_favicon.svg";
 import { formatFechaCorta, formatFechaLegible } from "@/utils";
@@ -581,7 +582,9 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-line/60">
-                                {asig.grupos.map((grupo) => (
+                                {[...asig.grupos]
+                                  .sort((a, b) => compararGrupos(a, b, asig.tipo === "GRUPAL"))
+                                  .map((grupo) => (
                                   <tr
                                     key={grupo.id}
                                     className="hover:bg-line/20 transition-colors"
@@ -594,22 +597,20 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                             {grupo.nombre}
                                           </p>
                                         )}
-                                        <div className="flex flex-wrap gap-1.5">
-                                          {grupo.integrantes.map((u) => (
-                                            <a
-                                              key={u.id ?? u.username}
-                                              href={`https://github.com/${u.username}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                                            >
-                                              @{u.username}
-                                            </a>
-                                          ))}
+                                        <div className="flex flex-col gap-1 items-start">
+                                          {[...grupo.integrantes]
+                                            .sort(compararUsuarios)
+                                            .map((u) => (
+                                              <UserDetail
+                                                key={u.id ?? u.username}
+                                                username={u.username}
+                                                nombreCompleto={u.nombreCompleto}
+                                                layout="inline"
+                                              />
+                                            ))}
                                         </div>
                                       </div>
                                     </td>
-
                                     {/* Repositorio */}
                                     <td className="py-3.5 px-4">
                                       {grupo.repositorio ? (
