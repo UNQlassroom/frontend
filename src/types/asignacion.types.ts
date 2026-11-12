@@ -164,7 +164,7 @@ export interface IssueResponseDTO {
 export interface CorreccionGrupoResponseDTO {
   grupoId: number;
   nombre: string | null;
-  integrantes: string[];
+  integrantes: (string | UsuarioResponseDTO)[];
   repoNombre: string;
   repoHtmlUrl: string;
   issues: IssueResponseDTO[];

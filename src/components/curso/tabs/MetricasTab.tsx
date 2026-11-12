@@ -5,10 +5,13 @@ import type {
   AlumnoResponseDTO,
   AsignacionResponseDTO,
   CursoResponseDTO,
+  UsuarioResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones } from "@/services";
 import { CIStatusBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios, compararGrupos } from "@/components/curso/ordenamiento";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
@@ -27,7 +30,7 @@ interface ItemMetrica {
   repoUrl: string;
   alumnoUsername: string;
   grupoNombre?: string | null;
-  integrantes: string[];
+  integrantes: UsuarioResponseDTO[];
   esGrupal: boolean;
   estadoCI: "success" | "failure" | "pending" | "sin_ci";
   ultimoCommit: string;
@@ -160,10 +163,10 @@ export function MetricasTab({
             alumnoUsername:
               grupo.nombre ||
               (grupo.integrantes.length > 0
-                ? grupo.integrantes.map((u) => u.username).join(", ")
+                ? grupo.integrantes.map((u) => u.nombreCompleto?.trim() || u.username).join(", ")
                 : "Sin asignar"),
             grupoNombre: grupo.nombre,
-            integrantes: grupo.integrantes.map((u) => u.username),
+            integrantes: grupo.integrantes,
             esGrupal: asig.tipo === "GRUPAL",
             estadoCI: ["success", "failure", "pending", "sin_ci"].includes(
               estadoValido
@@ -195,24 +198,32 @@ export function MetricasTab({
   const sinCiPct = total > 0 ? Math.round((sinCiCount / total) * 100) : 0;
 
   // Filtrado por texto y estado de CI
+  // Filtrado y ordenamiento alfabético por apellido
   const itemsFiltrados = useMemo(() => {
-    return datosItems.filter((item) => {
-      const matchBusqueda =
-        item.repoNombre.toLowerCase().includes(busqueda.toLowerCase().trim()) ||
-        item.alumnoUsername
-          .toLowerCase()
-          .includes(busqueda.toLowerCase().trim()) ||
-        item.integrantes.some((u) =>
-          u.toLowerCase().includes(busqueda.toLowerCase().trim())
-        ) ||
-        (item.grupoNombre &&
-          item.grupoNombre.toLowerCase().includes(busqueda.toLowerCase().trim())) ||
-        item.ultimoCommit.toLowerCase().includes(busqueda.toLowerCase().trim());
+    return datosItems
+      .filter((item) => {
+        const searchLower = busqueda.toLowerCase().trim();
+        const matchBusqueda =
+          !searchLower ||
+          item.repoNombre.toLowerCase().includes(searchLower) ||
+          item.alumnoUsername.toLowerCase().includes(searchLower) ||
+          item.integrantes.some(
+            (u) =>
+              u.username.toLowerCase().includes(searchLower) ||
+              Boolean(
+                u.nombreCompleto &&
+                  u.nombreCompleto.toLowerCase().includes(searchLower)
+              )
+          ) ||
+          (item.grupoNombre &&
+            item.grupoNombre.toLowerCase().includes(searchLower)) ||
+          item.ultimoCommit.toLowerCase().includes(searchLower);
 
-      if (!matchBusqueda) return false;
-      if (filtroEstado === "todos") return true;
-      return item.estadoCI === filtroEstado;
-    });
+        if (!matchBusqueda) return false;
+        if (filtroEstado === "todos") return true;
+        return item.estadoCI === filtroEstado;
+      })
+      .sort((a, b) => compararGrupos(a, b, a.esGrupal));
   }, [datosItems, busqueda, filtroEstado]);
 
   const handleCardClick = (estadoTarget: string) => {
@@ -450,25 +461,25 @@ export function MetricasTab({
                       >
                         {/* Alumno o Grupo */}
                         <td className="py-4 px-4.5">
-                          <div className="space-y-0.5">
+                          <div className="space-y-1">
                             {item.esGrupal && item.grupoNombre && (
                               <p className="font-semibold text-foreground text-sm">
                                 {item.grupoNombre}
                               </p>
                             )}
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="flex flex-col gap-1 items-start">
                               {item.integrantes.length > 0 ? (
-                                item.integrantes.map((username) => (
-                                  <a
-                                    key={username}
-                                    href={`https://github.com/${username}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                                  >
-                                    @{username}
-                                  </a>
-                                ))
+                                [...item.integrantes]
+                                  .sort(compararUsuarios)
+                                  .map((u) => (
+                                    <UserDetail
+                                      key={u.id ?? u.username}
+                                      username={u.username}
+                                      nombreCompleto={u.nombreCompleto}
+                                      layout="stacked"
+                                      nameClassName="text-xs"
+                                    />
+                                  ))
                               ) : (
                                 <span className="text-xs text-muted-foreground">
                                   {item.alumnoUsername}

@@ -3,6 +3,8 @@ import type { AlumnoResponseDTO, CursoResponseDTO } from "@/types";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import { EmptyState, ErrorBanner } from "@/components/common";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios } from "@/components/curso/ordenamiento";
 
 export interface AlumnosTabProps {
   curso?: CursoResponseDTO;
@@ -37,18 +39,25 @@ export function AlumnosTab({
     () => alumnos.filter((a) => a.state !== "active").length,
     [alumnos]
   );
-  // Filtrado de alumnos por búsqueda y estado
+  // Filtrado y ordenamiento alfabético de alumnos por apellido
   const alumnosFiltrados = useMemo(() => {
-    return alumnos.filter((alumno) => {
-      const coincideBusqueda = alumno.username
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase().trim());
+    return alumnos
+      .filter((alumno) => {
+        const termino = searchTerm.toLowerCase().trim();
+        const coincideBusqueda =
+          !termino ||
+          alumno.username.toLowerCase().includes(termino) ||
+          Boolean(
+            alumno.nombreCompleto &&
+              alumno.nombreCompleto.toLowerCase().includes(termino)
+          );
 
-      if (!coincideBusqueda) return false;
+        if (!coincideBusqueda) return false;
 
-      if (filtroEstado === "todos") return true;
-      return alumno.state === filtroEstado;
-    });
+        if (filtroEstado === "todos") return true;
+        return alumno.state === filtroEstado;
+      })
+      .sort(compararUsuarios);
   }, [alumnos, searchTerm, filtroEstado]);
 
   return (
@@ -191,18 +200,11 @@ export function AlumnosTab({
                               e.currentTarget.style.display = "none";
                             }}
                           />
-                          <a
-                            href={`https://github.com/${alumno.username}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-semibold text-base text-foreground hover:text-primary hover:underline inline-flex items-center gap-1.5 truncate"
-                            title={`Ver perfil de GitHub de @${alumno.username}`}
-                          >
-                            <span>@{alumno.username}</span>
-                            <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">
-                              ↗
-                            </span>
-                          </a>
+                          <UserDetail
+                            username={alumno.username}
+                            nombreCompleto={alumno.nombreCompleto}
+                            layout="stacked"
+                          />
                         </div>
                       </td>
 

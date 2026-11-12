@@ -5,3 +5,5 @@ export * from "./CrearCursoModal";
 export * from "./InvitarAlumnosModal";
 export * from "./VerAlumnosModal";
 export * from "./ArchivarCursoModal";
+export * from "./UserDetail";
+export * from "./ordenamiento";

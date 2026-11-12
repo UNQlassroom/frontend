@@ -6,10 +6,13 @@ import type {
   CorreccionGrupoResponseDTO,
   AsignacionResponseDTO,
   IssueResponseDTO,
+  UsuarioResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones, obtenerCorrecciones } from "@/services";
 import { IssueEstadoBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios, compararGrupos } from "@/components/curso/ordenamiento";
 import githubIcon from "@/assets/github_favicon.svg";
 import { getGitHubNewIssueUrl, getGitHubIssuesUrl, formatFechaLegible } from "@/utils";
 
@@ -124,6 +127,36 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
   const asignacionActual = useMemo(
     () => asignaciones.find((a) => a.id === selectedAsignacionId),
     [asignaciones, selectedAsignacionId]
+  );
+
+  // Mapa de username a nombre completo a partir de los grupos de la asignación seleccionada
+  const usuariosMap = useMemo(() => {
+    const map = new Map<string, string>();
+    asignacionActual?.grupos.forEach((g) => {
+      g.integrantes.forEach((u) => {
+        if (u.nombreCompleto) {
+          map.set(u.username, u.nombreCompleto);
+        }
+      });
+    });
+    return map;
+  }, [asignacionActual]);
+
+  const getIntegranteInfo = useCallback(
+    (item: string | UsuarioResponseDTO) => {
+      if (typeof item === "object" && item !== null) {
+        return {
+          username: item.username || "",
+          nombreCompleto: item.nombreCompleto || null,
+        };
+      }
+      const u = String(item || "");
+      return {
+        username: u,
+        nombreCompleto: usuariosMap.get(u) || null,
+      };
+    },
+    [usuariosMap]
   );
 
   // Refresco silencioso ante eventos SSE
@@ -247,37 +280,45 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
     };
   }, [correcciones]);
 
-  // Filtrado de grupos
+  // Filtrado y ordenamiento alfabético de grupos
   const gruposFiltrados = useMemo(() => {
-    return correcciones.filter((g) => {
-      const searchLower = busqueda.trim().toLowerCase();
-      const coincideBusqueda =
-        !searchLower ||
-        (g.nombre && g.nombre.toLowerCase().includes(searchLower)) ||
-        g.repoNombre.toLowerCase().includes(searchLower) ||
-        g.integrantes.some((i) => i.toLowerCase().includes(searchLower));
+    return correcciones
+      .filter((g) => {
+        const searchLower = busqueda.trim().toLowerCase();
+        const coincideBusqueda =
+          !searchLower ||
+          (g.nombre && g.nombre.toLowerCase().includes(searchLower)) ||
+          g.repoNombre.toLowerCase().includes(searchLower) ||
+          g.integrantes.some((i) => {
+            const info = getIntegranteInfo(i);
+            return (
+              info.username.toLowerCase().includes(searchLower) ||
+              Boolean(info.nombreCompleto?.toLowerCase().includes(searchLower))
+            );
+          });
 
-      if (!coincideBusqueda) return false;
+        if (!coincideBusqueda) return false;
 
-      if (filtroEstado === "todos") return true;
-      if (filtroEstado === "con_correcciones") return g.issues.length > 0;
-      if (filtroEstado === "sin_correcciones") return g.issues.length === 0;
-      if (filtroEstado === "actualizados")
-        return g.issues.some(
-          (i) => (i.estado || "").toUpperCase() === "ACTUALIZADO"
-        );
-      if (filtroEstado === "pendientes")
-        return g.issues.some(
-          (i) => (i.estado || "").toUpperCase() === "PENDIENTE"
-        );
-      if (filtroEstado === "resueltos")
-        return g.issues.some(
-          (i) => (i.estado || "").toUpperCase() === "RESUELTO"
-        );
+        if (filtroEstado === "todos") return true;
+        if (filtroEstado === "con_correcciones") return g.issues.length > 0;
+        if (filtroEstado === "sin_correcciones") return g.issues.length === 0;
+        if (filtroEstado === "actualizados")
+          return g.issues.some(
+            (i) => (i.estado || "").toUpperCase() === "ACTUALIZADO"
+          );
+        if (filtroEstado === "pendientes")
+          return g.issues.some(
+            (i) => (i.estado || "").toUpperCase() === "PENDIENTE"
+          );
+        if (filtroEstado === "resueltos")
+          return g.issues.some(
+            (i) => (i.estado || "").toUpperCase() === "RESUELTO"
+          );
 
-      return true;
-    });
-  }, [correcciones, busqueda, filtroEstado]);
+        return true;
+      })
+      .sort((a, b) => compararGrupos(a, b, asignacionActual?.tipo === "GRUPAL", getIntegranteInfo));
+  }, [correcciones, busqueda, filtroEstado, getIntegranteInfo, asignacionActual]);
 
   const handleCardClick = (estadoTarget: string) => {
     setFiltroEstado((prev) => (prev === estadoTarget ? "todos" : estadoTarget));
@@ -532,16 +573,15 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                         className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-4.5 transition-all hover:border-foreground/20 animate-rise"
                       >
                         {/* Cabecera del Grupo/Repo */}
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3.5 border-b border-line/60">
-                          <div className="space-y-1">
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 pb-3.5 border-b border-line/60">
+                          <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              {/* Nombre de Grupo o Alumno */}
-                              <h4 className="font-display text-lg sm:text-xl font-bold text-foreground">
-                                {grupo.nombre ||
-                                  (grupo.integrantes.length === 1
-                                    ? `@${grupo.integrantes[0]}`
-                                    : "Grupo")}
-                              </h4>
+                              {/* Nombre de Grupo si existe */}
+                              {grupo.nombre && (
+                                <h4 className="font-display text-lg sm:text-xl font-bold text-foreground">
+                                  {grupo.nombre}
+                                </h4>
+                              )}
 
                               {/* Badge con cantidad de correcciones */}
                               <span className="text-xs px-2.5 py-0.5 rounded-full border border-line bg-panel2 text-muted-foreground font-semibold">
@@ -552,19 +592,26 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               </span>
                             </div>
 
-                            {/* Integrantes y Repositorio */}
-                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                              {grupo.integrantes.length > 0 && (
-                                <span>
-                                  Integrantes:{" "}
-                                  <strong className="text-foreground font-medium">
-                                    {grupo.integrantes
-                                      .map((i) => `@${i}`)
-                                      .join(", ")}
-                                  </strong>
-                                </span>
-                              )}
-                              <span>•</span>
+                            {/* Alumnos listados directamente uno debajo del otro, como en métricas */}
+                            {grupo.integrantes.length > 0 && (
+                              <div className="flex flex-col gap-1 items-start">
+                                {[...grupo.integrantes]
+                                  .map(getIntegranteInfo)
+                                  .sort(compararUsuarios)
+                                  .map((info, idx) => (
+                                    <UserDetail
+                                      key={info.username || idx}
+                                      username={info.username}
+                                      nombreCompleto={info.nombreCompleto}
+                                      layout="stacked"
+                                      nameClassName={grupo.nombre ? "text-sm font-semibold" : "text-base font-bold"}
+                                    />
+                                  ))}
+                              </div>
+                            )}
+
+                            {/* Repositorio */}
+                            <div className="pt-0.5">
                               {grupo.repoHtmlUrl ? (
                                 <a
                                   href={grupo.repoHtmlUrl}
@@ -586,7 +633,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                   </span>
                                 </a>
                               ) : (
-                                <span className="text-foreground font-medium truncate max-w-xs sm:max-w-md">
+                                <span className="text-foreground font-medium text-xs truncate max-w-xs sm:max-w-md">
                                   {grupo.repoNombre}
                                 </span>
                               )}
