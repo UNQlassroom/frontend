@@ -1,4 +1,4 @@
-import { get, post } from "@/api";
+import { get, post, deleteRequest } from "@/api";
 import type {
   ApiResponse,
   CursoRequestDTO,
@@ -56,6 +56,16 @@ export const cursoService = {
       data
     );
   },
+
+  /**
+   * Envía la petición DELETE http://localhost:8080/cursos/{cursoId}/alumnos/{username}
+   */
+  eliminarAlumno: (
+    cursoId: number,
+    username: string
+  ): Promise<ApiResponse<void>> => {
+    return deleteRequest<void>(`/cursos/${cursoId}/alumnos/${username}`);
+  },
 };
 
 export const {
@@ -65,4 +75,5 @@ export const {
   archivarCurso,
   obtenerAlumnos,
   agregarAlumnos,
+  eliminarAlumno,
 } = cursoService;
