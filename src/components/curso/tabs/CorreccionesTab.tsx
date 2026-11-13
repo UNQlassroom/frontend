@@ -593,7 +593,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                             </div>
 
                             {/* Alumnos listados directamente uno debajo del otro, como en métricas */}
-                            {grupo.integrantes.length > 0 && (
+                            {grupo.integrantes.length > 0 ? (
                               <div className="flex flex-col gap-1 items-start">
                                 {[...grupo.integrantes]
                                   .map(getIntegranteInfo)
@@ -608,6 +608,10 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     />
                                   ))}
                               </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground italic">
+                                Sin integrantes activos
+                              </span>
                             )}
 
                             {/* Repositorio */}

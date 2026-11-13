@@ -481,8 +481,8 @@ export function MetricasTab({
                                     />
                                   ))
                               ) : (
-                                <span className="text-xs text-muted-foreground">
-                                  {item.alumnoUsername}
+                                <span className="text-xs text-muted-foreground italic">
+                                  Sin integrantes activos
                                 </span>
                               )}
                             </div>
