@@ -476,13 +476,14 @@ export function MetricasTab({
                                       key={u.id ?? u.username}
                                       username={u.username}
                                       nombreCompleto={u.nombreCompleto}
+                                      activo={u.activo}
                                       layout="stacked"
                                       nameClassName="text-xs"
                                     />
                                   ))
                               ) : (
-                                <span className="text-xs text-muted-foreground">
-                                  {item.alumnoUsername}
+                                <span className="text-xs text-muted-foreground italic">
+                                  Sin integrantes activos
                                 </span>
                               )}
                             </div>

@@ -599,16 +599,23 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                           </p>
                                         )}
                                         <div className="flex flex-col gap-1 items-start">
-                                          {[...grupo.integrantes]
-                                            .sort(compararUsuarios)
-                                            .map((u) => (
-                                              <UserDetail
-                                                key={u.id ?? u.username}
-                                                username={u.username}
-                                                nombreCompleto={u.nombreCompleto}
-                                                layout="inline"
-                                              />
-                                            ))}
+                                          {grupo.integrantes.length > 0 ? (
+                                            [...grupo.integrantes]
+                                              .sort(compararUsuarios)
+                                              .map((u) => (
+                                                <UserDetail
+                                                  key={u.id ?? u.username}
+                                                  username={u.username}
+                                                  nombreCompleto={u.nombreCompleto}
+                                                   activo={u.activo}
+                                                  layout="inline"
+                                                />
+                                              ))
+                                          ) : (
+                                            <span className="text-xs text-muted-foreground italic">
+                                              Sin integrantes activos
+                                            </span>
+                                          )}
                                         </div>
                                       </div>
                                     </td>

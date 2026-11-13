@@ -131,12 +131,13 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
 
   // Mapa de username a nombre completo a partir de los grupos de la asignación seleccionada
   const usuariosMap = useMemo(() => {
-    const map = new Map<string, string>();
+    const map = new Map<string, { nombreCompleto?: string | null; activo?: boolean }>();
     asignacionActual?.grupos.forEach((g) => {
       g.integrantes.forEach((u) => {
-        if (u.nombreCompleto) {
-          map.set(u.username, u.nombreCompleto);
-        }
+        map.set(u.username, {
+          nombreCompleto: u.nombreCompleto || null,
+          activo: u.activo,
+        });
       });
     });
     return map;
@@ -148,12 +149,15 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
         return {
           username: item.username || "",
           nombreCompleto: item.nombreCompleto || null,
+          activo: item.activo,
         };
       }
       const u = String(item || "");
+      const mapped = usuariosMap.get(u);
       return {
         username: u,
-        nombreCompleto: usuariosMap.get(u) || null,
+        nombreCompleto: mapped?.nombreCompleto || null,
+        activo: mapped?.activo,
       };
     },
     [usuariosMap]
@@ -593,7 +597,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                             </div>
 
                             {/* Alumnos listados directamente uno debajo del otro, como en métricas */}
-                            {grupo.integrantes.length > 0 && (
+                            {grupo.integrantes.length > 0 ? (
                               <div className="flex flex-col gap-1 items-start">
                                 {[...grupo.integrantes]
                                   .map(getIntegranteInfo)
@@ -603,11 +607,16 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                       key={info.username || idx}
                                       username={info.username}
                                       nombreCompleto={info.nombreCompleto}
+                                      activo={info.activo}
                                       layout="stacked"
                                       nameClassName={grupo.nombre ? "text-sm font-semibold" : "text-base font-bold"}
                                     />
                                   ))}
                               </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground italic">
+                                Sin integrantes activos
+                              </span>
                             )}
 
                             {/* Repositorio */}

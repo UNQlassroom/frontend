@@ -4,6 +4,7 @@ export interface UsuarioResponseDTO {
   esDocente?: boolean;
   email?: string | null;
   nombreCompleto?: string | null;
+  activo?: boolean;
 }
 
 export interface GitHubLoginResponseDTO {

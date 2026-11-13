@@ -1,10 +1,15 @@
 import { useState, useMemo } from "react";
+import { toast } from "react-toastify";
 import type { AlumnoResponseDTO, CursoResponseDTO } from "@/types";
+import { useAuth } from "@/hooks";
+import { eliminarAlumno } from "@/services";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
 import { PanelHeader, PanelFilterBar } from "@/components/panel";
 import { EmptyState, ErrorBanner } from "@/components/common";
 import { UserDetail } from "@/components/curso/UserDetail";
 import { compararUsuarios } from "@/components/curso/ordenamiento";
+import { DarDeBajaAlumnoModal } from "@/components/curso/DarDeBajaAlumnoModal";
+import { resolveApiError } from "@/utils";
 
 export interface AlumnosTabProps {
   curso?: CursoResponseDTO;
@@ -24,10 +29,21 @@ export function AlumnosTab({
   onRetry,
   onOpenInvitarModal,
 }: AlumnosTabProps) {
+  const { user, isDocente } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
+  const [alumnoABajar, setAlumnoABajar] = useState<AlumnoResponseDTO | null>(null);
+  const [isBajaLoading, setIsBajaLoading] = useState(false);
+  const [errorBaja, setErrorBaja] = useState<string | null>(null);
 
   const esArchivado = Boolean(curso?.archivado);
+  const puedeDarDeBaja = Boolean(
+    !esArchivado &&
+      isDocente &&
+      curso?.ownerUsername &&
+      user?.username &&
+      curso.ownerUsername === user.username
+  );
 
   // Métricas y conteos
   const total = alumnos.length;
@@ -59,6 +75,30 @@ export function AlumnosTab({
       })
       .sort(compararUsuarios);
   }, [alumnos, searchTerm, filtroEstado]);
+
+  const handleCerrarBaja = () => {
+    if (isBajaLoading) return;
+    setAlumnoABajar(null);
+    setErrorBaja(null);
+  };
+
+  const handleConfirmarBaja = async () => {
+    if (!alumnoABajar || !curso?.id) return;
+    setIsBajaLoading(true);
+    setErrorBaja(null);
+    try {
+      await eliminarAlumno(curso.id, alumnoABajar.username);
+      toast.success("Alumno dado de baja exitosamente");
+      setAlumnoABajar(null);
+      setErrorBaja(null);
+      onRetry();
+    } catch (err: unknown) {
+      const resolved = resolveApiError(err);
+      setErrorBaja(resolved?.message || "Error al dar de baja al alumno");
+    } finally {
+      setIsBajaLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-rise">
@@ -122,7 +162,7 @@ export function AlumnosTab({
                   alt="Invitar"
                   className="w-3.5 h-3.5 brightness-0 invert"
                 />
-                <span>Invitar alumnos</span>
+                <span>Invitar primer alumno</span>
               </button>
             ) : undefined
           }
@@ -181,6 +221,9 @@ export function AlumnosTab({
                     <th className="py-3.5 px-5">Alumno</th>
                     <th className="py-3.5 px-5">Estado en Curso</th>
                     <th className="py-3.5 px-5">Membresía en GitHub</th>
+                    {puedeDarDeBaja && (
+                      <th className="py-3.5 px-5 text-right">Acción</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line/70 text-sm">
@@ -244,6 +287,23 @@ export function AlumnosTab({
                           </div>
                         )}
                       </td>
+
+                      {/* Acciones */}
+                      {puedeDarDeBaja && (
+                        <td className="py-4 px-5 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setErrorBaja(null);
+                              setAlumnoABajar(alumno);
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/50 transition-colors cursor-pointer"
+                            title={`Dar de baja a @${alumno.username}`}
+                          >
+                            <span>Dar de baja</span>
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -252,6 +312,16 @@ export function AlumnosTab({
           )}
         </>
       )}
+
+      {/* Modal para confirmar baja de alumno */}
+      <DarDeBajaAlumnoModal
+        open={Boolean(alumnoABajar)}
+        onClose={handleCerrarBaja}
+        onConfirm={handleConfirmarBaja}
+        alumno={alumnoABajar}
+        isLoading={isBajaLoading}
+        error={errorBaja}
+      />
     </div>
   );
 }

@@ -294,10 +294,13 @@ export function GeneralTab({
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {asignacion.integrantesDetalle.map((miembro) => {
                 const esUsuarioActual = miembro.username === currentUsername;
+                const esInactivo = miembro.activo === false;
                 return (
                   <li
                     key={miembro.id ?? miembro.username}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-line bg-panel2/60 p-3 text-xs"
+                    className={`flex items-center justify-between gap-3 rounded-xl border border-line bg-panel2/60 p-3 text-xs ${
+                      esInactivo ? "opacity-60 grayscale" : ""
+                    }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <img
@@ -318,6 +321,11 @@ export function GeneralTab({
                           {esUsuarioActual && (
                             <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary">
                               Vos
+                            </span>
+                          )}
+                          {esInactivo && (
+                            <span className="rounded bg-line/80 px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground border border-line">
+                              Dado de baja
                             </span>
                           )}
                         </div>
