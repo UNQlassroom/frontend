@@ -222,7 +222,7 @@ export function AlumnosTab({
                     <th className="py-3.5 px-5">Estado en Curso</th>
                     <th className="py-3.5 px-5">Membresía en GitHub</th>
                     {puedeDarDeBaja && (
-                      <th className="py-3.5 px-5 text-right">Acciones</th>
+                      <th className="py-3.5 px-5 text-right">Acción</th>
                     )}
                   </tr>
                 </thead>

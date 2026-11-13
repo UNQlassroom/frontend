@@ -607,6 +607,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                                   key={u.id ?? u.username}
                                                   username={u.username}
                                                   nombreCompleto={u.nombreCompleto}
+                                                   activo={u.activo}
                                                   layout="inline"
                                                 />
                                               ))

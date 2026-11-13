@@ -476,6 +476,7 @@ export function MetricasTab({
                                       key={u.id ?? u.username}
                                       username={u.username}
                                       nombreCompleto={u.nombreCompleto}
+                                      activo={u.activo}
                                       layout="stacked"
                                       nameClassName="text-xs"
                                     />

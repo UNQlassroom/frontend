@@ -39,16 +39,9 @@ export const CursoDetalleAlumno = () => {
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
         <ErrorBanner
           className="max-w-lg mx-auto p-8"
-          title="No se pudo cargar el curso"
           message={errorCurso || "El curso solicitado no existe o no se encuentra disponible."}
           onRetry={cargarCurso}
         >
-          <Link
-            to="/home"
-            className="rounded-lg border border-line bg-panel px-4 py-2 text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
-          >
-            Volver a Cursos
-          </Link>
         </ErrorBanner>
       </main>
     );
