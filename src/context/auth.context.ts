@@ -10,6 +10,7 @@ export interface AuthContextType {
   isAlumno: boolean;
   login: (token: string, user: Usuario) => void;
   logout: () => void;
+  actualizarUsuario: (usuario: Partial<Usuario>) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

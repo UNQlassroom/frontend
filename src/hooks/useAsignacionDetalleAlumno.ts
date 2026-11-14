@@ -1,0 +1,420 @@
+import { useState, useEffect, useCallback } from "react";
+import type {
+  AsignacionAlumnoDTO,
+  CorreccionGrupoResponseDTO,
+  DiagnosticoCIResponseDTO,
+  MetricasCIResponseDTO,
+  ReporteLinterResponseDTO,
+} from "@/types";
+import type { SubSeccionTecnica } from "@/components/asignacion/tabs/EstadoTecnicoTab";
+import {
+  obtenerAsignacionPorId,
+  obtenerCorrecciones,
+  obtenerDiagnosticoCI,
+  obtenerMetricasCI,
+  obtenerReporteLinter,
+  entregarAsignacion,
+} from "@/services";
+import { useAuth } from "./useAuth";
+import { mapAsignacionesDTO } from "./useAsignacionesAlumno";
+import { useSseListener } from "./useSseListener";
+
+export type SeccionDetalle = "general" | "tecnico" | "correcciones" | "guia-git";
+
+export function useAsignacionDetalleAlumno(
+  cursoId?: number,
+  asignacionId?: number,
+  seccionActiva: SeccionDetalle = "general",
+  subSeccionTecnica: SubSeccionTecnica = "ci"
+) {
+  const { user } = useAuth();
+  const username = user?.username;
+
+  const [asignacion, setAsignacion] = useState<AsignacionAlumnoDTO | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [correccionGrupo, setCorreccionGrupo] =
+    useState<CorreccionGrupoResponseDTO | null>(null);
+  const [isLoadingCorrecciones, setIsLoadingCorrecciones] =
+    useState<boolean>(false);
+  const [errorCorrecciones, setErrorCorrecciones] = useState<string | null>(
+    null
+  );
+
+  // Estados técnicos cargados bajo demanda (Lazy Loading)
+  const [diagnosticoCI, setDiagnosticoCI] =
+    useState<DiagnosticoCIResponseDTO | null>(null);
+  const [metricasCI, setMetricasCI] =
+    useState<MetricasCIResponseDTO | null>(null);
+  const [reporteLinter, setReporteLinter] =
+    useState<ReporteLinterResponseDTO | null>(null);
+
+  const [isLoadingCI, setIsLoadingCI] = useState<boolean>(false);
+  const [isLoadingMetricas, setIsLoadingMetricas] = useState<boolean>(false);
+  const [isLoadingLinter, setIsLoadingLinter] = useState<boolean>(false);
+
+  // El indicador general de carga técnica refleja el estado de la sub-sección que se está visualizando
+  const isLoadingTecnico =
+    (subSeccionTecnica === "ci" && isLoadingCI) ||
+    (subSeccionTecnica === "cobertura" && isLoadingMetricas) ||
+    (subSeccionTecnica === "git" && isLoadingLinter);
+
+  const [entregando, setEntregando] = useState<boolean>(false);
+
+  const grupoId = asignacion?.grupoId;
+
+  const cargarCorrecciones = useCallback(
+    async (silencioso = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!silencioso) {
+        setIsLoadingCorrecciones(true);
+        setErrorCorrecciones(null);
+      }
+      try {
+        const res = await obtenerCorrecciones(cursoId, asignacionId);
+        setCorreccionGrupo(res.data[0] || null);
+        if (silencioso) {
+          setErrorCorrecciones(null);
+        }
+      } catch {
+        if (!silencioso) {
+          setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
+        }
+      } finally {
+        if (!silencioso) {
+          setIsLoadingCorrecciones(false);
+        }
+      }
+    },
+    [cursoId, asignacionId]
+  );
+
+  const refrescarAsignacionSilencioso = useCallback(
+    async (conservarDiagnostico = true) => {
+      if (!cursoId || !asignacionId) return;
+      try {
+        const asigResponse = await obtenerAsignacionPorId(cursoId, asignacionId);
+        const mapeadas = mapAsignacionesDTO([asigResponse.data], username);
+        setAsignacion(() => {
+          const nueva = mapeadas[0] ?? null;
+          if (!nueva) return null;
+          if (!conservarDiagnostico || !diagnosticoCI) {
+            return nueva;
+          }
+          return {
+            ...nueva,
+            estadoCI: diagnosticoCI.estadoCI ?? nueva.estadoCI,
+            ciEtapaFallida: diagnosticoCI.etapaFallida ?? nueva.ciEtapaFallida,
+            ciLogError: diagnosticoCI.logError ?? nueva.ciLogError,
+            ciRunUrl: diagnosticoCI.runUrl ?? nueva.ciRunUrl,
+          };
+        });
+      } catch {
+        // Ignorar errores en refresco silencioso por SSE
+      }
+    },
+    [cursoId, asignacionId, username, diagnosticoCI]
+  );
+
+  // Carga Lazy de Diagnóstico de CI + Unificación de estado
+  const cargarDiagnostico = useCallback(
+    async (force = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!force && diagnosticoCI !== null) return;
+      setIsLoadingCI(true);
+      try {
+        const res = await obtenerDiagnosticoCI(
+          cursoId,
+          asignacionId,
+          grupoId
+        );
+        setDiagnosticoCI(res.data);
+
+        // Solución a la dualidad de estado: sincronizar el diagnóstico en la entidad de asignación
+        setAsignacion((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            estadoCI: res.data.estadoCI ?? prev.estadoCI,
+            ciEtapaFallida: res.data.etapaFallida ?? prev.ciEtapaFallida,
+            ciLogError: res.data.logError ?? prev.ciLogError,
+            ciRunUrl: res.data.runUrl ?? prev.ciRunUrl,
+          };
+        });
+      } catch {
+        // Fallback defensivo
+      } finally {
+        setIsLoadingCI(false);
+      }
+    },
+    [cursoId, asignacionId, grupoId, diagnosticoCI]
+  );
+
+  // Carga Lazy de Métricas (JaCoCo / JUnit)
+  const cargarMetricas = useCallback(
+    async (force = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!force && metricasCI !== null) return;
+      setIsLoadingMetricas(true);
+      try {
+        const res = await obtenerMetricasCI(
+          cursoId,
+          asignacionId,
+          grupoId
+        );
+        setMetricasCI(res.data);
+      } catch {
+        // Fallback defensivo
+      } finally {
+        setIsLoadingMetricas(false);
+      }
+    },
+    [cursoId, asignacionId, grupoId, metricasCI]
+  );
+
+  // Carga Lazy de Linter
+  const cargarLinter = useCallback(
+    async (force = false) => {
+      if (!cursoId || !asignacionId) return;
+      if (!force && reporteLinter !== null) return;
+      setIsLoadingLinter(true);
+      try {
+        const res = await obtenerReporteLinter(
+          cursoId,
+          asignacionId,
+          grupoId
+        );
+        setReporteLinter(res.data);
+      } catch {
+        // Fallback defensivo
+      } finally {
+        setIsLoadingLinter(false);
+      }
+    },
+    [cursoId, asignacionId, grupoId, reporteLinter]
+  );
+
+  // Lazy Loading reactivo: solo consulta lo que el usuario está viendo actualmente
+  useEffect(() => {
+    if (seccionActiva !== "tecnico" || !asignacion) return;
+
+    let isMounted = true;
+    queueMicrotask(() => {
+      if (!isMounted) return;
+      if (subSeccionTecnica === "ci") {
+        void cargarDiagnostico();
+      } else if (subSeccionTecnica === "cobertura") {
+        void cargarMetricas();
+      } else if (subSeccionTecnica === "git") {
+        void cargarLinter();
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    seccionActiva,
+    subSeccionTecnica,
+    asignacion,
+    cargarDiagnostico,
+    cargarMetricas,
+    cargarLinter,
+  ]);
+
+  // Suscripción a eventos SSE para actualizar el detalle en tiempo real
+  useSseListener(
+    [
+      "ASIGNACION_ACTUALIZADA",
+      "PUSH_RECIBIDO",
+      "CI_ACTUALIZADO",
+      "METRICAS_CI_ACTUALIZADAS",
+      "LINTER_ACTUALIZADO",
+      "ENTREGA_REALIZADA",
+      "ISSUE_ACTUALIZADO",
+    ],
+    (event) => {
+      if (!cursoId || !asignacionId) return;
+      if (event.cursoId !== null && event.cursoId !== cursoId) return;
+      if (event.asignacionId !== null && event.asignacionId !== asignacionId) return;
+
+      switch (event.type) {
+        case "ASIGNACION_ACTUALIZADA":
+        case "ENTREGA_REALIZADA":
+          void refrescarAsignacionSilencioso(true);
+          break;
+
+        case "PUSH_RECIBIDO":
+          void refrescarAsignacionSilencioso(true);
+          void cargarCorrecciones(true);
+          break;
+
+        case "CI_ACTUALIZADO":
+          void refrescarAsignacionSilencioso(false);
+          if (seccionActiva === "tecnico" && subSeccionTecnica === "ci") {
+            void cargarDiagnostico(true);
+          } else {
+            setDiagnosticoCI(null);
+          }
+          break;
+
+        case "METRICAS_CI_ACTUALIZADAS":
+          if (seccionActiva === "tecnico" && subSeccionTecnica === "cobertura") {
+            void cargarMetricas(true);
+          } else {
+            setMetricasCI(null);
+          }
+          break;
+
+        case "LINTER_ACTUALIZADO":
+          if (seccionActiva === "tecnico" && subSeccionTecnica === "git") {
+            void cargarLinter(true);
+          } else {
+            setReporteLinter(null);
+          }
+          break;
+
+        case "ISSUE_ACTUALIZADO":
+          void cargarCorrecciones(true);
+          break;
+      }
+    }
+  );
+
+  const cargarDetalle = useCallback(
+    async () => {
+      if (!cursoId || !asignacionId) return;
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const tareas: Promise<unknown>[] = [
+          obtenerAsignacionPorId(cursoId, asignacionId),
+          cargarCorrecciones(),
+        ];
+
+        // Al recargar, si está en técnico, solo forzar la subsección activa
+        if (seccionActiva === "tecnico") {
+          if (subSeccionTecnica === "ci") tareas.push(cargarDiagnostico(true));
+          else if (subSeccionTecnica === "cobertura") tareas.push(cargarMetricas(true));
+          else if (subSeccionTecnica === "git") tareas.push(cargarLinter(true));
+        }
+
+        const [asigResponse] = (await Promise.all(tareas)) as [
+          Awaited<ReturnType<typeof obtenerAsignacionPorId>>,
+          ...unknown[]
+        ];
+
+        const mapeadas = mapAsignacionesDTO([asigResponse.data], username);
+        setAsignacion(() => {
+          const nueva = mapeadas[0] ?? null;
+          if (!nueva) return null;
+          // Conservar diagnósticos unificados si ya se obtuvieron
+          return {
+            ...nueva,
+            estadoCI: diagnosticoCI?.estadoCI ?? nueva.estadoCI,
+            ciEtapaFallida: diagnosticoCI?.etapaFallida ?? nueva.ciEtapaFallida,
+            ciLogError: diagnosticoCI?.logError ?? nueva.ciLogError,
+            ciRunUrl: diagnosticoCI?.runUrl ?? nueva.ciRunUrl,
+          };
+        });
+      } catch {
+        setError("No se pudo cargar el detalle de la asignación");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      cursoId,
+      asignacionId,
+      username,
+      seccionActiva,
+      subSeccionTecnica,
+      cargarCorrecciones,
+      cargarDiagnostico,
+      cargarMetricas,
+      cargarLinter,
+      diagnosticoCI,
+    ]
+  );
+
+  useEffect(() => {
+    if (!cursoId || !asignacionId) return;
+    let isMounted = true;
+
+    // Cargar correcciones iniciales
+    obtenerCorrecciones(cursoId, asignacionId)
+      .then((res) => {
+        if (isMounted) {
+          setCorreccionGrupo(res.data[0] || null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setErrorCorrecciones("No se pudieron obtener las correcciones en GitHub.");
+        }
+      });
+
+    // Cargar detalle de la asignación (sin llamadas técnicas pesadas)
+    obtenerAsignacionPorId(cursoId, asignacionId)
+      .then((res) => {
+        if (isMounted) {
+          const mapeadas = mapAsignacionesDTO([res.data], username);
+          setAsignacion(mapeadas[0] ?? null);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setError("No se pudo cargar el detalle de la asignación");
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [cursoId, asignacionId, username]);
+
+  const entregar = useCallback(async (): Promise<boolean> => {
+    if (!cursoId || !asignacionId || !asignacion) return false;
+    setEntregando(true);
+    try {
+      const response = await entregarAsignacion(
+        cursoId,
+        asignacionId,
+        asignacion.grupoId
+      );
+      const mapeadas = mapAsignacionesDTO([response.data], username);
+      if (mapeadas[0]) {
+        setAsignacion(mapeadas[0]);
+      }
+      return true;
+    } catch {
+      return false;
+    } finally {
+      setEntregando(false);
+    }
+  }, [cursoId, asignacionId, asignacion, username]);
+
+  return {
+    asignacion,
+    username,
+    isLoading,
+    error,
+    correccionGrupo,
+    isLoadingCorrecciones,
+    errorCorrecciones,
+    diagnosticoCI,
+    metricasCI,
+    reporteLinter,
+    isLoadingTecnico,
+    entregando,
+    cargarDetalle,
+    entregar,
+  };
+}

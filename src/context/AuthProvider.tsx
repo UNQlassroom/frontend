@@ -1,6 +1,7 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { AuthContext } from "./auth.context";
 import { STORAGE_KEYS } from "@/constants";
+import { setUnauthorizedHandler } from "@/api";
 import type { Usuario } from "@/types";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -26,13 +27,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(newUser));
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null);
     setUser(null);
     localStorage.removeItem(STORAGE_KEYS.TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER);
     sessionStorage.removeItem(STORAGE_KEYS.OAUTH_ES_DOCENTE);
-  };
+  }, []);
+
+  const actualizarUsuario = useCallback((updatedFields: Partial<Usuario>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated: Usuario = { ...prev, ...updatedFields };
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(logout);
+    return () => {
+      setUnauthorizedHandler(null);
+    };
+  }, [logout]);
 
   const isAuthenticated = Boolean(token && user);
   const isDocente = Boolean(user?.esDocente);
@@ -49,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAlumno,
         login,
         logout,
+        actualizarUsuario,
       }}
     >
       {children}

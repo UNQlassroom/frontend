@@ -7,30 +7,6 @@ export const useCursoDetalle = (cursoId: number | undefined) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCurso = useCallback(
-    async (id: number) => {
-      try {
-        const response = await obtenerCursoPorId(id);
-        setCurso(response.data);
-      } catch (err: unknown) {
-        console.error("Error al cargar detalle del curso:", err);
-        if (typeof err === "object" && err !== null && "message" in err) {
-          const apiErr = err as { message: string; code?: string };
-          if (apiErr.message === "Network Error" || apiErr.code === "ERR_NETWORK") {
-            setError("Error de conexión con el servidor.");
-          } else {
-            setError(`No se pudo cargar el curso (${apiErr.message}).`);
-          }
-        } else {
-          setError("Ocurrió un error al cargar el curso.");
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
   const cargarCurso = useCallback(async () => {
     if (!cursoId || isNaN(cursoId)) {
       setError("Identificador de curso inválido.");
@@ -39,44 +15,34 @@ export const useCursoDetalle = (cursoId: number | undefined) => {
     }
     setIsLoading(true);
     setError(null);
-    await fetchCurso(cursoId);
-  }, [cursoId, fetchCurso]);
+    try {
+      const response = await obtenerCursoPorId(cursoId);
+      setCurso(response.data);
+    } catch {
+      setError("El curso solicitado no existe o no se encuentra disponible.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cursoId]);
 
   useEffect(() => {
     if (!cursoId || isNaN(cursoId)) {
       return;
     }
-    let isMounted = true;
-
+    let ignore = false;
     obtenerCursoPorId(cursoId)
-      .then((response) => {
-        if (isMounted) {
-          setCurso(response.data);
-        }
+      .then((res) => {
+        if (!ignore) setCurso(res.data);
       })
-      .catch((err: unknown) => {
-        if (isMounted) {
-          console.error("Error al cargar detalle del curso:", err);
-          if (typeof err === "object" && err !== null && "message" in err) {
-            const apiErr = err as { message: string; code?: string };
-            if (apiErr.message === "Network Error" || apiErr.code === "ERR_NETWORK") {
-              setError("Error de conexión con el servidor.");
-            } else {
-              setError(`No se pudo cargar el curso (${apiErr.message}).`);
-            }
-          } else {
-            setError("Ocurrió un error al cargar el curso.");
-          }
-        }
+      .catch(() => {
+        if (!ignore) setError("El curso solicitado no existe o no se encuentra disponible.");
       })
       .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (!ignore) setIsLoading(false);
       });
 
     return () => {
-      isMounted = false;
+      ignore = true;
     };
   }, [cursoId]);
 

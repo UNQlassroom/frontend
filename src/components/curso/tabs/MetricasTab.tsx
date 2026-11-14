@@ -1,21 +1,26 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useSseListener } from "@/hooks";
 import type {
-  AlumnoMiembroDeUnCursoDTO,
+  AlumnoResponseDTO,
   AsignacionResponseDTO,
   CursoResponseDTO,
+  UsuarioResponseDTO,
 } from "@/types";
 import { obtenerAsignaciones } from "@/services";
-import { CIStatusBadge, KpiCard, EmptyState } from "../common";
-import { PanelHeader, PanelFilterBar } from "../panel";
+import { CIStatusBadge, KpiCard, EmptyState, ErrorBanner } from "@/components/common";
+import { PanelHeader, PanelFilterBar } from "@/components/panel";
+import { UserDetail } from "@/components/curso/UserDetail";
+import { compararUsuarios, compararGrupos } from "@/components/curso/ordenamiento";
 import {
   formatearFechaCommit,
   obtenerPrimerLineaCommit,
 } from "@/utils";
 import githubIcon from "@/assets/github_favicon.svg";
 
-interface PanelMetricasRepositoriosProps {
+export interface MetricasTabProps {
   curso: CursoResponseDTO;
-  alumnos?: AlumnoMiembroDeUnCursoDTO[];
+  alumnos?: AlumnoResponseDTO[];
   asignaciones?: AsignacionResponseDTO[];
 }
 
@@ -24,6 +29,9 @@ interface ItemMetrica {
   repoNombre: string;
   repoUrl: string;
   alumnoUsername: string;
+  grupoNombre?: string | null;
+  integrantes: UsuarioResponseDTO[];
+  esGrupal: boolean;
   estadoCI: "success" | "failure" | "pending" | "sin_ci";
   ultimoCommit: string;
   commitHash: string;
@@ -31,20 +39,24 @@ interface ItemMetrica {
   branch: string;
 }
 
-export function PanelMetricasRepositorios({
+export function MetricasTab({
   curso,
-}: PanelMetricasRepositoriosProps) {
+}: MetricasTabProps) {
+  const [, setSearchParams] = useSearchParams();
   const [asignaciones, setAsignaciones] = useState<AsignacionResponseDTO[]>([]);
   const [selectedAsignacionId, setSelectedAsignacionId] = useState<number | null>(
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");
 
+  const esArchivado = Boolean(curso.archivado);
+
   const cargarDatos = useCallback(async () => {
-    setIsLoading(true);
+    setIsRecargando(true);
     setError(null);
     try {
       const response = await obtenerAsignaciones(curso.id);
@@ -59,17 +71,15 @@ export function PanelMetricasRepositorios({
       } else {
         setSelectedAsignacionId(null);
       }
-    } catch (err: unknown) {
-      console.error("Error al cargar métricas de repositorios desde la BD:", err);
+    } catch {
       setError("No se pudieron cargar las asignaciones y repositorios del curso.");
     } finally {
-      setIsLoading(false);
+      setIsRecargando(false);
     }
   }, [curso.id]);
 
   useEffect(() => {
     let ignore = false;
-
     obtenerAsignaciones(curso.id)
       .then((response) => {
         if (!ignore) {
@@ -86,9 +96,8 @@ export function PanelMetricasRepositorios({
           }
         }
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar métricas desde la BD:", err);
           setError("No se pudieron cargar las asignaciones y repositorios del curso.");
         }
       })
@@ -102,6 +111,31 @@ export function PanelMetricasRepositorios({
       ignore = true;
     };
   }, [curso.id]);
+
+  const asignacionActual = useMemo(
+    () => asignaciones.find((a) => a.id === selectedAsignacionId),
+    [asignaciones, selectedAsignacionId]
+  );
+
+  // Refresco silencioso ante eventos SSE
+  useSseListener(
+    [
+      "ASIGNACION_ACTUALIZADA",
+      "PUSH_RECIBIDO",
+      "CI_ACTUALIZADO",
+      "ENTREGA_REALIZADA",
+    ],
+    (event) => {
+      if (event.cursoId !== null && event.cursoId !== curso.id) {
+        return;
+      }
+      obtenerAsignaciones(curso.id)
+        .then((response) => {
+          setAsignaciones(response.data);
+        })
+        .catch(() => {});
+    }
+  );
 
   // Extraer repositorios filtrados por la asignación seleccionada
   const datosItems: ItemMetrica[] = useMemo(() => {
@@ -129,8 +163,11 @@ export function PanelMetricasRepositorios({
             alumnoUsername:
               grupo.nombre ||
               (grupo.integrantes.length > 0
-                ? grupo.integrantes.join(", ")
+                ? grupo.integrantes.map((u) => u.nombreCompleto?.trim() || u.username).join(", ")
                 : "Sin asignar"),
+            grupoNombre: grupo.nombre,
+            integrantes: grupo.integrantes,
+            esGrupal: asig.tipo === "GRUPAL",
             estadoCI: ["success", "failure", "pending", "sin_ci"].includes(
               estadoValido
             )
@@ -161,19 +198,32 @@ export function PanelMetricasRepositorios({
   const sinCiPct = total > 0 ? Math.round((sinCiCount / total) * 100) : 0;
 
   // Filtrado por texto y estado de CI
+  // Filtrado y ordenamiento alfabético por apellido
   const itemsFiltrados = useMemo(() => {
-    return datosItems.filter((item) => {
-      const matchBusqueda =
-        item.repoNombre.toLowerCase().includes(busqueda.toLowerCase().trim()) ||
-        item.alumnoUsername
-          .toLowerCase()
-          .includes(busqueda.toLowerCase().trim()) ||
-        item.ultimoCommit.toLowerCase().includes(busqueda.toLowerCase().trim());
+    return datosItems
+      .filter((item) => {
+        const searchLower = busqueda.toLowerCase().trim();
+        const matchBusqueda =
+          !searchLower ||
+          item.repoNombre.toLowerCase().includes(searchLower) ||
+          item.alumnoUsername.toLowerCase().includes(searchLower) ||
+          item.integrantes.some(
+            (u) =>
+              u.username.toLowerCase().includes(searchLower) ||
+              Boolean(
+                u.nombreCompleto &&
+                  u.nombreCompleto.toLowerCase().includes(searchLower)
+              )
+          ) ||
+          (item.grupoNombre &&
+            item.grupoNombre.toLowerCase().includes(searchLower)) ||
+          item.ultimoCommit.toLowerCase().includes(searchLower);
 
-      if (!matchBusqueda) return false;
-      if (filtroEstado === "todos") return true;
-      return item.estadoCI === filtroEstado;
-    });
+        if (!matchBusqueda) return false;
+        if (filtroEstado === "todos") return true;
+        return item.estadoCI === filtroEstado;
+      })
+      .sort((a, b) => compararGrupos(a, b, a.esGrupal));
   }, [datosItems, busqueda, filtroEstado]);
 
   const handleCardClick = (estadoTarget: string) => {
@@ -182,41 +232,17 @@ export function PanelMetricasRepositorios({
 
   return (
     <div className="space-y-6 animate-rise">
-      {/* Encabezado del panel de métricas con botón de actualización */}
+      {/* Encabezado del panel de métricas */}
       <PanelHeader
-        title="Panel de Métricas de Repositorios (CI/CD)"
+        title="Panel de Métricas de Repositorios"
         description="Monitoreo en tiempo real de los pipelines de GitHub Actions, fechas y actividad de commits de las asignaciones."
-        actions={
-          <button
-            type="button"
-            onClick={cargarDatos}
-            disabled={isLoading}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3.5 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto shrink-0"
-            title="Consultar datos actualizados de la base de datos y GitHub"
-          >
-            <svg
-              className={`w-3.5 h-3.5 ${
-                isLoading ? "animate-spin text-primary" : "text-muted-foreground"
-              }`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-            <span>{isLoading ? "Actualizando..." : "Actualizar métricas"}</span>
-          </button>
-        }
       />
 
       {/* Estado: Cargando */}
       {isLoading && (
         <div className="rounded-2xl border border-line bg-panel p-12 text-center flex flex-col items-center justify-center gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Cargando repositorios y métricas desde el servidor...
           </p>
         </div>
@@ -224,16 +250,7 @@ export function PanelMetricasRepositorios({
 
       {/* Estado: Error */}
       {!isLoading && error && (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-          <p className="font-mono text-xs text-destructive mb-3">{error}</p>
-          <button
-            type="button"
-            onClick={cargarDatos}
-            className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorBanner message={error} onRetry={cargarDatos} />
       )}
 
       {/* Estado sin asignaciones creadas */}
@@ -241,7 +258,11 @@ export function PanelMetricasRepositorios({
         <EmptyState
           icon="📋"
           title="No hay asignaciones en este curso"
-          description='Para poder monitorear repositorios, primero debes crear al menos una asignación desde la pestaña "Asignaciones".'
+          description={
+            esArchivado
+              ? "Este curso fue archivado sin asignaciones registradas."
+              : 'Para poder monitorear repositorios, primero debes crear al menos una asignación desde la pestaña "Asignaciones".'
+          }
         />
       )}
 
@@ -250,7 +271,7 @@ export function PanelMetricasRepositorios({
         <>
           {/* Selector de Asignación idéntico al de Correcciones */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-line">
-            <span className="font-mono text-xs font-semibold text-muted-foreground shrink-0 mr-1">
+            <span className="text-sm font-semibold text-muted-foreground shrink-0 mr-1">
               Asignación:
             </span>
             {asignaciones.map((asig) => {
@@ -260,7 +281,7 @@ export function PanelMetricasRepositorios({
                   key={asig.id}
                   type="button"
                   onClick={() => setSelectedAsignacionId(asig.id)}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer shrink-0 ${
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-xs"
                       : "bg-panel2 border border-line text-muted-foreground hover:text-foreground hover:bg-line/40"
@@ -268,7 +289,7 @@ export function PanelMetricasRepositorios({
                 >
                   <span>{asig.titulo}</span>
                   <span
-                    className={`rounded-full px-1.5 py-0.2 text-[10px] ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       isSelected
                         ? "bg-primary-foreground/20 text-primary-foreground"
                         : "bg-line/60 text-muted-foreground"
@@ -276,13 +297,46 @@ export function PanelMetricasRepositorios({
                   >
                     {asig.tipo === "GRUPAL" ? "Grupal" : "Individual"}
                   </span>
+                  {asig.estado === "CREANDO" && (
+                    <span
+                      className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0"
+                      title="Creando repositorios en GitHub..."
+                    />
+                  )}
+                  {asig.estado === "ERROR" && (
+                    <span title="Error al crear repositorios en GitHub">⚠️</span>
+                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* Si la asignación seleccionada no tiene repositorios generados */}
-          {datosItems.length === 0 ? (
+          {/* Estado asíncrono de la asignación seleccionada o métricas */}
+          {asignacionActual?.estado === "CREANDO" ? (
+            <>
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-center gap-3 text-xs sm:text-sm">
+                <div className="w-4 h-4 border-2 border-amber-600 dark:border-amber-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                <p className="text-muted-foreground">
+                  <strong className="text-amber-700 dark:text-amber-300">
+                    Creando repositorios en GitHub:
+                  </strong>{" "}
+                  Los repositorios de esta asignación se están generando en segundo plano y pueden demorar unos momentos en estar listos.
+                </p>
+              </div>
+              <EmptyState
+                icon="⏳"
+                title="Creando repositorios en GitHub..."
+                description="La asignación fue creada y sus repositorios se están generando en segundo plano. Esto puede demorar unos momentos. El estado se actualizará automáticamente."
+              />
+            </>
+          ) : asignacionActual?.estado === "ERROR" ? (
+            <ErrorBanner
+              title="Ocurrió un error al crear los repositorios en GitHub"
+              message="Ocurrió un error al generar los repositorios en GitHub para esta asignación. Te recomendamos eliminarla desde la pestaña Asignaciones y volver a crearla."
+              onRetry={() => setSearchParams({ tab: "asignaciones" })}
+              retryText="Ir a Asignaciones"
+            />
+          ) : datosItems.length === 0 ? (
             <EmptyState
               icon="📊"
               title="No hay repositorios en esta asignación"
@@ -294,10 +348,9 @@ export function PanelMetricasRepositorios({
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
                 {/* Total Repositorios */}
                 <KpiCard
-                  label="Total Monitoreados"
+                  label="Total Repositorios"
                   value={total}
-                  unit="repos"
-                  subtext={`Curso: ${curso.materia}`}
+                  unit={total === 1 ? "repo" : "repos"}
                   variant="default"
                   isSelected={filtroEstado === "todos"}
                   onClick={() => handleCardClick("todos")}
@@ -315,7 +368,7 @@ export function PanelMetricasRepositorios({
                 <KpiCard
                   label="Sin CI"
                   value={sinCiCount}
-                  subtext={`${sinCiPct}% del total`}
+                  subtext={`${sinCiPct}% de los repos`}
                   variant="neutral"
                   isSelected={filtroEstado === "sin_ci"}
                   onClick={() => handleCardClick("sin_ci")}
@@ -324,7 +377,7 @@ export function PanelMetricasRepositorios({
 
                 {/* Pending */}
                 <KpiCard
-                  label="CI En Ejecución"
+                  label="En Ejecución"
                   value={pendingCount}
                   subtext={`${pendingPct}% del total`}
                   variant="amber"
@@ -335,7 +388,7 @@ export function PanelMetricasRepositorios({
 
                 {/* CI Passing */}
                 <KpiCard
-                  label="CI Exitosos"
+                  label="Exitosos"
                   value={passingCount}
                   subtext={`${passingPct}% del total`}
                   variant="emerald"
@@ -346,7 +399,7 @@ export function PanelMetricasRepositorios({
 
                 {/* CI Failing */}
                 <KpiCard
-                  label="CI Fallidos"
+                  label="Fallidos"
                   value={failingCount}
                   subtext={`${failingPct}% del total`}
                   variant="rose"
@@ -367,7 +420,7 @@ export function PanelMetricasRepositorios({
                 <select
                   value={filtroEstado}
                   onChange={(e) => setFiltroEstado(e.target.value)}
-                  className="rounded-lg border border-line bg-background px-3 py-1.5 font-mono text-xs text-foreground focus:outline-none cursor-pointer"
+                  className="rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none cursor-pointer"
                 >
                   <option value="todos">Todos los pipelines</option>
                   <option value="success">Solo exitosos</option>
@@ -378,65 +431,99 @@ export function PanelMetricasRepositorios({
               </PanelFilterBar>
 
               {/* Tabla detallada de estado de Repositorios y Commits */}
-              <div className="overflow-x-auto rounded-xl border border-line bg-panel shadow-sm">
+              <div
+                className={`overflow-x-auto rounded-xl border border-line bg-panel shadow-sm transition-all duration-300 ${
+                  isRecargando ? "opacity-50 pointer-events-none" : "opacity-100"
+                }`}
+              >
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-line bg-panel2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                      <th className="py-3 px-4">Repositorio</th>
-                      <th className="py-3 px-4">Alumno / Grupo</th>
-                      <th className="py-3 px-4">Pipeline CI/CD</th>
-                      <th className="py-3 px-4">Último Commit</th>
-                      <th className="py-3 px-4">Rama</th>
-                      <th className="py-3 px-4">Fecha Commit</th>
+                    <tr className="border-b border-line bg-panel2 text-xs uppercase tracking-wider text-muted-foreground">
+                      <th className="py-3.5 px-4.5">
+                        {asignacionActual
+                          ? asignacionActual.tipo === "GRUPAL"
+                            ? "Grupo / Integrantes"
+                            : "Alumno"
+                          : "Alumno / Grupo"}
+                      </th>
+                      <th className="py-3.5 px-4.5">Repositorio</th>
+                      <th className="py-3.5 px-4.5">Pipeline CI/CD</th>
+                      <th className="py-3.5 px-4.5">Último Commit</th>
+                      <th className="py-3.5 px-4.5">Rama</th>
+                      <th className="py-3.5 px-4.5">Fecha Commit</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-line/70 font-mono text-xs">
+                  <tbody className="divide-y divide-line/70 text-sm">
                     {itemsFiltrados.map((item) => (
                       <tr
                         key={item.id}
                         className="hover:bg-line/20 transition-colors group"
                       >
+                        {/* Alumno o Grupo */}
+                        <td className="py-4 px-4.5">
+                          <div className="space-y-1">
+                            {item.esGrupal && item.grupoNombre && (
+                              <p className="font-semibold text-foreground text-sm">
+                                {item.grupoNombre}
+                              </p>
+                            )}
+                            <div className="flex flex-col gap-1 items-start">
+                              {item.integrantes.length > 0 ? (
+                                [...item.integrantes]
+                                  .sort(compararUsuarios)
+                                  .map((u) => (
+                                    <UserDetail
+                                      key={u.id ?? u.username}
+                                      username={u.username}
+                                      nombreCompleto={u.nombreCompleto}
+                                      activo={u.activo}
+                                      layout="stacked"
+                                      nameClassName="text-xs"
+                                    />
+                                  ))
+                              ) : (
+                                <span className="text-xs text-muted-foreground italic">
+                                  Sin integrantes activos
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
                         {/* Repositorio */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-4 px-4.5">
                           <a
                             href={item.repoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-line/50 transition-colors max-w-[240px]"
+                            className="inline-flex items-center gap-2 rounded-lg border border-line bg-panel2 px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-line/50 transition-colors max-w-[240px]"
                             title={item.repoUrl}
                           >
                             <img
                               src={githubIcon}
                               alt="GitHub"
-                              className="w-3.5 h-3.5 opacity-80 shrink-0"
+                              className="w-4 h-4 opacity-80 shrink-0"
                             />
                             <span className="truncate">{item.repoNombre}</span>
-                            <span className="text-[10px] text-muted-foreground shrink-0">
+                            <span className="text-xs text-muted-foreground shrink-0">
                               ↗
                             </span>
                           </a>
                         </td>
 
-                        {/* Alumno o Grupo */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span className="font-medium text-foreground">
-                            {item.alumnoUsername}
-                          </span>
-                        </td>
-
                         {/* Pipeline CI/CD */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-4 px-4.5 whitespace-nowrap">
                           <CIStatusBadge estado={item.estadoCI} />
                         </td>
 
                         {/* Último commit */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-1.5 min-w-[200px] max-w-[320px]">
-                            <span className="rounded bg-panel2 border border-line px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground shrink-0">
+                        <td className="py-4 px-4.5">
+                          <div className="flex items-center gap-2 min-w-[200px] max-w-[320px]">
+                            <span className="rounded bg-panel2 border border-line px-2 py-0.5 text-xs text-muted-foreground shrink-0">
                               {item.commitHash}
                             </span>
                             <span
-                              className="truncate text-foreground text-[11px]"
+                              className="truncate text-foreground text-xs sm:text-sm"
                               title={item.ultimoCommit}
                             >
                               {obtenerPrimerLineaCommit(item.ultimoCommit)}
@@ -445,16 +532,16 @@ export function PanelMetricasRepositorios({
                         </td>
 
                         {/* Rama */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 text-[11px] text-muted-foreground">
+                        <td className="py-4 px-4.5 whitespace-nowrap">
+                          <span className="rounded-md border border-line bg-panel2 px-2.5 py-0.5 text-xs text-muted-foreground">
                             {item.branch}
                           </span>
                         </td>
 
                         {/* Fecha commit */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-4 px-4.5 whitespace-nowrap">
                           <div
-                            className="text-[11px] text-muted-foreground"
+                            className="text-xs sm:text-sm text-muted-foreground"
                             title={
                               item.fechaUltimoCommit
                                 ? new Date(
@@ -482,4 +569,3 @@ export function PanelMetricasRepositorios({
     </div>
   );
 }
-

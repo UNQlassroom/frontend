@@ -30,27 +30,27 @@ export const LoginPage = () => {
 
   return (
     <div className="min-h-[calc(100vh-65px)] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-xl border border-line bg-panel p-8 shadow-xl text-center">
-        <div className="flex justify-center mb-4">
+      <div className="w-full max-w-lg rounded-2xl border border-line bg-panel p-8 sm:p-10 shadow-xl text-center">
+        <div className="flex justify-center mb-5">
           <img
             src={unqlassroomLogo}
             alt="UNQlassroom"
-            className="w-16 h-16 object-contain"
+            className="w-20 h-20 object-contain"
           />
         </div>
-        <h1 className="font-suez text-2xl tracking-tight mb-2">
+        <h1 className="font-suez text-3xl tracking-tight mb-2.5">
           Bienvenido a UNQlassroom
         </h1>
-        <p className="text-sm text-muted-foreground mb-8">
+        <p className="text-base text-muted-foreground mb-8 max-w-sm mx-auto">
           Inicia sesión o regístrate utilizando tu cuenta de GitHub seleccionando tu rol.
         </p>
 
         {pendienteOrg && (
-          <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-left space-y-2">
-            <h3 className="text-sm font-semibold text-amber-500">
+          <div className="mb-6 p-4.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-left space-y-2">
+            <h3 className="text-base font-semibold text-amber-500">
               Invitación a la organización pendiente
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Debes unirte a la organización para ingresar. Acepta la invitación en GitHub y luego pulsa el botón correspondiente a tu rol para finalizar tu ingreso.
             </p>
             {invitacionUrl && (
@@ -59,7 +59,7 @@ export const LoginPage = () => {
                   href={invitacionUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-600 dark:text-amber-400 font-medium text-xs transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-600 dark:text-amber-400 font-medium text-sm transition-colors"
                 >
                   <span>Abrir invitación en GitHub</span>
                   <span aria-hidden="true">↗</span>
@@ -69,11 +69,11 @@ export const LoginPage = () => {
           </div>
         )}
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3.5">
           <button
             type="button"
             onClick={() => iniciarLoginGitHub(true)}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-700 text-white font-medium transition-colors border border-neutral-700 cursor-pointer shadow-sm"
+            className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-base transition-colors border border-neutral-700 cursor-pointer shadow-sm"
           >
             <img src={githubLogo} alt="" className="w-5 h-5 invert" />
             <span>Ingresar como Docente</span>
@@ -82,14 +82,14 @@ export const LoginPage = () => {
           <button
             type="button"
             onClick={() => iniciarLoginGitHub(false)}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors cursor-pointer shadow-sm"
+            className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-base transition-colors cursor-pointer shadow-sm"
           >
             <img src={githubLogo} alt="" className="w-5 h-5 invert" />
             <span>Ingresar como Alumno</span>
           </button>
         </div>
 
-        <p className="mt-8 text-xs text-muted-foreground">
+        <p className="mt-8 text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
           Al iniciar sesión, autorizas a UNQlassroom a acceder a tu perfil público de GitHub para gestionar tus cursos.
         </p>
       </div>

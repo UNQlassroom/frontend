@@ -28,7 +28,7 @@ export function EmptyState({
         {title}
       </h4>
       {description && (
-        <p className="mt-1 font-mono text-xs text-muted-foreground leading-relaxed">
+        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
           {description}
         </p>
       )}

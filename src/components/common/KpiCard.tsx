@@ -101,40 +101,38 @@ export function KpiCard({
       type="button"
       onClick={onClick}
       disabled={!onClick}
-      className={`rounded-xl border p-4 shadow-xs text-left transition-all duration-150 ${
+      className={`rounded-xl border p-4 sm:p-4.5 shadow-xs text-left transition-all duration-150 ${
         onClick
           ? "cursor-pointer hover:scale-[1.02] hover:shadow-md"
           : "cursor-default"
       } ${isSelected ? styles.selected : styles.unselected} ${className}`}
       title={title}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 min-w-0">
         <span
-          className={`font-mono text-[11px] uppercase tracking-wider ${styles.labelColor}`}
+          className={`text-[11px] sm:text-xs uppercase tracking-wide font-semibold ${styles.labelColor}`}
         >
           {label}
         </span>
         {icon !== undefined ? (
           icon
         ) : (
-          <span className={`w-2 h-2 rounded-full ${styles.dotColor}`} />
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${styles.dotColor}`} />
         )}
       </div>
 
-      <div className="mt-2 flex items-baseline gap-2">
-        <span className={`font-suez text-3xl font-bold ${styles.valueColor}`}>
+      <div className="mt-2.5 flex items-baseline gap-2">
+        <span className={`font-suez text-3xl sm:text-4xl font-bold ${styles.valueColor}`}>
           {value}
         </span>
         {unit && (
-          <span className="font-mono text-xs text-muted-foreground">{unit}</span>
+          <span className="text-sm text-muted-foreground">{unit}</span>
         )}
       </div>
 
-      {subtext && (
-        <p className={`mt-1 font-mono text-[11px] ${styles.subtextColor}`}>
-          {subtext}
-        </p>
-      )}
+      <p className={`mt-1.5 text-xs sm:text-sm truncate ${styles.subtextColor}`}>
+        {subtext || <span className="invisible select-none">&nbsp;</span>}
+      </p>
     </button>
   );
 }

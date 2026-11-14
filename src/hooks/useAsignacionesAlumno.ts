@@ -1,7 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import type { AsignacionAlumnoDTO, AsignacionResponseDTO, EstadoEntrega } from "@/types";
-import { obtenerAsignaciones, entregarAsignacion } from "@/services";
+import type {
+  AsignacionAlumnoDTO,
+  AsignacionResponseDTO,
+  EstadoEntrega,
+} from "@/types";
+import {
+  obtenerAsignaciones,
+  entregarAsignacion,
+} from "@/services";
 import { useAuth } from "./useAuth";
+import { useSseListener } from "./useSseListener";
+import { formatFechaCorta, formatFechaLegible } from "@/utils";
 
 export interface EstadisticasProgresoAlumno {
   totalAsignaciones: number;
@@ -12,7 +21,7 @@ export interface EstadisticasProgresoAlumno {
   porcentajeCompletado: number;
 }
 
-function mapAsignacionesDTO(
+export function mapAsignacionesDTO(
   asignaciones: AsignacionResponseDTO[],
   currentUsername?: string
 ): AsignacionAlumnoDTO[] {
@@ -20,7 +29,9 @@ function mapAsignacionesDTO(
     // Buscar el grupo donde participa el alumno logueado, o fallback al primer grupo
     const miGrupo =
       asig.grupos?.find((g) =>
-        currentUsername ? g.integrantes?.includes(currentUsername) : false
+        currentUsername
+          ? g.integrantes?.some((u) => u.username === currentUsername)
+          : false
       ) ?? asig.grupos?.[0];
     const repo = miGrupo?.repositorio;
 
@@ -42,39 +53,31 @@ function mapAsignacionesDTO(
       titulo: asig.titulo,
       descripcion: asig.descripcion,
       tipo: asig.tipo,
+      estado: asig.estado,
       templateRepoName: asig.templateRepoName,
       fechaLimite: asig.fechaLimite,
-      fechaLimiteFormatted: asig.fechaLimite
-        ? new Date(asig.fechaLimite).toLocaleDateString("es-AR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
-        : undefined,
+      fechaLimiteFormatted: asig.fechaLimite ? formatFechaCorta(asig.fechaLimite) ?? undefined : undefined,
       estadoEntrega,
       calificacion,
       observaciones: miGrupo?.observaciones ?? null,
       fechaCalificacion: miGrupo?.fechaCalificacion ?? null,
       grupoId: miGrupo?.id,
       grupoNombre: miGrupo?.nombre,
-      integrantes: miGrupo?.integrantes,
+      integrantes: miGrupo?.integrantes?.map((u) => u.username),
+      integrantesDetalle: miGrupo?.integrantes ?? [],
       repoNombre: repo?.nombre,
       repoUrl: repo?.htmlUrl,
       releaseUrl: miGrupo?.releaseUrl ?? null,
       estadoCI: repo?.estadoCI ?? "sin_ci",
+      ciEtapaFallida: repo?.ciEtapaFallida ?? null,
+      ciLogError: repo?.ciLogError ?? null,
+      ciRunUrl: repo?.ciRunUrl ?? null,
+      advertenciasGit: miGrupo?.advertenciasGit ?? [],
       ultimoCommit: repo?.ultimoCommit,
       fechaUltimoCommit: repo?.fechaUltimoCommit,
       entregada: estaEntregada,
       fechaEntregada: fechaEntregada,
-      fechaEntregadaFormatted: fechaEntregada
-        ? new Date(fechaEntregada).toLocaleDateString("es-AR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : undefined,
+      fechaEntregadaFormatted: fechaEntregada ? formatFechaLegible(fechaEntregada) ?? undefined : undefined,
     };
   });
 }
@@ -84,21 +87,23 @@ export function useAsignacionesAlumno(cursoId?: number) {
   const username = user?.username;
   const [asignaciones, setAsignaciones] = useState<AsignacionAlumnoDTO[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(Boolean(cursoId));
+  const [isRecargando, setIsRecargando] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [entregandoId, setEntregandoId] = useState<number | string | null>(null);
 
   const cargarAsignaciones = useCallback(async () => {
     if (!cursoId) return;
-    setIsLoading(true);
+    setIsRecargando(true);
     setError(null);
     try {
       const response = await obtenerAsignaciones(cursoId);
-      setAsignaciones(mapAsignacionesDTO(response.data, username));
-    } catch (err: unknown) {
-      console.error("Error al cargar asignaciones del alumno:", err);
+      const mapeadas = mapAsignacionesDTO(response.data, username);
+      setAsignaciones(mapeadas);
+    } catch {
+      // Error manejado por interceptor
       setError("No se pudieron cargar las asignaciones del curso.");
     } finally {
-      setIsLoading(false);
+      setIsRecargando(false);
     }
   }, [cursoId, username]);
 
@@ -109,12 +114,13 @@ export function useAsignacionesAlumno(cursoId?: number) {
     obtenerAsignaciones(cursoId)
       .then((response) => {
         if (!ignore) {
-          setAsignaciones(mapAsignacionesDTO(response.data, username));
+          const mapeadas = mapAsignacionesDTO(response.data, username);
+          setAsignaciones(mapeadas);
         }
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (!ignore) {
-          console.error("Error al cargar asignaciones del alumno:", err);
+          // Error manejado por interceptor
           setError("No se pudieron cargar las asignaciones del curso.");
         }
       })
@@ -128,6 +134,29 @@ export function useAsignacionesAlumno(cursoId?: number) {
       ignore = true;
     };
   }, [cursoId, username]);
+
+  // Refresco silencioso en tiempo real mediante SSE
+  useSseListener(
+    [
+      "ASIGNACION_ACTUALIZADA",
+      "PUSH_RECIBIDO",
+      "CI_ACTUALIZADO",
+      "ENTREGA_REALIZADA",
+    ],
+    (event) => {
+      if (!cursoId || (event.cursoId !== null && event.cursoId !== cursoId)) {
+        return;
+      }
+      obtenerAsignaciones(cursoId)
+        .then((response) => {
+          const mapeadas = mapAsignacionesDTO(response.data, username);
+          setAsignaciones(mapeadas);
+        })
+        .catch(() => {
+          // Ignorar errores en refresco silencioso por SSE
+        });
+    }
+  );
 
   const entregar = useCallback(
     async (asignacionId: number): Promise<boolean> => {
@@ -145,9 +174,6 @@ export function useAsignacionesAlumno(cursoId?: number) {
           return prev.map((a) => (a.id === asignacionId ? { ...a, ...nueva } : a));
         });
         return true;
-      } catch (err: unknown) {
-        console.error("Error al entregar asignación:", err);
-        throw err;
       } finally {
         setEntregandoId(null);
       }
@@ -206,6 +232,7 @@ export function useAsignacionesAlumno(cursoId?: number) {
   return {
     asignaciones,
     isLoading,
+    isRecargando,
     error,
     estadisticas,
     entregandoId,

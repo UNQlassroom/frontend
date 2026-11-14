@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useCursoDetalle, useAsignacionesAlumno } from "@/hooks";
-import { AsignacionesAlumnoList } from "@/components";
+import { AsignacionesAlumnoList, PanelHeader, ErrorBanner } from "@/components";
 
 export const CursoDetalleAlumno = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,10 +16,9 @@ export const CursoDetalleAlumno = () => {
   const {
     asignaciones,
     isLoading: isLoadingAsignaciones,
+    isRecargando: isRecargandoAsignaciones,
     error: errorAsignaciones,
     cargarAsignaciones,
-    entregar,
-    entregandoId,
   } = useAsignacionesAlumno(cursoId);
 
   if (isLoadingCurso) {
@@ -27,7 +26,7 @@ export const CursoDetalleAlumno = () => {
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cargando detalle del curso...
           </p>
         </div>
@@ -38,29 +37,12 @@ export const CursoDetalleAlumno = () => {
   if (errorCurso || !curso) {
     return (
       <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center max-w-lg mx-auto">
-          <h2 className="font-display text-xl font-bold text-foreground">
-            No se pudo cargar el curso
-          </h2>
-          <p className="mt-2 font-mono text-xs text-destructive">
-            {errorCurso || "El curso solicitado no existe o no se encuentra disponible."}
-          </p>
-          <div className="mt-6 flex justify-center gap-3">
-            <Link
-              to="/home"
-              className="rounded-lg border border-line bg-panel px-4 py-2 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors"
-            >
-              ← Volver a Cursos
-            </Link>
-            <button
-              type="button"
-              onClick={cargarCurso}
-              className="rounded-lg bg-destructive px-4 py-2 font-mono text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
+        <ErrorBanner
+          className="max-w-lg mx-auto p-8"
+          message={errorCurso || "El curso solicitado no existe o no se encuentra disponible."}
+          onRetry={cargarCurso}
+        >
+        </ErrorBanner>
       </main>
     );
   }
@@ -71,23 +53,22 @@ export const CursoDetalleAlumno = () => {
       <div>
         <Link
           to="/home"
-          className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors group"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
           <span>Volver a Cursos</span>
         </Link>
       </div>
 
       {/* Encabezado Principal del Curso - Enfocado en Alumno */}
-      <section className="bg-panel rounded-2xl border border-line p-6 sm:p-8 shadow-sm">
+      <section className="bg-panel rounded-2xl border border-line p-7 sm:p-8 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
                 Espacio del Alumno
               </span>
               <span className="text-muted-foreground/40">•</span>
-              <span className="rounded-md border border-line bg-panel2 px-2 py-0.5 font-mono text-[11px] font-medium text-foreground">
+              <span className="rounded-lg border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground">
                 Año {curso.anio}
               </span>
             </div>
@@ -97,19 +78,19 @@ export const CursoDetalleAlumno = () => {
             </h1>
 
             {/* Metadatos Académicos: Comisión y Semestre */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-1">
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1 font-mono text-xs font-semibold text-foreground">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
                 <span className="text-muted-foreground font-normal">Comisión:</span>
                 <span>{curso.comision}</span>
               </span>
 
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1 font-mono text-xs font-semibold text-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
                 <span className="text-muted-foreground font-normal">Semestre:</span>
                 <span>{curso.semestre}° Semestre</span>
               </span>
 
               {curso.descripcion && (
-                <p className="font-mono text-xs text-muted-foreground mt-1 block w-full">
+                <p className="text-sm text-muted-foreground mt-1.5 block w-full leading-relaxed">
                   {curso.descripcion}
                 </p>
               )}
@@ -118,48 +99,20 @@ export const CursoDetalleAlumno = () => {
         </div>
       </section>
 
-      {/* Lista Principal de Asignaciones y Trabajos Prácticos */}
-      <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3">
-          <div>
-            <h2 className="font-display text-lg font-bold tracking-tight text-foreground">
-              Asignaciones
-            </h2>
-            <p className="font-mono text-xs text-muted-foreground">
-              Aquí podrás ver tus asignaciones, su fecha de entrega, calificación, correcciones y feedback docente.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={cargarAsignaciones}
-            disabled={isLoadingAsignaciones}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 font-mono text-xs font-semibold text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50 shadow-2xs self-start sm:self-auto"
-            title="Recargar asignaciones y verificar estado actualizado"
-          >
-            <svg
-              className={`w-3.5 h-3.5 ${isLoadingAsignaciones ? "animate-spin text-primary" : "text-muted-foreground"}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-            <span>{isLoadingAsignaciones ? "Actualizando..." : "Actualizar"}</span>
-          </button>
-        </div>
+      {/* Panel Principal de Asignaciones y Trabajos Prácticos */}
+      <section className="space-y-6">
+        <PanelHeader
+          title="Panel de Asignaciones"
+          description="Seleccioná una asignación para ver en detalle su consigna, el estado técnico de tu repositorio, entregas y devoluciones."
+        />
 
         <AsignacionesAlumnoList
           asignaciones={asignaciones}
           cursoId={curso.id}
           isLoading={isLoadingAsignaciones}
+          isRecargando={isRecargandoAsignaciones}
           error={errorAsignaciones}
           onRetry={cargarAsignaciones}
-          onEntregar={entregar}
-          entregandoId={entregandoId}
         />
       </section>
     </main>

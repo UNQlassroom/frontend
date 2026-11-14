@@ -1,4 +1,13 @@
-export interface Usuario {
+export interface UsuarioResponseDTO {
+  id?: number | null;
+  username: string;
+  esDocente?: boolean;
+  email?: string | null;
+  nombreCompleto?: string | null;
+  activo?: boolean;
+}
+
+export interface GitHubLoginResponseDTO {
   id: number;
   username: string;
   esDocente: boolean;
@@ -6,9 +15,11 @@ export interface Usuario {
   nombreCompleto: string | null;
 }
 
+export type Usuario = GitHubLoginResponseDTO;
+
 export interface AuthResponseDTO {
   token?: string | null;
-  user?: Usuario | null;
+  user?: GitHubLoginResponseDTO | null;
   requiereUnirseAOrg?: boolean;
   redirectUrl?: string | null;
 }
@@ -16,4 +27,9 @@ export interface AuthResponseDTO {
 export interface GitHubLoginRequestDTO {
   code: string;
   esDocente: boolean;
+}
+
+export interface ActualizarNombreRequestDTO {
+  nombre: string;
+  apellido: string;
 }

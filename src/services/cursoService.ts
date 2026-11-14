@@ -1,58 +1,47 @@
-import { get, post } from "@/api";
+import { get, post, deleteRequest } from "@/api";
 import type {
   ApiResponse,
   CursoRequestDTO,
   CursoResponseDTO,
-  AlumnosDeUnCursoResponseDTO,
+  CursoAlumnosResponseDTO,
   AgregarAlumnosRequestDTO,
 } from "@/types";
 
 export const cursoService = {
   /**
-   * Envía la petición POST http://localhost:8080/cursos/crear
+   * Envía la petición POST http://localhost:8080/cursos
    */
   crearCurso: (data: CursoRequestDTO): Promise<ApiResponse<CursoResponseDTO>> => {
-    return post<CursoResponseDTO, CursoRequestDTO>("/cursos/crear", data);
+    return post<CursoResponseDTO, CursoRequestDTO>("/cursos", data);
   },
 
   /**
-   * Envía la petición GET http://localhost:8080/cursos
+   * Envía la petición GET http://localhost:8080/cursos (o GET /cursos?archivados=true)
    */
-  obtenerCursos: (): Promise<ApiResponse<CursoResponseDTO[]>> => {
-    return get<CursoResponseDTO[]>("/cursos");
+  obtenerCursos: (archivados?: boolean): Promise<ApiResponse<CursoResponseDTO[]>> => {
+    const config = archivados !== undefined ? { params: { archivados } } : {};
+    return get<CursoResponseDTO[]>("/cursos", config);
   },
 
   /**
    * Envía la petición GET http://localhost:8080/cursos/{id}
-   * Con fallback a obtenerCursos si el backend aún no expone el endpoint individual
    */
-  obtenerCursoPorId: async (id: number): Promise<ApiResponse<CursoResponseDTO>> => {
-    try {
-      return await get<CursoResponseDTO>(`/cursos/${id}`);
-    } catch (err: unknown) {
-      try {
-        const todos = await get<CursoResponseDTO[]>("/cursos");
-        const encontrado = todos.data.find((c) => c.id === id);
-        if (encontrado) {
-          return {
-            headers: todos.headers,
-            status: todos.status,
-            statusText: todos.statusText,
-            data: encontrado,
-          };
-        }
-      } catch {
-        // Ignorar y lanzar el error original
-      }
-      throw err;
-    }
+  obtenerCursoPorId: (id: number): Promise<ApiResponse<CursoResponseDTO>> => {
+    return get<CursoResponseDTO>(`/cursos/${id}`);
+  },
+
+  /**
+   * Envía la petición POST http://localhost:8080/cursos/{id}/archivar
+   */
+  archivarCurso: (id: number): Promise<ApiResponse<CursoResponseDTO>> => {
+    return post<CursoResponseDTO>(`/cursos/${id}/archivar`);
   },
 
   /**
    * Envía la petición GET http://localhost:8080/cursos/{id}/alumnos
    */
-  obtenerAlumnos: (id: number): Promise<ApiResponse<AlumnosDeUnCursoResponseDTO>> => {
-    return get<AlumnosDeUnCursoResponseDTO>(`/cursos/${id}/alumnos`);
+  obtenerAlumnos: (id: number): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
+    return get<CursoAlumnosResponseDTO>(`/cursos/${id}/alumnos`);
   },
 
   /**
@@ -61,22 +50,21 @@ export const cursoService = {
   agregarAlumnos: (
     id: number,
     data: AgregarAlumnosRequestDTO
-  ): Promise<ApiResponse<AlumnosDeUnCursoResponseDTO>> => {
-    return post<AlumnosDeUnCursoResponseDTO, AgregarAlumnosRequestDTO>(
+  ): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
+    return post<CursoAlumnosResponseDTO, AgregarAlumnosRequestDTO>(
       `/cursos/${id}/alumnos`,
       data
     );
   },
 
   /**
-   * Envía la petición POST http://localhost:8080/cursos/{id}/alumnos/sync
-   * Sincroniza con GitHub el estado de las invitaciones pendientes
+   * Envía la petición DELETE http://localhost:8080/cursos/{cursoId}/alumnos/{username}
    */
-  sincronizarAlumnos: (id: number): Promise<ApiResponse<AlumnosDeUnCursoResponseDTO>> => {
-    return post<AlumnosDeUnCursoResponseDTO, Record<string, never>>(
-      `/cursos/${id}/alumnos/sync`,
-      {}
-    );
+  eliminarAlumno: (
+    cursoId: number,
+    username: string
+  ): Promise<ApiResponse<void>> => {
+    return deleteRequest<void>(`/cursos/${cursoId}/alumnos/${username}`);
   },
 };
 
@@ -84,7 +72,8 @@ export const {
   crearCurso,
   obtenerCursos,
   obtenerCursoPorId,
+  archivarCurso,
   obtenerAlumnos,
   agregarAlumnos,
-  sincronizarAlumnos,
+  eliminarAlumno,
 } = cursoService;

@@ -1,7 +1,8 @@
 import { useState } from "react";
+import * as React from "react";
 import { agregarAlumnos } from "@/services";
 import type { CursoResponseDTO } from "@/types";
-import * as React from "react";
+import { isValidGitHubUsername, resolveApiError } from "@/utils";
 
 interface InvitarAlumnosModalProps {
   open: boolean;
@@ -28,12 +29,17 @@ export function InvitarAlumnosModal({
     const clean = inputValue.trim().replace(/^@/, "");
     if (!clean) return;
 
-    if (usernames.includes(clean)) {
-      setError(`El usuario @${clean} ya está en la lista.`);
+    if (!isValidGitHubUsername(clean)) {
+      setError("El formato del usuario de GitHub no es válido.");
       return;
     }
 
-    setUsernames((prev) => [...prev, clean]);
+    const exists = usernames.some(
+      (u) => u.toLowerCase() === clean.toLowerCase()
+    );
+    if (!exists) {
+      setUsernames((prev) => [...prev, clean]);
+    }
     setInputValue("");
     setError(null);
   };
@@ -55,9 +61,19 @@ export function InvitarAlumnosModal({
 
     const finalUsernames = [...usernames];
     const pending = inputValue.trim().replace(/^@/, "");
-    if (pending && !finalUsernames.includes(pending)) {
-      finalUsernames.push(pending);
-      setUsernames(finalUsernames);
+    if (pending) {
+      if (!isValidGitHubUsername(pending)) {
+        setError("El formato del usuario de GitHub no es válido.");
+        return;
+      }
+
+      const exists = finalUsernames.some(
+        (u) => u.toLowerCase() === pending.toLowerCase()
+      );
+      if (!exists) {
+        finalUsernames.push(pending);
+        setUsernames(finalUsernames);
+      }
       setInputValue("");
     }
 
@@ -76,36 +92,9 @@ export function InvitarAlumnosModal({
         onSuccess();
       }
     } catch (err: unknown) {
-      if (typeof err === "object" && err !== null) {
-        const apiErr = err as {
-          response?: {
-            status?: number;
-            data?: { message?: string };
-          };
-          message?: string;
-        };
-
-        const status = apiErr.response?.status;
-        const serverMessage = apiErr.response?.data?.message || "";
-
-        if (status === 404 || serverMessage.includes("404")) {
-          setError(
-            "Uno o más usuarios no fueron encontrados en GitHub. Verificá que estén bien escritos."
-          );
-        } else if (status === 422 || serverMessage.includes("422")) {
-          setError(
-            "Uno o más usuarios están bloqueados o no pueden ser invitados. Verificá que estén bien escritos y que no tengan restricciones."
-          );
-        } else {
-          setError(
-            apiErr.message === "Network Error"
-              ? "Error de conexión."
-              : "Ocurrió un error inesperado."
-          );
-        }
-      } else {
-        setError("Ocurrió un error inesperado al invitar a los alumnos.");
-      }
+      // El interceptor global de Axios muestra el toast amigable correspondiente (ej: GITHUB_USERS_NOT_FOUND, ALUMNO_DUPLICADO)
+      const resolved = resolveApiError(err);
+      setError(resolved?.message || "Ocurrió un error al invitar alumnos.");
     } finally {
       setIsLoading(false);
     }
@@ -121,24 +110,24 @@ export function InvitarAlumnosModal({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-line bg-panel2 p-6 shadow-xl flex flex-col animate-rise">
+      <div className="w-full max-w-2xl rounded-2xl border border-line bg-panel2 p-7 sm:p-8 shadow-xl flex flex-col animate-rise">
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-line">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
               Gestión de alumnos
             </p>
-            <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <span>Invitar alumnos</span>
             </h2>
-            <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
             </p>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+            className="rounded-lg p-2 text-sm text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer"
             aria-label="Cerrar modal"
           >
             ✕
@@ -147,15 +136,15 @@ export function InvitarAlumnosModal({
 
         {/* Formulario */}
         {success ? (
-          <div className="py-6 text-center space-y-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center mx-auto text-xl font-bold">
+          <div data-testid="success-feedback" className="py-8 text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center mx-auto text-2xl font-bold">
               ✓
             </div>
             <div>
-              <h3 className="font-display text-lg font-bold text-foreground">
+              <h3 className="font-display text-xl font-bold text-foreground">
                 ¡Invitaciones enviadas!
               </h3>
-              <p className="mt-1 font-mono text-xs text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Se agregaron {usernames.length} alumno(s) al curso.
               </p>
             </div>
@@ -163,34 +152,35 @@ export function InvitarAlumnosModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-lg bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
+                className="rounded-xl bg-primary px-6 py-2.5 text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
               >
                 Listo
               </button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="py-4 space-y-4">
+          <form data-testid="invitar-form" onSubmit={handleSubmit} className="py-5 space-y-5">
             <div>
               <label
                 htmlFor="github-username-input"
-                className="mb-1.5 block font-mono text-[11px] uppercase tracking-wide text-muted-foreground"
+                className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
               >
                 Usuarios de GitHub
               </label>
 
               {/* Área interactiva con burbujas e input */}
-              <div className="min-h-[96px] w-full rounded-xl border border-line bg-background p-2.5 flex flex-wrap gap-2 items-start transition-colors">
+              <div className="min-h-[110px] w-full rounded-xl border border-line bg-background p-3 flex flex-wrap gap-2.5 items-start transition-colors focus-within:border-primary">
                 {usernames.map((u) => (
                   <span
                     key={u}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-xs font-medium text-foreground animate-rise"
+                    data-testid={`username-chip-${u}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-foreground animate-rise"
                   >
                     <span>@{u}</span>
                     <button
                       type="button"
                       onClick={() => handleRemove(u)}
-                      className="rounded-full hover:bg-foreground/10 p-0.5 text-muted-foreground hover:text-foreground cursor-pointer text-[10px] leading-none"
+                      className="rounded-full hover:bg-foreground/10 p-0.5 text-muted-foreground hover:text-foreground cursor-pointer text-xs leading-none"
                       title="Eliminar"
                     >
                       ✕
@@ -200,6 +190,7 @@ export function InvitarAlumnosModal({
 
                 <input
                   id="github-username-input"
+                  data-testid="username-input"
                   type="text"
                   value={inputValue}
                   onChange={(e) => {
@@ -213,40 +204,41 @@ export function InvitarAlumnosModal({
                       ? "Escribí un usuario y presioná Enter..."
                       : "Escribí otro y presioná Enter..."
                   }
-                  className="flex-1 min-w-[200px] bg-transparent outline-none py-1 px-1 font-mono text-xs placeholder:text-muted-foreground/60"
+                  className="flex-1 min-w-[220px] bg-transparent outline-none py-1.5 px-2 text-base placeholder:text-muted-foreground/60"
                 />
               </div>
 
-              <p className="mt-1.5 font-mono text-[11px] text-muted-foreground">
-                Presioná <kbd className="rounded border border-line px-1.5 py-0.5 bg-panel text-[10px]">Enter</kbd> luego de cada usuario para agregarlo como burbuja.
+              <p className="mt-2 text-xs text-muted-foreground">
+                Presioná <kbd className="rounded border border-line px-1.5 py-0.5 bg-panel text-xs">Enter</kbd> luego de cada usuario para agregarlo como burbuja.
               </p>
             </div>
 
             {error && (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
-                <p className="font-mono text-xs text-destructive">{error}</p>
+              <div data-testid="error-message" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5">
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
 
             {/* Footer con botones */}
-            <div className="pt-3 border-t border-line flex items-center justify-between">
-              <span className="font-mono text-xs text-muted-foreground">
+            <div className="pt-4 border-t border-line flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
                 {usernames.length} {usernames.length === 1 ? "alumno listo" : "alumnos listos"}
               </span>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={handleClose}
                   disabled={isLoading}
-                  className="rounded-lg px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="rounded-xl px-5 py-2.5 text-sm sm:text-base font-medium text-muted-foreground hover:text-foreground hover:bg-line/30 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
+                  data-testid="submit-button"
                   disabled={isLoading || (usernames.length === 0 && !inputValue.trim())}
-                  className="rounded-lg bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                  className="rounded-xl bg-primary px-6 py-2.5 text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
                 >
                   {isLoading ? "Invitando..." : "Invitar alumnos"}
                 </button>

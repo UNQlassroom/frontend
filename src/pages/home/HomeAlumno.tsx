@@ -1,5 +1,5 @@
 import { useCursos } from "@/hooks";
-import { CursoCardAlumno } from "@/components";
+import { CursoCardAlumno, ErrorBanner } from "@/components";
 
 export const HomeAlumno = () => {
   const { cursos, isLoading, error, cargarCursos } = useCursos();
@@ -8,13 +8,13 @@ export const HomeAlumno = () => {
     <main className="mx-auto max-w-6xl px-6 py-12 flex-1 w-full">
       <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b border-line">
         <div className="text-left">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
             Espacio del Alumno
           </p>
-          <h1 className="mt-2 font-suez text-4xl tracking-tight">
+          <h1 className="mt-2 font-suez text-4xl sm:text-5xl tracking-tight">
             Cursos
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-base text-muted-foreground">
             Accedé a tus cursos.
           </p>
         </div>
@@ -24,23 +24,14 @@ export const HomeAlumno = () => {
       {isLoading && (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Cargando tus cursos...
           </p>
         </div>
       )}
 
       {!isLoading && error && (
-        <div className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-          <p className="text-sm text-destructive font-medium mb-3">{error}</p>
-          <button
-            type="button"
-            onClick={cargarCursos}
-            className="rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorBanner message={error} onRetry={cargarCursos} className="mt-8" />
       )}
 
       {!isLoading && !error && cursos.length === 0 && (
