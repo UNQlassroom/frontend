@@ -44,6 +44,10 @@ export const BACKEND_ERROR_CODES = {
   USUARIO_NOT_FOUND: "USUARIO_NOT_FOUND",
   USUARIO_NO_ES_DOCENTE: "USUARIO_NO_ES_DOCENTE",
   NOMBRE_USUARIO_INVALIDO: "NOMBRE_USUARIO_INVALIDO",
+  EMAIL_INVALIDO: "EMAIL_INVALIDO",
+  EMAIL_DUPLICADO: "EMAIL_DUPLICADO",
+  DNI_INVALIDO: "DNI_INVALIDO",
+  DNI_DUPLICADO: "DNI_DUPLICADO",
   NO_ES_DOCENTE_DEL_CURSO: "NO_ES_DOCENTE_DEL_CURSO",
   SIN_PERMISO_ACCESO_CURSO: "SIN_PERMISO_ACCESO_CURSO",
   SIN_PERMISO_ACCESO_ASIGNACION: "SIN_PERMISO_ACCESO_ASIGNACION",
@@ -216,6 +220,26 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   },
   [BACKEND_ERROR_CODES.NOMBRE_USUARIO_INVALIDO]: {
     message: "El nombre y apellido contiene caracteres inválidos o excede el límite de 35 caracteres.",
+    severity: "warning",
+    preferBackendMessage: true,
+  },
+  [BACKEND_ERROR_CODES.EMAIL_INVALIDO]: {
+    message: "El email ingresado no es valido",
+    severity: "warning",
+    preferBackendMessage: true,
+  },
+  [BACKEND_ERROR_CODES.EMAIL_DUPLICADO]: {
+    message: "El correo electrónico ya se encuentra registrado en otra cuenta.",
+    severity: "warning",
+    preferBackendMessage: true,
+  },
+  [BACKEND_ERROR_CODES.DNI_INVALIDO]: {
+    message: "El DNI ingresado no es valido",
+    severity: "warning",
+    preferBackendMessage: true,
+  },
+  [BACKEND_ERROR_CODES.DNI_DUPLICADO]: {
+    message: "El DNI ya se encuentra registrado en otra cuenta.",
     severity: "warning",
     preferBackendMessage: true,
   },
