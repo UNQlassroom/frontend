@@ -3,6 +3,7 @@ export interface UsuarioResponseDTO {
   username: string;
   esDocente?: boolean;
   email?: string | null;
+  dni?: string | null;
   nombreCompleto?: string | null;
   activo?: boolean;
 }
@@ -11,7 +12,6 @@ export interface GitHubLoginResponseDTO {
   id: number;
   username: string;
   esDocente: boolean;
-  email: string | null;
   nombreCompleto: string | null;
 }
 
@@ -32,4 +32,11 @@ export interface GitHubLoginRequestDTO {
 export interface ActualizarNombreRequestDTO {
   nombre: string;
   apellido: string;
+}
+
+export interface ActualizarDatosRequestDTO {
+  nombre: string;
+  apellido: string;
+  email: string;
+  dni: string;
 }

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { useAuth } from "@/hooks";
+import { useAuth, useDatosPersonalesForm } from "@/hooks";
 import { usuarioService } from "@/services";
+import { DatosPersonalesInputs } from "./DatosPersonalesInputs";
 import {
-  validarNombreYApellido,
+  validarDatosUsuario,
   formatearNombreCompleto,
-  desglosarNombreCompleto,
   NOMBRE_MAX_LENGTH,
   resolveApiError,
   notifyApiError,
@@ -32,9 +32,16 @@ function MisDatosModalContent({
   onSuccess,
 }: Omit<MisDatosModalProps, "open">) {
   const { user, isDocente, actualizarUsuario } = useAuth();
-  const initial = desglosarNombreCompleto(user?.nombreCompleto);
-  const [nombre, setNombre] = useState(initial.nombre);
-  const [apellido, setApellido] = useState(initial.apellido);
+  const {
+    nombre,
+    setNombre,
+    apellido,
+    setApellido,
+    email,
+    setEmail,
+    dni,
+    setDni,
+  } = useDatosPersonalesForm(user);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,6 +49,8 @@ function MisDatosModalContent({
 
   const trimmedNombre = nombre.trim();
   const trimmedApellido = apellido.trim();
+  const trimmedEmail = email.trim();
+  const trimmedDni = dni.trim();
 
   const previewLength =
     trimmedApellido && trimmedNombre
@@ -52,7 +61,7 @@ function MisDatosModalContent({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const validacion = validarNombreYApellido(nombre, apellido);
+    const validacion = validarDatosUsuario(nombre, apellido, email, dni);
     if (!validacion.valido) {
       setError(validacion.error);
       return;
@@ -62,9 +71,11 @@ function MisDatosModalContent({
       setIsLoading(true);
       setError(null);
 
-      const response = await usuarioService.actualizarNombre({
+      const response = await usuarioService.actualizarDatos({
         nombre: trimmedNombre,
         apellido: trimmedApellido,
+        email: trimmedEmail,
+        dni: trimmedDni,
       });
 
       const nuevoNombreCompleto =
@@ -75,14 +86,13 @@ function MisDatosModalContent({
         nombreCompleto: nuevoNombreCompleto,
       });
 
-      toast.success("Nombre y apellido actualizado correctamente");
+      toast.success("Datos actualizados correctamente");
       onSuccess?.(nuevoNombreCompleto);
       onClose();
     } catch (err: unknown) {
       const resolved = resolveApiError(err);
       const msg =
-        resolved?.message ||
-        "Ocurrió un error al actualizar el nombre y apellido.";
+        resolved?.message || "Ocurrió un error al actualizar tus datos.";
       setError(msg);
       if (resolved) {
         notifyApiError(resolved);
@@ -107,6 +117,7 @@ function MisDatosModalContent({
       onClick={handleClose}
     >
       <form
+        noValidate
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-lg rounded-2xl border border-line bg-panel2 p-6 sm:p-7 shadow-xl animate-rise flex flex-col gap-5"
@@ -171,77 +182,32 @@ function MisDatosModalContent({
             </p>
           </div>
 
-          {/* Inputs de Nombre y Apellido */}
-          <div className="space-y-2.5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Nombre/s */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="misdatos-nombre-input"
-                  className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
-                >
-                  Nombre/s
-                </label>
-                <input
-                  id="misdatos-nombre-input"
-                  type="text"
-                  disabled={isLoading}
-                  autoFocus
-                  maxLength={NOMBRE_MAX_LENGTH}
-                  placeholder="Ingresá tu nombre"
-                  value={nombre}
-                  onChange={(e) => {
-                    setNombre(e.target.value);
-                    if (error) setError(null);
-                  }}
-                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-                />
-              </div>
+          {/* Formulario de datos personales compartido */}
+          <DatosPersonalesInputs
+            idPrefix="misdatos"
+            nombre={nombre}
+            setNombre={setNombre}
+            apellido={apellido}
+            setApellido={setApellido}
+            email={email}
+            setEmail={setEmail}
+            dni={dni}
+            setDni={setDni}
+            disabled={isLoading}
+            onFieldChange={() => {
+              if (error) setError(null);
+            }}
+          />
 
-              {/* Apellido/s */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="misdatos-apellido-input"
-                  className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
-                >
-                  Apellido/s
-                </label>
-                <input
-                  id="misdatos-apellido-input"
-                  type="text"
-                  disabled={isLoading}
-                  maxLength={NOMBRE_MAX_LENGTH}
-                  placeholder="Ingresá tu apellido"
-                  value={apellido}
-                  onChange={(e) => {
-                    setApellido(e.target.value);
-                    if (error) setError(null);
-                  }}
-                  className="w-full rounded-xl border border-line bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-                />
-              </div>
+          {/* Error general del formulario */}
+          {error && (
+            <div
+              role="alert"
+              className="rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 animate-rise"
+            >
+              <p className="text-sm text-destructive font-medium">{error}</p>
             </div>
-
-            {/* Contador */}
-            <div className="flex justify-end text-xs pt-0.5">
-              <span
-                className={`tabular-nums font-medium ${
-                  isExceeded ? "text-rose-500 font-bold" : "text-muted-foreground"
-                }`}
-              >
-                {previewLength} / {NOMBRE_MAX_LENGTH}
-              </span>
-            </div>
-
-            {error && (
-              <div
-                role="alert"
-                className="rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 animate-rise"
-              >
-                <p className="text-sm text-destructive font-medium">{error}</p>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -256,7 +222,14 @@ function MisDatosModalContent({
           </button>
           <button
             type="submit"
-            disabled={isLoading || isExceeded || !trimmedNombre || !trimmedApellido}
+            disabled={
+              isLoading ||
+              isExceeded ||
+              !trimmedNombre ||
+              !trimmedApellido ||
+              !trimmedEmail ||
+              !trimmedDni
+            }
             className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
           >
             {isLoading ? (

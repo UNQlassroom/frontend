@@ -11,6 +11,11 @@ export interface ValidacionNombreResult {
   error: string | null;
 }
 
+export interface ValidacionCampoResult {
+  valido: boolean;
+  error: string | null;
+}
+
 /**
  * Da formato estándar "Apellido/s, Nombre/s" a partir de las dos partes.
  */
@@ -100,6 +105,74 @@ export const validarNombreYApellido = (
       error: `El nombre y apellido combinados no pueden superar los ${NOMBRE_MAX_LENGTH} caracteres (actualmente ${nombreCompleto.length}).`,
     };
   }
+
+  return { valido: true, error: null };
+};
+
+/**
+ * Valida que el email contenga '@' y termine en '.com' o '.com.ar'.
+ */
+export const validarEmail = (email: string): ValidacionCampoResult => {
+  const trimmed = email.trim();
+  if (!trimmed) {
+    return {
+      valido: false,
+      error: "Por favor, ingresá tu correo electrónico.",
+    };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.(com|com\.ar)$/i;
+  if (!emailRegex.test(trimmed)) {
+    return {
+      valido: false,
+      error: "El email ingresado no es válido.",
+    };
+  }
+
+  return { valido: true, error: null };
+};
+
+/**
+ * Valida que el DNI sea numérico y contenga entre 7 y 8 dígitos.
+ */
+export const validarDni = (dni: string): ValidacionCampoResult => {
+  const trimmed = dni.trim();
+  if (!trimmed) {
+    return {
+      valido: false,
+      error: "Por favor, ingresá tu DNI.",
+    };
+  }
+
+  const dniRegex = /^\d{7,8}$/;
+  if (!dniRegex.test(trimmed)) {
+    return {
+      valido: false,
+      error: "El DNI ingresado no es válido.",
+    };
+  }
+
+  return { valido: true, error: null };
+};
+
+/**
+ * Valida de forma secuencial todos los datos personales del usuario:
+ * Nombre y Apellido -> Correo Electrónico -> DNI.
+ */
+export const validarDatosUsuario = (
+  nombre: string,
+  apellido: string,
+  email: string,
+  dni: string
+): ValidacionCampoResult => {
+  const vNombre = validarNombreYApellido(nombre, apellido);
+  if (!vNombre.valido) return vNombre;
+
+  const vEmail = validarEmail(email);
+  if (!vEmail.valido) return vEmail;
+
+  const vDni = validarDni(dni);
+  if (!vDni.valido) return vDni;
 
   return { valido: true, error: null };
 };

@@ -57,10 +57,13 @@ export interface AgregarAlumnosRequestDTO {
  * Alumno perteneciente al curso (sin repositorio directo)
  */
 export interface AlumnoResponseDTO {
+  id?: number;
   username: string;
   role: string;
   state: "active" | "pending" | string;
   nombreCompleto?: string | null;
+  email?: string | null;
+  dni?: string | null;
 }
 
 /**
