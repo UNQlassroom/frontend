@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { useAuth } from "@/hooks";
+import { useAuth, useDatosPersonalesForm } from "@/hooks";
 import { usuarioService } from "@/services";
 import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
+import { DatosPersonalesInputs } from "./DatosPersonalesInputs";
 import {
-  validarNombreYApellido,
+  validarDatosUsuario,
   formatearNombreCompleto,
   NOMBRE_MAX_LENGTH,
   resolveApiError,
@@ -13,20 +14,37 @@ import {
 
 export function BienvenidaModal() {
   const { user, isAuthenticated, actualizarUsuario } = useAuth();
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
+  const {
+    nombre,
+    setNombre,
+    apellido,
+    setApellido,
+    email,
+    setEmail,
+    dni,
+    setDni,
+    perfil,
+    setPerfil,
+    cargando,
+  } = useDatosPersonalesForm(user);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Se muestra si al usuario autenticado le falta nombreCompleto, email o DNI en el backend
   const shouldShow =
     isAuthenticated &&
     Boolean(user) &&
-    (!user?.nombreCompleto || user.nombreCompleto.trim() === "");
+    !cargando &&
+    (!perfil?.nombreCompleto?.trim() ||
+      !perfil?.email?.trim() ||
+      !perfil?.dni?.trim());
 
   if (!shouldShow || !user) return null;
 
   const trimmedNombre = nombre.trim();
   const trimmedApellido = apellido.trim();
+  const trimmedEmail = email.trim();
+  const trimmedDni = dni.trim();
 
   const previewLength =
     trimmedApellido && trimmedNombre
@@ -37,7 +55,7 @@ export function BienvenidaModal() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const validacion = validarNombreYApellido(nombre, apellido);
+    const validacion = validarDatosUsuario(nombre, apellido, email, dni);
     if (!validacion.valido) {
       setError(validacion.error);
       return;
@@ -47,9 +65,11 @@ export function BienvenidaModal() {
       setIsLoading(true);
       setError(null);
 
-      const response = await usuarioService.actualizarNombre({
+      const response = await usuarioService.actualizarDatos({
         nombre: trimmedNombre,
         apellido: trimmedApellido,
+        email: trimmedEmail,
+        dni: trimmedDni,
       });
 
       const nuevoNombreCompleto =
@@ -60,12 +80,12 @@ export function BienvenidaModal() {
         nombreCompleto: nuevoNombreCompleto,
       });
 
+      setPerfil(response.data);
       toast.success(`¡Bienvenido/a a UNQlassroom, ${nuevoNombreCompleto}!`);
     } catch (err: unknown) {
       const resolved = resolveApiError(err);
       const msg =
-        resolved?.message ||
-        "Ocurrió un error al registrar tu nombre y apellido.";
+        resolved?.message || "Ocurrió un error al registrar tus datos.";
       setError(msg);
       if (resolved) {
         notifyApiError(resolved);
@@ -83,6 +103,7 @@ export function BienvenidaModal() {
       className="fixed inset-0 z-50 grid place-items-center bg-background/70 backdrop-blur-sm p-4"
     >
       <form
+        noValidate
         onSubmit={handleSubmit}
         className="w-full max-w-lg rounded-2xl border border-line bg-panel2 p-7 sm:p-8 shadow-2xl animate-rise flex flex-col gap-6"
       >
@@ -110,88 +131,48 @@ export function BienvenidaModal() {
           Para que los docentes y tus compañeros puedan identificarte fácilmente
           en los cursos y asignaciones sin confundirte por tu usuario de GitHub (
           <span className="font-semibold text-emerald-500">@{user.username}</span>
-          ), por favor ingresá tu nombre y apellido.
+          ), por favor completá tus datos personales.
         </p>
 
-        {/* Inputs de Nombre y Apellido */}
-        <div className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Nombre/s */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="bienvenida-nombre-input"
-                className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
-              >
-                Nombre/s
-              </label>
-              <input
-                id="bienvenida-nombre-input"
-                data-testid="bienvenida-nombre-input"
-                type="text"
-                disabled={isLoading}
-                autoFocus
-                maxLength={NOMBRE_MAX_LENGTH}
-                placeholder="Ingresá tu nombre"
-                value={nombre}
-                onChange={(e) => {
-                  setNombre(e.target.value);
-                  if (error) setError(null);
-                }}
-                className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-              />
-            </div>
+        {/* Formulario de datos personales compartido */}
+        <DatosPersonalesInputs
+          idPrefix="bienvenida"
+          nombre={nombre}
+          setNombre={setNombre}
+          apellido={apellido}
+          setApellido={setApellido}
+          email={email}
+          setEmail={setEmail}
+          dni={dni}
+          setDni={setDni}
+          disabled={isLoading}
+          onFieldChange={() => {
+            if (error) setError(null);
+          }}
+        />
 
-            {/* Apellido/s */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="bienvenida-apellido-input"
-                className="text-xs uppercase tracking-wider font-semibold text-muted-foreground"
-              >
-                Apellido/s
-              </label>
-              <input
-                id="bienvenida-apellido-input"
-                data-testid="bienvenida-apellido-input"
-                type="text"
-                disabled={isLoading}
-                maxLength={NOMBRE_MAX_LENGTH}
-                placeholder="Ingresá tu apellido"
-                value={apellido}
-                onChange={(e) => {
-                  setApellido(e.target.value);
-                  if (error) setError(null);
-                }}
-                className="w-full rounded-xl border border-line bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-              />
-            </div>
+        {/* Error general del formulario */}
+        {error && (
+          <div
+            role="alert"
+            className="rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 animate-rise"
+          >
+            <p className="text-sm text-destructive font-medium">{error}</p>
           </div>
-
-          {/* Contador */}
-          <div className="flex justify-end text-xs pt-0.5">
-            <span
-              className={`tabular-nums font-medium ${
-                isExceeded ? "text-rose-500 font-bold" : "text-muted-foreground"
-              }`}
-            >
-              {previewLength} / {NOMBRE_MAX_LENGTH}
-            </span>
-          </div>
-
-          {error && (
-            <div
-              role="alert"
-              className="rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 animate-rise"
-            >
-              <p className="text-sm text-destructive font-medium">{error}</p>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Botón de acción */}
         <div className="flex items-center justify-end pt-2 border-t border-line">
           <button
             type="submit"
-            disabled={isLoading || isExceeded || !trimmedNombre || !trimmedApellido}
+            disabled={
+              isLoading ||
+              isExceeded ||
+              !trimmedNombre ||
+              !trimmedApellido ||
+              !trimmedEmail ||
+              !trimmedDni
+            }
             className="w-full sm:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
           >
             {isLoading ? (

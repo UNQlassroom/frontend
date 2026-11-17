@@ -3,6 +3,7 @@ import type {
   ApiResponse,
   UsuarioResponseDTO,
   ActualizarNombreRequestDTO,
+  ActualizarDatosRequestDTO,
 } from "@/types";
 
 export const usuarioService = {
@@ -26,6 +27,20 @@ export const usuarioService = {
       data
     );
   },
+
+  /**
+   * Actualiza los datos completos del usuario autenticado actual (nombre, apellido, email, dni).
+   * PUT /usuarios/me/datos
+   */
+  actualizarDatos: (
+    data: ActualizarDatosRequestDTO
+  ): Promise<ApiResponse<UsuarioResponseDTO>> => {
+    return put<UsuarioResponseDTO, ActualizarDatosRequestDTO>(
+      "/usuarios/me/datos",
+      data
+    );
+  },
 };
 
-export const { getUsuarioActual, actualizarNombre } = usuarioService;
+export const { getUsuarioActual, actualizarNombre, actualizarDatos } =
+  usuarioService;
