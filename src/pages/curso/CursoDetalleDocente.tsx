@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Archive } from "lucide-react";
+import { Archive, Download, MoreVertical } from "lucide-react";
 import { toast } from "react-toastify";
 import { useCursoDetalle, useAlumnos, useAuth } from "@/hooks";
-import { archivarCurso } from "@/services";
+import { archivarCurso, exportarCurso } from "@/services";
 import {
   AlumnosTab,
   AsignacionesTab,
@@ -11,8 +11,10 @@ import {
   MetricasTab,
   InvitarAlumnosModal,
   ArchivarCursoModal,
+  ExportarCursoModal,
   ErrorBanner,
 } from "@/components";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui";
 
 type TabType = "alumnos" | "asignaciones" | "metricas" | "correcciones";
 
@@ -30,9 +32,12 @@ export const CursoDetalleDocente = () => {
       ? tabParam
       : "alumnos";
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [openInvitarModal, setOpenInvitarModal] = useState(false);
   const [openArchivarModal, setOpenArchivarModal] = useState(false);
+  const [openExportarModal, setOpenExportarModal] = useState(false);
   const [isArchivando, setIsArchivando] = useState(false);
+  const [isExportando, setIsExportando] = useState(false);
 
   // Hook para obtener el detalle académico del curso
   const {
@@ -78,6 +83,20 @@ export const CursoDetalleDocente = () => {
       // El interceptor global de Axios notifica el error mediante Toast
     } finally {
       setIsArchivando(false);
+    }
+  };
+
+  const handleConfirmExportar = async () => {
+    if (!curso) return;
+    setIsExportando(true);
+    try {
+      const filename = await exportarCurso(curso.id, curso.materia);
+      setOpenExportarModal(false);
+      toast.success(`Planilla "${filename}" descargada con éxito.`);
+    } catch {
+      // El interceptor global de Axios notifica el error mediante Toast
+    } finally {
+      setIsExportando(false);
     }
   };
 
@@ -166,17 +185,54 @@ export const CursoDetalleDocente = () => {
             </div>
           </div>
 
-          {!esArchivado && esOwner && (
+          {/* Menú de Opciones (Kebab) del Curso */}
+          {esOwner && (
             <div className="shrink-0 self-start">
-              <button
-                type="button"
-                onClick={() => setOpenArchivarModal(true)}
-                aria-label="Archivar curso"
-                title="Archivar curso"
-                className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 hover:border-amber-500/50 transition-colors cursor-pointer"
-              >
-                <Archive className="w-5 h-5 shrink-0" />
-              </button>
+              <Popover open={menuOpen} onOpenChange={setMenuOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Opciones del curso"
+                    title="Opciones del curso"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-line bg-panel2 text-foreground hover:bg-line/40 transition-colors cursor-pointer"
+                  >
+                    <MoreVertical className="w-5 h-5 shrink-0" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  sideOffset={6}
+                  className="w-56 p-1.5 rounded-2xl border border-line bg-panel shadow-xl"
+                >
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setOpenExportarModal(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-line/40 transition-colors cursor-pointer text-left"
+                    >
+                      <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>Exportar</span>
+                    </button>
+
+                    {!esArchivado && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setOpenArchivarModal(true);
+                        }}
+                        className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer text-left"
+                      >
+                        <Archive className="w-4 h-4 shrink-0" />
+                        <span>Archivar</span>
+                      </button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           )}
         </div>
@@ -221,7 +277,7 @@ export const CursoDetalleDocente = () => {
               <span>Asignaciones</span>
             </button>
 
-            {/* Pestaña Correcciones e Issues */}
+            {/* Pestaña Correcciones */}
             <button
               type="button"
               onClick={() => handleTabChange("correcciones")}
@@ -234,7 +290,7 @@ export const CursoDetalleDocente = () => {
               <span>Correcciones</span>
             </button>
 
-            {/* Pestaña Métricas de Repositorios */}
+            {/* Pestaña Métricas */}
             <button
               type="button"
               onClick={() => handleTabChange("metricas")}
@@ -244,7 +300,7 @@ export const CursoDetalleDocente = () => {
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
               }`}
             >
-              <span>Métricas de Repositorios</span>
+              <span>Métricas</span>
             </button>
           </nav>
         </div>
@@ -276,7 +332,7 @@ export const CursoDetalleDocente = () => {
         </div>
       </section>
 
-      {/* Modal de Invitación de Alumnos y Archivado */}
+      {/* Modal de Invitación de Alumnos y Archivado (Solo si no está archivado) */}
       {!esArchivado && (
         <>
           <InvitarAlumnosModal
@@ -295,6 +351,15 @@ export const CursoDetalleDocente = () => {
           />
         </>
       )}
+
+      {/* Modal de Exportación de Planilla (Permitido tanto en activos como archivados) */}
+      <ExportarCursoModal
+        open={openExportarModal}
+        onClose={() => setOpenExportarModal(false)}
+        onConfirm={handleConfirmExportar}
+        curso={curso}
+        isLoading={isExportando}
+      />
     </main>
   );
 };

@@ -1,4 +1,5 @@
-import { get, post, deleteRequest } from "@/api";
+import { get, post, deleteRequest, apiClient } from "@/api";
+import { downloadBlob, getFilenameFromContentDisposition } from "@/utils";
 import type {
   ApiResponse,
   CursoRequestDTO,
@@ -38,6 +39,35 @@ export const cursoService = {
   },
 
   /**
+   * Envía la petición POST http://localhost:8080/cursos/{id}/exportar
+   * Descarga la planilla de calificaciones del curso en formato Excel (.xlsx) y retorna el nombre del archivo.
+   */
+  exportarCurso: async (
+    id: number,
+    fallbackNombreCurso?: string
+  ): Promise<string> => {
+    const response = await apiClient.post<Blob>(
+      `/cursos/${id}/exportar`,
+      null,
+      {
+        responseType: "blob",
+      }
+    );
+
+    const safeCursoName = (fallbackNombreCurso || `${id}`)
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-");
+    const defaultFilename = `curso_${safeCursoName}_unqlassroom.xlsx`;
+
+    const disposition = response.headers["content-disposition"] as string | undefined;
+    const filename = getFilenameFromContentDisposition(disposition, defaultFilename);
+
+    downloadBlob(response.data, filename);
+    return filename;
+  },
+
+  /**
    * Envía la petición GET http://localhost:8080/cursos/{id}/alumnos
    */
   obtenerAlumnos: (id: number): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
@@ -73,6 +103,7 @@ export const {
   obtenerCursos,
   obtenerCursoPorId,
   archivarCurso,
+  exportarCurso,
   obtenerAlumnos,
   agregarAlumnos,
   eliminarAlumno,
