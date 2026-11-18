@@ -6,3 +6,4 @@ export * from "./useAsignacionDetalleAlumno";
 export * from "./useAuth";
 export * from "./useSseListener";
 export * from "./useDatosPersonalesForm";
+export * from "./useTheme";
