@@ -222,7 +222,7 @@ export function AlumnosTab({
                     <th className="py-3.5 px-5">Estado en Curso</th>
                     <th className="py-3.5 px-5">Membresía en GitHub</th>
                     {puedeDarDeBaja && (
-                      <th className="py-3.5 px-5 text-right">Acción</th>
+                      <th className="py-3.5 px-5 text-left">Acción</th>
                     )}
                   </tr>
                 </thead>
@@ -290,7 +290,7 @@ export function AlumnosTab({
 
                       {/* Acciones */}
                       {puedeDarDeBaja && (
-                        <td className="py-4 px-5 text-right whitespace-nowrap">
+                        <td className="py-4 px-5 text-left whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => {
