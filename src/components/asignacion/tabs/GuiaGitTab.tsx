@@ -176,10 +176,10 @@ export function GuiaGitTab({ subSeccionActiva, asignacion }: GuiaGitTabProps) {
               <img
                 src={githubIcon}
                 alt="GitHub"
-                className="w-4 h-4 opacity-80"
+                className="w-4 h-4 opacity-80 dark:invert"
               />
               <span>GitHub Actions</span>
-              <span className="text-muted-foreground text-xs">↗</span>
+              <span className="text-muted-foreground dark:text-neutral-300 text-xs">↗</span>
             </a>
           </div>
         )}

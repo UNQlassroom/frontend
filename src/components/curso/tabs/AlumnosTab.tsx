@@ -117,7 +117,7 @@ export function AlumnosTab({
               <img
                 src={circleAddIcon}
                 alt="Invitar"
-                className="w-4 h-4 brightness-0 invert"
+                className="w-4 h-4 brightness-0 invert dark:invert-0"
               />
               <span>Invitar alumnos</span>
             </button>
@@ -160,7 +160,7 @@ export function AlumnosTab({
                 <img
                   src={circleAddIcon}
                   alt="Invitar"
-                  className="w-3.5 h-3.5 brightness-0 invert"
+                  className="w-3.5 h-3.5 brightness-0 invert dark:invert-0"
                 />
                 <span>Invitar primer alumno</span>
               </button>

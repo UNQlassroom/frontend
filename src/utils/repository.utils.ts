@@ -8,21 +8,21 @@ export function getEstadoCIInfo(estado?: string | null): EstadoCIInfo {
     case "success":
       return {
         label: "CI exitoso",
-        badgeClass: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+        badgeClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
         dotClass: "bg-emerald-500",
         type: "success",
       };
     case "failure":
       return {
         label: "CI fallido",
-        badgeClass: "bg-rose-500/10 text-rose-600 border border-rose-500/20",
+        badgeClass: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
         dotClass: "bg-rose-500",
         type: "failure",
       };
     case "pending":
       return {
         label: "CI en ejecución",
-        badgeClass: "bg-amber-100 text-amber-600 border border-amber-500/25",
+        badgeClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
         dotClass: "bg-amber-500",
         type: "pending",
       };
@@ -45,20 +45,20 @@ export function getBadgeEstadoEntrega(estado: EstadoEntrega) {
     case "corregido":
       return {
         label: "Corregido",
-        classes: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+        classes: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
         dotColor: "bg-emerald-500",
       };
     case "entregado":
       return {
         label: "Entregado",
-        classes: "bg-sky-500/10 text-sky-600 border border-sky-500/20",
+        classes: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20",
         dotColor: "bg-sky-500",
       };
     case "pendiente":
     default:
       return {
         label: "Pendiente",
-        classes: "bg-amber-100 text-amber-600 dark:text-amber-400 border border-amber-500/25",
+        classes: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
         dotColor: "bg-amber-500",
       };
   }

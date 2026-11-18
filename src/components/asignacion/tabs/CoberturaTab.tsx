@@ -92,7 +92,7 @@ export function CoberturaTab({
             Cobertura de Tests y Métricas
           </h2>
           <p className="text-xs text-muted-foreground">
-            Porcentaje de líneas cubiertas por pruebas unitarias y resultado de
+            Porcentaje de líneas cubiertas y resultado de
             ejecución de la suite.
           </p>
         </div>
@@ -161,7 +161,7 @@ export function CoberturaTab({
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Porcentaje de líneas cubiertas por pruebas unitarias.
+                  Porcentaje de líneas cubiertas.
                 </p>
               </div>
 
@@ -226,7 +226,7 @@ export function CoberturaTab({
                     />
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    Línea divisoria marca el objetivo de la cátedra ({umbral}%).
+                    La línea divisoria marca el objetivo del curso ({umbral}%).
                   </p>
                 </div>
               </div>

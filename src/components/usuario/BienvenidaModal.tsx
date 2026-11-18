@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { useAuth, useDatosPersonalesForm } from "@/hooks";
 import { usuarioService } from "@/services";
-import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
+import unqlassroomLogo from "@/assets/unqlassroom_circled_logo.svg";
 import { DatosPersonalesInputs } from "./DatosPersonalesInputs";
 import {
   validarDatosUsuario,

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks";
-import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
+import unqlassroomLogo from "@/assets/unqlassroom_circled_logo.svg";
 import { UserMenu } from "./UserMenu";
 import { BienvenidaModal } from "@/components/usuario";
 

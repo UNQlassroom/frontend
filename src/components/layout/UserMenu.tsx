@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import { Archive, BookOpen, ChevronDown, LogOut, User } from "lucide-react";
-import { useAuth } from "@/hooks";
+import {Archive, BookOpen, ChevronDown, Circle, LogOut, Moon, Sun, User} from "lucide-react";
+import { useAuth, useTheme } from "@/hooks";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui";
 import { MisDatosModal } from "@/components/usuario";
 
 export const UserMenu = () => {
   const { user, isDocente, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMisDatosOpen, setIsMisDatosOpen] = useState(false);
   const navigate = useNavigate();
@@ -82,21 +83,6 @@ export const UserMenu = () => {
             )}
           </div>
 
-          {/* Opción Mis datos */}
-          <div className="py-1.5 border-b border-line/70 space-y-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setIsMisDatosOpen(true);
-              }}
-              className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-line/40 transition-colors cursor-pointer text-left"
-            >
-              <User className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>Mis datos</span>
-            </button>
-          </div>
-
           {/* Opciones de navegación y configuración para docentes */}
           {isDocente && (
             <div className="py-1.5 border-b border-line/70 space-y-0.5">
@@ -127,6 +113,59 @@ export const UserMenu = () => {
               </button>
             </div>
           )}
+
+          {/* Opción Alternar modo (Claro / Oscuro) */}
+          <div className="py-1.5 border-b border-line/70 space-y-0.5">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              role="switch"
+              aria-checked={theme === "dark"}
+              aria-label="Alternar modo"
+              className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-line/40 transition-colors cursor-pointer text-left"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                {theme === "dark" ? (
+                  <Moon className="w-4 h-4 text-sky-400 shrink-0 transition-transform duration-200" />
+                ) : (
+                  <Sun className="w-4 h-4 text-amber-500 shrink-0 transition-transform duration-200" />
+                )}
+                <span className="truncate">Alternar modo</span>
+              </div>
+              <div
+                className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out ${
+                  theme === "dark" ? "bg-indigo-600" : "bg-neutral-300 dark:bg-neutral-700"
+                }`}
+              >
+                <span
+                  className={`inline-flex h-3.5 w-3.5 items-center justify-center transform rounded-full bg-white shadow-xs transition-transform duration-200 ease-in-out ${
+                    theme === "dark" ? "translate-x-4.5" : "translate-x-1"
+                  }`}
+                >
+                  {theme === "dark" ? (
+                    <Circle className="w-2.5 h-2.5 text-indigo-600" />
+                  ) : (
+                    <Circle className="w-2.5 h-2.5 text-amber-500" />
+                  )}
+                </span>
+              </div>
+            </button>
+          </div>
+
+          {/* Opción Mis datos */}
+          <div className="py-1.5 border-b border-line/70 space-y-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                setIsMisDatosOpen(true);
+              }}
+              className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-line/40 transition-colors cursor-pointer text-left"
+            >
+              <User className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Mis datos</span>
+            </button>
+          </div>
 
           {/* Acción de cierre de sesión */}
           <div className="pt-1.5">

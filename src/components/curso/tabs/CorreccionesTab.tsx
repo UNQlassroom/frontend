@@ -453,7 +453,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                 <img
                   src={githubIcon}
                   alt="GitHub"
-                  className="w-4 h-4 opacity-60"
+                  className="w-4 h-4 opacity-60 dark:invert"
                 />
               }
             />
@@ -632,7 +632,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                   <img
                                     src={githubIcon}
                                     alt="GitHub"
-                                    className="w-4 h-4 opacity-80"
+                                    className="w-4 h-4 opacity-80 dark:invert"
                                   />
                                   <span className="truncate max-w-[220px]">
                                     {grupo.repoNombre}
@@ -661,7 +661,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                               <img
                                 src={githubIcon}
                                 alt="GitHub"
-                                className="w-4 h-4 opacity-80"
+                                className="w-4 h-4 opacity-80 dark:invert"
                               />
                               <span>Ver todos en GitHub ({totalGrupoCorrecciones})</span>
                               <span className="text-xs text-muted-foreground">
@@ -773,7 +773,7 @@ export function CorreccionesTab({ curso }: CorreccionesTabProps) {
                                     <img
                                         src={githubIcon}
                                         alt="GitHub"
-                                        className="w-4 h-4 opacity-80"
+                                        className="w-4 h-4 opacity-80 dark:invert"
                                     />
                                     <span>Ver en GitHub</span>
                                     <span className="text-xs">↗</span>

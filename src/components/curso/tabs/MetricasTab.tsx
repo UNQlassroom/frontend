@@ -359,7 +359,7 @@ export function MetricasTab({
                     <img
                       src={githubIcon}
                       alt="GitHub"
-                      className="w-4 h-4 opacity-60"
+                      className="w-4 h-4 opacity-60 dark:invert"
                     />
                   }
                 />
@@ -502,7 +502,7 @@ export function MetricasTab({
                             <img
                               src={githubIcon}
                               alt="GitHub"
-                              className="w-4 h-4 opacity-80 shrink-0"
+                              className="w-4 h-4 opacity-80 shrink-0 dark:invert"
                             />
                             <span className="truncate">{item.repoNombre}</span>
                             <span className="text-xs text-muted-foreground shrink-0">

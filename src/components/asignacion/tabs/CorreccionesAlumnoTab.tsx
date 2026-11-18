@@ -51,7 +51,7 @@ export function CorreccionesAlumnoTab({
     <section className="rounded-2xl border border-line bg-panel p-6 sm:p-7 shadow-xs space-y-4 animate-rise">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-line">
         <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-          <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80" />
+          <img src={githubIcon} alt="GitHub" className="w-4 h-4 opacity-80 dark:invert" />
           <span>Correcciones del docente en GitHub</span>
           <span className="rounded-full bg-line/60 px-2.5 py-0.5 text-xs text-muted-foreground font-semibold">
             {cantIssues}
@@ -69,7 +69,7 @@ export function CorreccionesAlumnoTab({
             <img
               src={githubIcon}
               alt="GitHub"
-              className="w-4 h-4 opacity-80"
+              className="w-4 h-4 opacity-80 dark:invert"
             />
             <span>Ver todos en GitHub</span>
             <span className="text-xs text-muted-foreground">↗</span>
@@ -192,10 +192,10 @@ export function CorreccionesAlumnoTab({
                       <img
                         src={githubIcon}
                         alt="GitHub"
-                        className="w-3.5 h-3.5 opacity-80"
+                        className="w-3.5 h-3.5 opacity-80 dark:invert"
                       />
                       <span>Ver en GitHub</span>
-                      <span className="text-muted-foreground text-[11px]">↗</span>
+                      <span className="text-muted-foreground dark:text-neutral-300 text-[11px]">↗</span>
                     </a>
                   </div>
                 </div>
