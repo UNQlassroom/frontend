@@ -189,12 +189,7 @@ export function AsignacionesAlumnoList({
                       </span>
 
                       {/* Badge de Estado de Entrega */}
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-semibold ${badge.classes}`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${badge.dotColor}`} />
-                        <span>{badge.label}</span>
-                      </span>
+                      <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 font-semibold ${badge.classes}`}>{badge.label}</span>
 
                       {/* Estado de creación de repo si aún no existe */}
                       {!asig.repoUrl && (

@@ -57,12 +57,7 @@ export function GeneralTab({
               <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                 Estado de tu Entrega
               </h2>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-xs font-semibold ${badge.classes}`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${badge.dotColor}`} />
-                <span>{badge.label}</span>
-              </span>
+              <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ${badge.classes}`}>{badge.label}</span>
             </div>
 
             <div className="space-y-2 text-xs">
@@ -101,10 +96,10 @@ export function GeneralTab({
                     <img
                       src={githubIcon}
                       alt="GitHub"
-                      className="w-4 h-4 opacity-80"
+                      className="w-4 h-4 opacity-80 dark:invert"
                     />
                     <span>Ver en GitHub</span>
-                    <span className="text-muted-foreground text-[11px]">↗</span>
+                    <span className="text-muted-foreground dark:text-neutral-300 text-[11px]">↗</span>
                   </a>
                 </div>
               )}

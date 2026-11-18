@@ -520,7 +520,7 @@ export function CrearAsignacionModal({
                                 }`}
                               >
                                 <span>@{alumno.username}</span>
-                                {estaSeleccionado && <span>✓</span>}
+                                {estaSeleccionado}
                               </button>
                             );
                           })}

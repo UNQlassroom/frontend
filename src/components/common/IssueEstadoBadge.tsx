@@ -17,7 +17,7 @@ export function IssueEstadoBadge({
     case "PENDIENTE":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-600 dark:text-amber-400 border border-amber-500/25 ${className}`}
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 ${className}`}
           title="El alumno aún no ha enviado commits posteriores"
         >
           {showIcon && (

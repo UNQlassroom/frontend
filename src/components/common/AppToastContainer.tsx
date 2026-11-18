@@ -1,7 +1,10 @@
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "@/hooks";
 
 export const AppToastContainer = () => {
+  const { theme } = useTheme();
+
   return (
     <ToastContainer
       position="top-right"
@@ -13,7 +16,7 @@ export const AppToastContainer = () => {
       pauseOnFocusLoss
       draggable
       pauseOnHover
-      theme="light"
+      theme={theme}
       limit={4}
     />
   );
