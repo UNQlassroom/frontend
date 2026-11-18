@@ -4,3 +4,4 @@ export * from "./repository.utils";
 export * from "./apiError.utils";
 export * from "./toast.utils";
 export * from "./validation.utils";
+export * from "./download.utils";
