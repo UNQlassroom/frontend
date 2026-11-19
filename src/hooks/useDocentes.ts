@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { obtenerDocentes } from "@/services";
 import type { CursoDocentesResponseDTO, DocenteResponseDTO } from "@/types";
 import { resolveApiError } from "@/utils";
@@ -9,6 +9,12 @@ export const useDocentes = (initialDocentes: DocenteResponseDTO[] = []) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const cursoIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      cursoIdRef.current = null;
+    };
+  }, []);
 
   const cargarDocentes = useCallback(
     async (cursoId: number): Promise<CursoDocentesResponseDTO | null> => {
@@ -43,7 +49,7 @@ export const useDocentes = (initialDocentes: DocenteResponseDTO[] = []) => {
     if (!activeCursoId || (event.cursoId !== null && event.cursoId !== activeCursoId)) {
       return;
     }
-    obtenerDocentes(activeCursoId)
+    obtenerDocentes(activeCursoId, { skipErrorToast: true })
       .then((res) => {
         if (cursoIdRef.current === activeCursoId) {
           setDocentes(res.data.docentes);

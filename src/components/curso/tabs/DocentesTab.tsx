@@ -334,12 +334,12 @@ export function DocentesTab({
                         {/* Acción */}
                         {puedeDarDeBaja && (
                           <td className="py-4 px-5 text-left whitespace-nowrap">
-                            <span
+                            <div
                               title={tooltipBaja}
                               className={
                                 esUnicoDocente
-                                  ? "inline-flex cursor-not-allowed"
-                                  : "inline-flex"
+                                  ? "relative inline-flex items-center group/baja cursor-not-allowed"
+                                  : "relative inline-flex items-center"
                               }
                             >
                               <button
@@ -352,11 +352,20 @@ export function DocentesTab({
                                 }}
                                 title={tooltipBaja}
                                 aria-label={tooltipBaja}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/50 transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:bg-rose-500/10 disabled:hover:border-rose-500/30"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/50 transition-colors cursor-pointer disabled:opacity-45 disabled:pointer-events-none"
                               >
                                 <span>Dar de baja</span>
                               </button>
-                            </span>
+
+                              {esUnicoDocente && (
+                                <div
+                                  role="tooltip"
+                                  className="pointer-events-none invisible opacity-0 group-hover/baja:visible group-hover/baja:opacity-100 transition-opacity duration-150 absolute right-full mr-2 top-1/2 -translate-y-1/2 z-30 whitespace-nowrap rounded-lg border border-line bg-panel2 px-3 py-1.5 text-xs font-medium text-foreground shadow-lg"
+                                >
+                                  {TOOLTIP_UNICO_DOCENTE}
+                                </div>
+                              )}
+                            </div>
                           </td>
                         )}
                       </tr>
