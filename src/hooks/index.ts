@@ -1,5 +1,6 @@
 export * from "./useCursos";
 export * from "./useAlumnos";
+export * from "./useDocentes";
 export * from "./useCursoDetalle";
 export * from "./useAsignacionesAlumno";
 export * from "./useAsignacionDetalleAlumno";

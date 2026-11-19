@@ -1,15 +1,18 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { obtenerDocentes } from "@/services";
 import type { CursoDocentesResponseDTO, DocenteResponseDTO } from "@/types";
 import { resolveApiError } from "@/utils";
+import { useSseListener } from "./useSseListener";
 
 export const useDocentes = (initialDocentes: DocenteResponseDTO[] = []) => {
   const [docentes, setDocentes] = useState<DocenteResponseDTO[]>(initialDocentes);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const cursoIdRef = useRef<number | null>(null);
 
   const cargarDocentes = useCallback(
     async (cursoId: number): Promise<CursoDocentesResponseDTO | null> => {
+      cursoIdRef.current = cursoId;
       setIsLoading(true);
       setError(null);
       try {
@@ -30,8 +33,26 @@ export const useDocentes = (initialDocentes: DocenteResponseDTO[] = []) => {
   );
 
   const limpiar = useCallback(() => {
+    cursoIdRef.current = null;
     setError(null);
   }, []);
+
+  // Refresco silencioso cuando un docente acepta la invitación en GitHub (MIEMBRO_ACTIVADO)
+  useSseListener("MIEMBRO_ACTIVADO", (event) => {
+    const activeCursoId = cursoIdRef.current;
+    if (!activeCursoId || (event.cursoId !== null && event.cursoId !== activeCursoId)) {
+      return;
+    }
+    obtenerDocentes(activeCursoId)
+      .then((res) => {
+        if (cursoIdRef.current === activeCursoId) {
+          setDocentes(res.data.docentes);
+        }
+      })
+      .catch(() => {
+        // Ignorar errores en refresco silencioso por SSE
+      });
+  });
 
   return {
     docentes,

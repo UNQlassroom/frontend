@@ -14,6 +14,8 @@ export interface CursoRequestDTO {
 export interface DocenteResponseDTO {
   id: number;
   username: string;
+  role?: string | null;
+  state?: "active" | "pending" | string | null;
   nombreCompleto?: string | null;
   email?: string | null;
   dni?: string | null;
