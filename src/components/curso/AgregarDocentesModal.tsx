@@ -1,0 +1,273 @@
+import { useState } from "react";
+import * as React from "react";
+import { agregarDocentes } from "@/services";
+import type { CursoResponseDTO, DocenteResponseDTO } from "@/types";
+import { isValidGitHubUsername, resolveApiError } from "@/utils";
+
+export interface AgregarDocentesModalProps {
+  open: boolean;
+  onClose: () => void;
+  curso: CursoResponseDTO;
+  onSuccess?: (docentesActualizados: DocenteResponseDTO[]) => void;
+}
+
+export function AgregarDocentesModal({
+  open,
+  onClose,
+  curso,
+  onSuccess,
+}: AgregarDocentesModalProps) {
+  const [usernames, setUsernames] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successCount, setSuccessCount] = useState<number | null>(null);
+
+  if (!open) return null;
+
+  const handleAddUsername = () => {
+    const clean = inputValue.trim().replace(/^@/, "");
+    if (!clean) return;
+
+    if (!isValidGitHubUsername(clean)) {
+      setError("El formato del usuario de GitHub no es válido.");
+      return;
+    }
+
+    const exists = usernames.some(
+      (u) => u.toLowerCase() === clean.toLowerCase()
+    );
+    if (!exists) {
+      setUsernames((prev) => [...prev, clean]);
+    }
+    setInputValue("");
+    setError(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddUsername();
+    }
+  };
+
+  const handleRemove = (usernameToRemove: string) => {
+    setUsernames((prev) => prev.filter((u) => u !== usernameToRemove));
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const finalUsernames = [...usernames];
+    const pending = inputValue.trim().replace(/^@/, "");
+    if (pending) {
+      if (!isValidGitHubUsername(pending)) {
+        setError("El formato del usuario de GitHub no es válido.");
+        return;
+      }
+
+      const exists = finalUsernames.some(
+        (u) => u.toLowerCase() === pending.toLowerCase()
+      );
+      if (!exists) {
+        finalUsernames.push(pending);
+        setUsernames(finalUsernames);
+      }
+      setInputValue("");
+    }
+
+    if (finalUsernames.length === 0) {
+      setError("Ingresá al menos un usuario de GitHub para agregar.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await agregarDocentes(curso.id, {
+        usernames: finalUsernames,
+      });
+      setSuccessCount(finalUsernames.length);
+      onSuccess?.(response.data.docentes);
+    } catch (err: unknown) {
+      // El interceptor global de Axios muestra el toast amigable correspondiente
+      const resolved = resolveApiError(err);
+      setError(resolved?.message || "Ocurrió un error al agregar docentes.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (isLoading) return;
+    setUsernames([]);
+    setInputValue("");
+    setError(null);
+    setSuccessCount(null);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-background/60 backdrop-blur-[2px] p-4">
+      <div className="w-full max-w-2xl rounded-2xl border border-line bg-panel2 p-7 sm:p-8 shadow-xl flex flex-col animate-rise">
+        {/* Header */}
+        <div className="flex items-start justify-between pb-4 border-b border-line">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
+              Gestión de docentes
+            </p>
+            <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <span>Agregar docentes</span>
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Comisión {curso.comision} · Semestre {curso.semestre} · Año{" "}
+              {curso.anio}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={isLoading}
+            className="rounded-lg p-2 text-sm text-muted-foreground hover:text-foreground hover:bg-line/40 transition-colors cursor-pointer disabled:opacity-50"
+            aria-label="Cerrar modal"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Contenido */}
+        {successCount !== null ? (
+          <div
+            data-testid="docente-success-feedback"
+            className="py-8 text-center space-y-4"
+          >
+            <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center mx-auto text-2xl font-bold">
+              ✓
+            </div>
+            <div>
+              <h3 className="font-display text-xl font-bold text-foreground">
+                ¡Docentes incorporados!
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Se {successCount === 1 ? "agregó 1 docente" : `agregaron ${successCount} docentes`} al curso.
+              </p>
+            </div>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="rounded-xl bg-primary px-6 py-2.5 text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                Listo
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form
+            data-testid="agregar-docentes-form"
+            onSubmit={handleSubmit}
+            className="py-5 space-y-5"
+          >
+            <div>
+              <label
+                htmlFor="docente-github-username-input"
+                className="mb-2 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
+              >
+                Usuarios de GitHub
+              </label>
+
+              {/* Área interactiva con burbujas e input */}
+              <div className="min-h-[110px] w-full rounded-xl border border-line bg-background p-3 flex flex-wrap gap-2.5 items-start transition-colors focus-within:border-primary">
+                {usernames.map((u) => (
+                  <span
+                    key={u}
+                    data-testid={`docente-chip-${u}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-foreground animate-rise"
+                  >
+                    <span>@{u}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(u)}
+                      disabled={isLoading}
+                      className="rounded-full hover:bg-foreground/10 p-0.5 text-muted-foreground hover:text-foreground cursor-pointer text-xs leading-none"
+                      title="Eliminar"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
+
+                <input
+                  id="docente-github-username-input"
+                  data-testid="docente-username-input"
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                    setError(null);
+                  }}
+                  onKeyDown={handleKeyDown}
+                  disabled={isLoading}
+                  placeholder={
+                    usernames.length === 0
+                      ? "Escribí un usuario docente y presioná Enter..."
+                      : "Escribí otro y presioná Enter..."
+                  }
+                  className="flex-1 min-w-[220px] bg-transparent outline-none py-1.5 px-2 text-base placeholder:text-muted-foreground/60"
+                />
+              </div>
+
+              <p className="mt-2 text-xs text-muted-foreground">
+                Presioná{" "}
+                <kbd className="rounded border border-line px-1.5 py-0.5 bg-panel text-xs">
+                  Enter
+                </kbd>{" "}
+                luego de cada usuario para agregarlo como burbuja.
+              </p>
+            </div>
+
+            {error && (
+              <div
+                data-testid="docente-error-message"
+                className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5"
+              >
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+
+            {/* Footer con botones */}
+            <div className="pt-4 border-t border-line flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                {usernames.length}{" "}
+                {usernames.length === 1 ? "docente listo" : "docentes listos"}
+              </span>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isLoading}
+                  className="rounded-xl px-5 py-2.5 text-sm sm:text-base font-medium text-muted-foreground hover:text-foreground hover:bg-line/30 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  data-testid="docente-submit-button"
+                  disabled={
+                    isLoading || (usernames.length === 0 && !inputValue.trim())
+                  }
+                  className="rounded-xl bg-primary px-6 py-2.5 text-sm sm:text-base font-semibold text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50"
+                >
+                  {isLoading ? "Agregando..." : "Agregar docentes"}
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
