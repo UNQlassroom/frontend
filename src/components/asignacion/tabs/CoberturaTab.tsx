@@ -339,31 +339,44 @@ export function CoberturaTab({
                 </div>
               </div>
 
-              {/* Metadatos del reporte: Commit (link estilo CI) y Actualizado */}
+              {/* Metadatos del reporte: Commit (link estilo CI), Rama y Actualizado */}
               <div className="pt-3 border-t border-line flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-                {nombreCommit ? (
-                  <div className="inline-flex items-center gap-1.5 min-w-0">
-                    <span className="shrink-0">Commit:</span>
-                    {commitUrl ? (
-                      <a
-                        href={commitUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors inline-flex items-center gap-1.5 group max-w-xs sm:max-w-md truncate"
-                        title="Ver commit en GitHub"
-                      >
-                        <span className="truncate">{nombreCommit}</span>
-                        <span className="text-muted-foreground group-hover:text-primary text-[10px] font-bold transition-colors shrink-0">
-                          ↗
+                <div className="flex flex-wrap items-center gap-3 min-w-0">
+                  {nombreCommit ? (
+                    <div className="inline-flex items-center gap-1.5 min-w-0">
+                      <span className="shrink-0">Commit:</span>
+                      {commitUrl ? (
+                        <a
+                          href={commitUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors inline-flex items-center gap-1.5 group max-w-xs sm:max-w-md truncate"
+                          title="Ver commit en GitHub"
+                        >
+                          <span className="truncate">{nombreCommit}</span>
+                          <span className="text-muted-foreground group-hover:text-primary text-[10px] font-bold transition-colors shrink-0">
+                            ↗
+                          </span>
+                        </a>
+                      ) : (
+                        <span className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground truncate max-w-xs sm:max-w-md" title={nombreCommit}>
+                          {nombreCommit}
                         </span>
-                      </a>
-                    ) : (
-                      <span className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground truncate max-w-xs sm:max-w-md">
-                        {nombreCommit}
+                      )}
+                    </div>
+                  ) : null}
+                  {asignacion.rama ? (
+                    <div className="inline-flex items-center gap-1.5 shrink-0">
+                      <span className="shrink-0">Rama:</span>
+                      <span
+                        className="rounded-md border border-line bg-panel px-2 py-0.5 text-xs text-muted-foreground font-mono inline-block max-w-[130px] sm:max-w-[160px] truncate align-middle"
+                        title={`Rama: ${asignacion.rama}`}
+                      >
+                        {asignacion.rama}
                       </span>
-                    )}
-                  </div>
-                ) : null}
+                    </div>
+                  ) : null}
+                </div>
                 {metricas?.fechaActualizacion ? (
                   <span className="shrink-0">
                     Actualizado:{" "}

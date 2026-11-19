@@ -436,7 +436,7 @@ export const GUIA_GIT_TEMAS: GuiaTema[] = [
         numero: 3,
         titulo: "Consultar el diagnóstico en esta plataforma",
         descripcion:
-          "Una vez que el pipeline finalice, volvé a la pestaña 'Estado Técnico > CI/CD' para ver el resultado de las pruebas, los tests pasados y, si hubo fallos, el fragmento exacto del log de compilación.",
+          "Una vez que el pipeline finalice, volvé a la pestaña 'Estado Técnico > Integración Continua (CI)' para ver el resultado de las pruebas, los tests pasados y, si hubo fallos, el fragmento exacto del log de compilación.",
       },
     ],
   },

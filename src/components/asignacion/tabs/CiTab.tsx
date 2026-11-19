@@ -58,7 +58,7 @@ export function CiTab({
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-line">
         <div className="space-y-1">
           <h2 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-            Integración Continua (CI/CD)
+            Integración Continua (CI)
           </h2>
           <p className="text-xs text-muted-foreground">
             Estado de compilación y ejecución del pipeline de GitHub Actions.
@@ -75,24 +75,41 @@ export function CiTab({
             Último commit analizado por CI
           </span>
           {asignacion.ultimoCommit ? (
-            <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs min-w-0">
               {commitUrl ? (
                 <a
                   href={commitUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors inline-flex items-center gap-1.5 group"
+                  className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors inline-flex items-center gap-1.5 group max-w-xs sm:max-w-md min-w-0 truncate"
                   title="Ver commit en GitHub"
                 >
-                  <span>{obtenerPrimerLineaCommit(asignacion.ultimoCommit)}</span>
-                  <span className="text-muted-foreground group-hover:text-primary text-[10px] transition-colors">
+                  <span className="truncate">{obtenerPrimerLineaCommit(asignacion.ultimoCommit)}</span>
+                  <span className="text-muted-foreground group-hover:text-primary text-[10px] transition-colors shrink-0">
                     ↗
                   </span>
                 </a>
               ) : (
-                <span className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground">
+                <span
+                  className="rounded border border-line bg-panel px-2 py-0.5 font-semibold text-foreground truncate max-w-xs sm:max-w-md"
+                  title={asignacion.ultimoCommit}
+                >
                   {obtenerPrimerLineaCommit(asignacion.ultimoCommit)}
                 </span>
+              )}
+              {asignacion.rama && (
+                <>
+                  <span className="text-muted-foreground/40">•</span>
+                  <div className="inline-flex items-center gap-1.5 shrink-0 text-muted-foreground">
+                    <span>Rama:</span>
+                    <span
+                      className="rounded-md border border-line bg-panel px-2 py-0.5 text-xs text-muted-foreground font-mono inline-block max-w-[130px] sm:max-w-[160px] truncate align-middle"
+                      title={`Rama: ${asignacion.rama}`}
+                    >
+                      {asignacion.rama}
+                    </span>
+                  </div>
+                </>
               )}
               {asignacion.fechaUltimoCommit && (
                 <>

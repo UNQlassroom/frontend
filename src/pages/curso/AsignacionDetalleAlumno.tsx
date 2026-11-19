@@ -26,7 +26,7 @@ import githubIcon from "@/assets/github_favicon.svg";
 import type { SeccionDetalle } from "@/types";
 
 const subItemsTecnicos: { id: SubSeccionTecnica; label: string }[] = [
-  { id: "ci", label: "Integración Continua (CI/CD)" },
+  { id: "ci", label: "Integración Continua (CI)" },
   { id: "cobertura", label: "Cobertura y Tests" },
   { id: "git", label: "Buenas Prácticas" },
 ];
