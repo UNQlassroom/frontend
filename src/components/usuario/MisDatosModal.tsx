@@ -31,7 +31,7 @@ function MisDatosModalContent({
   onClose,
   onSuccess,
 }: Omit<MisDatosModalProps, "open">) {
-  const { user, isDocente, actualizarUsuario } = useAuth();
+  const { user, actualizarUsuario } = useAuth();
   const {
     nombre,
     setNombre,
@@ -58,7 +58,7 @@ function MisDatosModalContent({
       : 0;
   const isExceeded = previewLength > NOMBRE_MAX_LENGTH;
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const validacion = validarDatosUsuario(nombre, apellido, email, dni);
@@ -165,15 +165,6 @@ function MisDatosModalContent({
                 />
                 <span className="font-semibold text-foreground truncate">
                   @{user.username}
-                </span>
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
-                    isDocente
-                      ? "bg-neutral-800 text-neutral-200 border-neutral-700"
-                      : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                  }`}
-                >
-                  {isDocente ? "Docente" : "Alumno"}
                 </span>
               </div>
             </div>
