@@ -289,18 +289,12 @@ export function DocentesTab({
                                 e.currentTarget.style.display = "none";
                               }}
                             />
-                            <div className="flex items-center gap-2 min-w-0">
-                              <UserDetail
-                                username={docente.username}
-                                nombreCompleto={docente.nombreCompleto}
-                                layout="stacked"
-                              />
-                              {esYo && (
-                                <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary shrink-0">
-                                  Vos
-                                </span>
-                              )}
-                            </div>
+                            <UserDetail
+                              username={docente.username}
+                              nombreCompleto={docente.nombreCompleto}
+                              esUsuarioActual={esYo}
+                              layout="stacked"
+                            />
                           </div>
                         </td>
 
