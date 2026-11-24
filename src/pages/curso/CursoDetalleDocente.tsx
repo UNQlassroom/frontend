@@ -193,11 +193,11 @@ export const CursoDetalleDocente = () => {
               {curso.materia}
             </h1>
 
-            {/* Metadatos Académicos: Materia, Comisión, Semestre */}
+            {/* Metadatos Académicos: Año, Semestre, Comisión */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
-                <span className="text-muted-foreground font-normal">Comisión:</span>
-                <span>{curso.comision}</span>
+                <span className="text-muted-foreground font-normal">Año:</span>
+                <span>{curso.anio}</span>
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
@@ -206,8 +206,8 @@ export const CursoDetalleDocente = () => {
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
-                <span className="text-muted-foreground font-normal">Año:</span>
-                <span>{curso.anio}</span>
+                <span className="text-muted-foreground font-normal">Comisión:</span>
+                <span>{curso.comision}</span>
               </span>
 
               {curso.descripcion && (

@@ -46,7 +46,7 @@ export function CursoCardDocente({ curso }: Props) {
             </h3>
           </div>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
+            Año {curso.anio} · Semestre {curso.semestre} · Comisión {curso.comision}
           </p>
         </div>
 
