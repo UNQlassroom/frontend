@@ -1,6 +1,10 @@
 import { useState, useMemo } from "react";
 import { toast } from "react-toastify";
-import type { AlumnoResponseDTO, CursoResponseDTO } from "@/types";
+import {
+  esDocenteDelCurso,
+  type AlumnoResponseDTO,
+  type CursoResponseDTO,
+} from "@/types";
 import { useAuth } from "@/hooks";
 import { eliminarAlumno } from "@/services";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
@@ -37,12 +41,11 @@ export function AlumnosTab({
   const [errorBaja, setErrorBaja] = useState<string | null>(null);
 
   const esArchivado = Boolean(curso?.archivado);
+  const tieneDocentesEnCurso = Boolean(curso?.docentes?.length);
+  const esDocenteAsignado =
+    !tieneDocentesEnCurso || esDocenteDelCurso(curso, user?.username);
   const puedeDarDeBaja = Boolean(
-    !esArchivado &&
-      isDocente &&
-      curso?.ownerUsername &&
-      user?.username &&
-      curso.ownerUsername === user.username
+    !esArchivado && isDocente && esDocenteAsignado
   );
 
   // Métricas y conteos

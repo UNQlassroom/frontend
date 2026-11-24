@@ -4,6 +4,7 @@ export interface UserDetailProps extends HTMLAttributes<HTMLDivElement> {
   username: string;
   nombreCompleto?: string | null;
   activo?: boolean;
+  esUsuarioActual?: boolean;
   layout?: "stacked" | "inline";
   nameClassName?: string;
   usernameClassName?: string;
@@ -13,6 +14,7 @@ export function UserDetail({
   username,
   nombreCompleto,
   activo = true,
+  esUsuarioActual = false,
   layout = "stacked",
   className = "",
   nameClassName = "",
@@ -31,6 +33,15 @@ export function UserDetail({
       : null);
 
   const esInactivo = !activo;
+
+  const renderBadgeVos = () => {
+    if (!esUsuarioActual) return null;
+    return (
+      <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary shrink-0">
+        Vos
+      </span>
+    );
+  };
 
   const renderBadgeBaja = () => {
     if (!esInactivo) return null;
@@ -57,6 +68,7 @@ export function UserDetail({
           >
             {actualNombreCompleto}
           </span>
+          {renderBadgeVos()}
           <a
             href={`https://github.com/${actualUsername}`}
             target="_blank"
@@ -86,6 +98,7 @@ export function UserDetail({
           >
             {actualNombreCompleto}
           </span>
+          {renderBadgeVos()}
           {renderBadgeBaja()}
         </div>
         <a
@@ -120,6 +133,7 @@ export function UserDetail({
         >
           @{actualUsername}
         </a>
+        {renderBadgeVos()}
         {renderBadgeBaja()}
       </div>
     </div>

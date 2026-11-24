@@ -9,6 +9,19 @@ export interface CursoRequestDTO {
 }
 
 /**
+ * Docente perteneciente al equipo docente de un curso
+ */
+export interface DocenteResponseDTO {
+  id: number;
+  username: string;
+  role?: string | null;
+  state?: "active" | "pending" | string | null;
+  nombreCompleto?: string | null;
+  email?: string | null;
+  dni?: string | null;
+}
+
+/**
  * Respuesta que devuelve el backend para un Curso
  */
 export interface CursoResponseDTO {
@@ -18,8 +31,39 @@ export interface CursoResponseDTO {
   semestre: number;
   comision: number;
   descripcion?: string | null;
-  ownerUsername?: string | null;
   archivado?: boolean;
+  docentes: DocenteResponseDTO[];
+}
+
+/**
+ * Verifica si un username pertenece al equipo docente del curso
+ */
+export const esDocenteDelCurso = (
+  curso?: Pick<CursoResponseDTO, "docentes"> | null,
+  username?: string | null
+): boolean => {
+  if (!curso || !username || !Array.isArray(curso.docentes)) {
+    return false;
+  }
+  const target = username.trim().toLowerCase();
+  return curso.docentes.some(
+    (d) => d?.username?.trim().toLowerCase() === target
+  );
+};
+
+/**
+ * Petición para agregar docentes al equipo docente de un curso
+ */
+export interface AgregarDocentesRequestDTO {
+  usernames: string[];
+}
+
+/**
+ * Respuesta del backend al listar o agregar docentes de un curso
+ */
+export interface CursoDocentesResponseDTO {
+  cursoId: number;
+  docentes: DocenteResponseDTO[];
 }
 
 /**

@@ -11,7 +11,12 @@ export const BACKEND_ERROR_CODES = {
   CURSO_DUPLICADO: "CURSO_DUPLICADO",
   CURSO_NOT_FOUND: "CURSO_NOT_FOUND",
   CURSO_ARCHIVADO: "CURSO_ARCHIVADO",
+  CURSO_SIN_DOCENTES: "CURSO_SIN_DOCENTES",
   CURSO_SIN_GITHUB_REPO_ASOCIADO: "CURSO_SIN_GITHUB_REPO_ASOCIADO",
+  DOCENTE_DUPLICADO: "DOCENTE_DUPLICADO",
+  DOCENTE_NO_ASIGNADO: "DOCENTE_NO_ASIGNADO",
+  DOCENTE_ES_ALUMNO_DEL_CURSO: "DOCENTE_ES_ALUMNO_DEL_CURSO",
+  ALUMNO_ES_DOCENTE_DEL_CURSO: "ALUMNO_ES_DOCENTE_DEL_CURSO",
   NOMBRE_MATERIA_VACIO: "NOMBRE_MATERIA_VACIO",
   ANIO_CURSO_INVALIDO: "ANIO_CURSO_INVALIDO",
   SEMESTRE_INVALIDO: "SEMESTRE_INVALIDO",
@@ -99,9 +104,34 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
     severity: "warning",
     preferBackendMessage: true,
   },
+  [BACKEND_ERROR_CODES.CURSO_SIN_DOCENTES]: {
+    message: "No se puede dar de baja al docente porque el curso debe tener al menos un docente.",
+    severity: "warning",
+    preferBackendMessage: true,
+  },
   [BACKEND_ERROR_CODES.CURSO_SIN_GITHUB_REPO_ASOCIADO]: {
     message: "El curso no tiene un repositorio de GitHub asociado.",
     severity: "warning",
+  },
+  [BACKEND_ERROR_CODES.DOCENTE_DUPLICADO]: {
+    message: "Uno o más docentes ya están asignados al curso.",
+    severity: "warning",
+    preferBackendMessage: true,
+  },
+  [BACKEND_ERROR_CODES.DOCENTE_NO_ASIGNADO]: {
+    message: "El docente indicado no está asignado a este curso.",
+    severity: "warning",
+    preferBackendMessage: true,
+  },
+  [BACKEND_ERROR_CODES.DOCENTE_ES_ALUMNO_DEL_CURSO]: {
+    message: "Uno o más usuarios ya están inscriptos como alumnos en este curso.",
+    severity: "warning",
+    preferBackendMessage: true,
+  },
+  [BACKEND_ERROR_CODES.ALUMNO_ES_DOCENTE_DEL_CURSO]: {
+    message: "Uno o más usuarios ya forman parte del equipo docente de este curso.",
+    severity: "warning",
+    preferBackendMessage: true,
   },
   [BACKEND_ERROR_CODES.NOMBRE_MATERIA_VACIO]: {
     message: "El nombre de la materia no puede estar vacío.",
@@ -216,7 +246,8 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
   },
   [BACKEND_ERROR_CODES.USUARIO_NO_ES_DOCENTE]: {
     message: "Se requieren permisos de docente para esta acción.",
-    severity: "error",
+    severity: "warning",
+    preferBackendMessage: true,
   },
   [BACKEND_ERROR_CODES.NOMBRE_USUARIO_INVALIDO]: {
     message: "El nombre y apellido contiene caracteres inválidos o excede el límite de 35 caracteres.",
@@ -244,8 +275,9 @@ export const ERROR_MESSAGES: Record<string, ErrorDefinition> = {
     preferBackendMessage: true,
   },
   [BACKEND_ERROR_CODES.NO_ES_DOCENTE_DEL_CURSO]: {
-    message: "Solo el docente a cargo del curso puede realizar esta operación.",
+    message: "Solo los docentes del curso pueden realizar esta operación.",
     severity: "error",
+    preferBackendMessage: true,
   },
   [BACKEND_ERROR_CODES.SIN_PERMISO_ACCESO_CURSO]: {
     message: "No tenés acceso a este curso.",

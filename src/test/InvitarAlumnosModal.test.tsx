@@ -27,7 +27,15 @@ describe("InvitarAlumnosModal", () => {
     anio: 2026,
     semestre: 1,
     comision: 1,
-    ownerUsername: "docente",
+    docentes: [
+      {
+        id: 1,
+        username: "docente",
+        nombreCompleto: "Docente Prueba",
+        email: "docente@unq.edu.ar",
+        dni: null,
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -157,6 +165,56 @@ describe("InvitarAlumnosModal", () => {
       backendMessage,
       expect.objectContaining({
         toastId: "api_err_ALUMNO_DUPLICADO",
+      })
+    );
+    expect(mockOnSuccess).not.toHaveBeenCalled();
+  });
+
+  test("Caso alumno ya es docente del curso (ALUMNO_ES_DOCENTE_DEL_CURSO): muestra error inline y toast", async () => {
+    // Arrange
+    const backendMessage =
+      "Los siguientes usuarios ya forman parte del equipo docente del curso: profe-alberto";
+
+    mockAdapter.mockRejectedValueOnce(
+      new AxiosError(
+        "Request failed with status code 400",
+        "ERR_BAD_REQUEST",
+        {} as InternalAxiosRequestConfig,
+        {},
+        {
+          status: 400,
+          statusText: "Bad Request",
+          headers: {},
+          config: {} as InternalAxiosRequestConfig,
+          data: {
+            errorCode: "ALUMNO_ES_DOCENTE_DEL_CURSO",
+            message: backendMessage,
+          },
+        }
+      )
+    );
+
+    render(
+      <InvitarAlumnosModal
+        open={true}
+        onClose={mockOnClose}
+        curso={mockCurso}
+        onSuccess={mockOnSuccess}
+      />
+    );
+
+    await userEvent.type(
+      screen.getByTestId("username-input"),
+      "profe-alberto{enter}"
+    );
+    await userEvent.click(screen.getByTestId("submit-button"));
+
+    const divError = await screen.findByTestId("error-message");
+    expect(divError).toHaveTextContent(backendMessage);
+    expect(toast.warning).toHaveBeenCalledWith(
+      backendMessage,
+      expect.objectContaining({
+        toastId: "api_err_ALUMNO_ES_DOCENTE_DEL_CURSO",
       })
     );
     expect(mockOnSuccess).not.toHaveBeenCalled();

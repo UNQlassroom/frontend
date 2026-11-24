@@ -2,21 +2,24 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Archive, Download, MoreVertical } from "lucide-react";
 import { toast } from "react-toastify";
-import { useCursoDetalle, useAlumnos, useAuth } from "@/hooks";
+import { useCursoDetalle, useAlumnos, useDocentes, useAuth } from "@/hooks";
 import { archivarCurso, exportarCurso } from "@/services";
+import { esDocenteDelCurso, type DocenteResponseDTO } from "@/types";
 import {
   AlumnosTab,
   AsignacionesTab,
   CorreccionesTab,
   MetricasTab,
+  DocentesTab,
   InvitarAlumnosModal,
+  AgregarDocentesModal,
   ArchivarCursoModal,
   ExportarCursoModal,
   ErrorBanner,
 } from "@/components";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui";
 
-type TabType = "alumnos" | "asignaciones" | "metricas" | "correcciones";
+type TabType = "alumnos" | "asignaciones" | "metricas" | "correcciones" | "docentes";
 
 export const CursoDetalleDocente = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,12 +31,16 @@ export const CursoDetalleDocente = () => {
   // Tab activo derivado directamente del query param (?tab=...)
   const tabParam = searchParams.get("tab") as TabType | null;
   const activeTab: TabType =
-    tabParam === "asignaciones" || tabParam === "metricas" || tabParam === "correcciones"
+    tabParam === "asignaciones" ||
+    tabParam === "metricas" ||
+    tabParam === "correcciones" ||
+    tabParam === "docentes"
       ? tabParam
       : "alumnos";
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [openInvitarModal, setOpenInvitarModal] = useState(false);
+  const [openAgregarDocentesModal, setOpenAgregarDocentesModal] = useState(false);
   const [openArchivarModal, setOpenArchivarModal] = useState(false);
   const [openExportarModal, setOpenExportarModal] = useState(false);
   const [isArchivando, setIsArchivando] = useState(false);
@@ -45,6 +52,7 @@ export const CursoDetalleDocente = () => {
     isLoading: isLoadingCurso,
     error: errorCurso,
     cargarCurso,
+    setCurso,
   } = useCursoDetalle(cursoId);
 
   // Hook para obtener la nómina de alumnos matriculados
@@ -55,11 +63,21 @@ export const CursoDetalleDocente = () => {
     cargarAlumnos,
   } = useAlumnos();
 
+  // Hook para obtener el equipo docente del curso
+  const {
+    docentes: docentesCargados,
+    setDocentes,
+    isLoading: isLoadingDocentes,
+    error: errorDocentes,
+    cargarDocentes,
+  } = useDocentes();
+
   useEffect(() => {
     if (cursoId && !isNaN(cursoId)) {
       cargarAlumnos(cursoId);
+      cargarDocentes(cursoId);
     }
-  }, [cursoId, cargarAlumnos]);
+  }, [cursoId, cargarAlumnos, cargarDocentes]);
 
   const handleTabChange = (tab: TabType) => {
     setSearchParams({ tab });
@@ -69,6 +87,17 @@ export const CursoDetalleDocente = () => {
     if (cursoId) {
       cargarAlumnos(cursoId);
     }
+  };
+
+  const handleDocentesUpdated = (docentesActualizados: DocenteResponseDTO[]) => {
+    setDocentes(docentesActualizados);
+    setCurso((prev) =>
+      prev ? { ...prev, docentes: docentesActualizados } : prev
+    );
+  };
+
+  const handleSelfRemoved = () => {
+    navigate("/home", { replace: true });
   };
 
   const handleConfirmArchivar = async () => {
@@ -129,8 +158,12 @@ export const CursoDetalleDocente = () => {
   }
 
   const alumnos = alumnosData?.alumnos || [];
+  const docentes =
+    docentesCargados.length > 0 ? docentesCargados : curso.docentes || [];
   const esArchivado = Boolean(curso.archivado);
-  const esOwner = !curso.ownerUsername || curso.ownerUsername === user?.username;
+  const esDocenteAsignado =
+    !docentes.length ||
+    esDocenteDelCurso({ docentes }, user?.username);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 flex-1 w-full space-y-8 animate-rise">
@@ -160,11 +193,11 @@ export const CursoDetalleDocente = () => {
               {curso.materia}
             </h1>
 
-            {/* Metadatos Académicos: Materia, Comisión, Semestre */}
+            {/* Metadatos Académicos: Año, Semestre, Comisión */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
-                <span className="text-muted-foreground font-normal">Comisión:</span>
-                <span>{curso.comision}</span>
+                <span className="text-muted-foreground font-normal">Año:</span>
+                <span>{curso.anio}</span>
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
@@ -173,8 +206,8 @@ export const CursoDetalleDocente = () => {
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
-                <span className="text-muted-foreground font-normal">Año:</span>
-                <span>{curso.anio}</span>
+                <span className="text-muted-foreground font-normal">Comisión:</span>
+                <span>{curso.comision}</span>
               </span>
 
               {curso.descripcion && (
@@ -186,7 +219,7 @@ export const CursoDetalleDocente = () => {
           </div>
 
           {/* Menú de Opciones (Kebab) del Curso */}
-          {esOwner && (
+          {esDocenteAsignado && (
             <div className="shrink-0 self-start">
               <Popover open={menuOpen} onOpenChange={setMenuOpen}>
                 <PopoverTrigger asChild>
@@ -302,6 +335,28 @@ export const CursoDetalleDocente = () => {
             >
               <span>Métricas</span>
             </button>
+
+            {/* Pestaña Docentes */}
+            <button
+              type="button"
+              onClick={() => handleTabChange("docentes")}
+              className={`inline-flex items-center gap-2.5 py-3.5 px-5 text-sm font-semibold border-b-2 transition-colors cursor-pointer shrink-0 ${
+                activeTab === "docentes"
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-line"
+              }`}
+            >
+              <span>Docentes</span>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  activeTab === "docentes"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-line/60 text-muted-foreground"
+                }`}
+              >
+                {docentes.length}
+              </span>
+            </button>
           </nav>
         </div>
 
@@ -329,10 +384,23 @@ export const CursoDetalleDocente = () => {
           {activeTab === "metricas" && (
             <MetricasTab curso={curso} alumnos={alumnos} />
           )}
+
+          {activeTab === "docentes" && (
+            <DocentesTab
+              curso={curso}
+              docentes={docentes}
+              isLoading={isLoadingDocentes}
+              error={errorDocentes}
+              onRetry={() => cursoId && cargarDocentes(cursoId)}
+              onOpenAgregarModal={() => setOpenAgregarDocentesModal(true)}
+              onDocentesUpdated={handleDocentesUpdated}
+              onSelfRemoved={handleSelfRemoved}
+            />
+          )}
         </div>
       </section>
 
-      {/* Modal de Invitación de Alumnos y Archivado (Solo si no está archivado) */}
+      {/* Modales de modificación (Solo si no está archivado) */}
       {!esArchivado && (
         <>
           <InvitarAlumnosModal
@@ -340,6 +408,13 @@ export const CursoDetalleDocente = () => {
             onClose={() => setOpenInvitarModal(false)}
             curso={curso}
             onSuccess={handleInvitarSuccess}
+          />
+
+          <AgregarDocentesModal
+            open={openAgregarDocentesModal}
+            onClose={() => setOpenAgregarDocentesModal(false)}
+            curso={curso}
+            onSuccess={handleDocentesUpdated}
           />
 
           <ArchivarCursoModal

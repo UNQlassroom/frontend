@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from "axios";
 import { get, post, deleteRequest, apiClient } from "@/api";
 import { downloadBlob, getFilenameFromContentDisposition } from "@/utils";
 import type {
@@ -6,6 +7,8 @@ import type {
   CursoResponseDTO,
   CursoAlumnosResponseDTO,
   AgregarAlumnosRequestDTO,
+  CursoDocentesResponseDTO,
+  AgregarDocentesRequestDTO,
 } from "@/types";
 
 export const cursoService = {
@@ -19,8 +22,14 @@ export const cursoService = {
   /**
    * Envía la petición GET http://localhost:8080/cursos (o GET /cursos?archivados=true)
    */
-  obtenerCursos: (archivados?: boolean): Promise<ApiResponse<CursoResponseDTO[]>> => {
-    const config = archivados !== undefined ? { params: { archivados } } : {};
+  obtenerCursos: (
+    archivados?: boolean,
+    requestConfig: AxiosRequestConfig = {}
+  ): Promise<ApiResponse<CursoResponseDTO[]>> => {
+    const config: AxiosRequestConfig =
+      archivados !== undefined
+        ? { ...requestConfig, params: { ...requestConfig.params, archivados } }
+        : requestConfig;
     return get<CursoResponseDTO[]>("/cursos", config);
   },
 
@@ -70,8 +79,11 @@ export const cursoService = {
   /**
    * Envía la petición GET http://localhost:8080/cursos/{id}/alumnos
    */
-  obtenerAlumnos: (id: number): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
-    return get<CursoAlumnosResponseDTO>(`/cursos/${id}/alumnos`);
+  obtenerAlumnos: (
+    id: number,
+    config: AxiosRequestConfig = {}
+  ): Promise<ApiResponse<CursoAlumnosResponseDTO>> => {
+    return get<CursoAlumnosResponseDTO>(`/cursos/${id}/alumnos`, config);
   },
 
   /**
@@ -96,6 +108,41 @@ export const cursoService = {
   ): Promise<ApiResponse<void>> => {
     return deleteRequest<void>(`/cursos/${cursoId}/alumnos/${username}`);
   },
+
+  /**
+   * Envía la petición GET http://localhost:8080/cursos/{id}/docentes
+   */
+  obtenerDocentes: (
+    id: number,
+    config: AxiosRequestConfig = {}
+  ): Promise<ApiResponse<CursoDocentesResponseDTO>> => {
+    return get<CursoDocentesResponseDTO>(`/cursos/${id}/docentes`, config);
+  },
+
+  /**
+   * Envía la petición POST http://localhost:8080/cursos/{id}/docentes
+   */
+  agregarDocentes: (
+    id: number,
+    data: AgregarDocentesRequestDTO
+  ): Promise<ApiResponse<CursoDocentesResponseDTO>> => {
+    return post<CursoDocentesResponseDTO, AgregarDocentesRequestDTO>(
+      `/cursos/${id}/docentes`,
+      data
+    );
+  },
+
+  /**
+   * Envía la petición DELETE http://localhost:8080/cursos/{cursoId}/docentes/{username}
+   */
+  eliminarDocente: (
+    cursoId: number,
+    username: string
+  ): Promise<ApiResponse<void>> => {
+    return deleteRequest<void>(
+      `/cursos/${cursoId}/docentes/${encodeURIComponent(username)}`
+    );
+  },
 };
 
 export const {
@@ -107,4 +154,7 @@ export const {
   obtenerAlumnos,
   agregarAlumnos,
   eliminarAlumno,
+  obtenerDocentes,
+  agregarDocentes,
+  eliminarDocente,
 } = cursoService;
