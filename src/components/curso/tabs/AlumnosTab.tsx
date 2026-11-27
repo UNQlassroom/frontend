@@ -1,6 +1,10 @@
 import { useState, useMemo } from "react";
 import { toast } from "react-toastify";
-import type { AlumnoResponseDTO, CursoResponseDTO } from "@/types";
+import {
+  esDocenteDelCurso,
+  type AlumnoResponseDTO,
+  type CursoResponseDTO,
+} from "@/types";
 import { useAuth } from "@/hooks";
 import { eliminarAlumno } from "@/services";
 import circleAddIcon from "@/assets/circle_add_favicon.svg";
@@ -37,12 +41,11 @@ export function AlumnosTab({
   const [errorBaja, setErrorBaja] = useState<string | null>(null);
 
   const esArchivado = Boolean(curso?.archivado);
+  const tieneDocentesEnCurso = Boolean(curso?.docentes?.length);
+  const esDocenteAsignado =
+    !tieneDocentesEnCurso || esDocenteDelCurso(curso, user?.username);
   const puedeDarDeBaja = Boolean(
-    !esArchivado &&
-      isDocente &&
-      curso?.ownerUsername &&
-      user?.username &&
-      curso.ownerUsername === user.username
+    !esArchivado && isDocente && esDocenteAsignado
   );
 
   // Métricas y conteos
@@ -117,7 +120,7 @@ export function AlumnosTab({
               <img
                 src={circleAddIcon}
                 alt="Invitar"
-                className="w-4 h-4 brightness-0 invert"
+                className="w-4 h-4 brightness-0 invert dark:invert-0"
               />
               <span>Invitar alumnos</span>
             </button>
@@ -160,7 +163,7 @@ export function AlumnosTab({
                 <img
                   src={circleAddIcon}
                   alt="Invitar"
-                  className="w-3.5 h-3.5 brightness-0 invert"
+                  className="w-3.5 h-3.5 brightness-0 invert dark:invert-0"
                 />
                 <span>Invitar primer alumno</span>
               </button>
@@ -222,7 +225,7 @@ export function AlumnosTab({
                     <th className="py-3.5 px-5">Estado en Curso</th>
                     <th className="py-3.5 px-5">Membresía en GitHub</th>
                     {puedeDarDeBaja && (
-                      <th className="py-3.5 px-5 text-right">Acción</th>
+                      <th className="py-3.5 px-5 text-left">Acción</th>
                     )}
                   </tr>
                 </thead>
@@ -290,7 +293,7 @@ export function AlumnosTab({
 
                       {/* Acciones */}
                       {puedeDarDeBaja && (
-                        <td className="py-4 px-5 text-right whitespace-nowrap">
+                        <td className="py-4 px-5 text-left whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => {

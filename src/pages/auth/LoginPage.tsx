@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks";
 import { STORAGE_KEYS } from "@/constants";
-import unqlassroomLogo from "@/assets/unqlassroom_logo.svg";
+import unqlassroomLogo from "@/assets/unqlassroom_circled_logo.svg";
 import githubLogo from "@/assets/github_favicon.svg";
 
 export const LoginPage = () => {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { obtenerAlumnos } from "@/services";
 import type { CursoAlumnosResponseDTO } from "@/types";
 import { useSseListener } from "./useSseListener";
@@ -8,6 +8,12 @@ export const useAlumnos = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const cursoIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      cursoIdRef.current = null;
+    };
+  }, []);
 
   const cargarAlumnos = useCallback(async (cursoId: number): Promise<CursoAlumnosResponseDTO | null> => {
     cursoIdRef.current = cursoId;
@@ -37,7 +43,7 @@ export const useAlumnos = () => {
     if (!activeCursoId || (event.cursoId !== null && event.cursoId !== activeCursoId)) {
       return;
     }
-    obtenerAlumnos(activeCursoId)
+    obtenerAlumnos(activeCursoId, { skipErrorToast: true })
       .then((res) => {
         if (cursoIdRef.current === activeCursoId) {
           setAlumnosData(res.data);

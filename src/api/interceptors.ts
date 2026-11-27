@@ -22,8 +22,24 @@ export const setUnauthorizedHandler = (handler: UnauthorizedHandler | null): voi
 export const setupResponseInterceptor = (instance: AxiosInstance): void => {
   instance.interceptors.response.use(
     (response) => response,
-    (error: unknown) => {
+    async (error: unknown) => {
       const isAxios = axios.isAxiosError(error);
+
+      // Si la petición esperaba un blob pero el servidor devolvió un error en JSON
+      if (
+        isAxios &&
+        error.response?.data instanceof Blob &&
+        (error.response.data.type?.includes("application/json") ||
+          String(error.response.headers?.["content-type"] || "").includes("application/json"))
+      ) {
+        try {
+          const text = await error.response.data.text();
+          error.response.data = JSON.parse(text);
+        } catch {
+          // Si no es JSON parseable, conservamos los datos originales
+        }
+      }
+
       const skipToast = isAxios && Boolean(error.config?.skipErrorToast);
 
       const resolved = resolveApiError(error);
@@ -35,7 +51,7 @@ export const setupResponseInterceptor = (instance: AxiosInstance): void => {
 
       // Si el backend notificó expiración de sesión (UNAUTHORIZED), cerramos la sesión silenciosamente
       if (resolved?.isUnauthorizedSession && onUnauthorizedCallback) {
-          onUnauthorizedCallback();
+        onUnauthorizedCallback();
       }
 
       // Propagamos el error para que los llamadores puedan manejar flujos específicos si lo desean

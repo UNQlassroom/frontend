@@ -48,7 +48,7 @@ export function VerAlumnosModal({ open, onClose, curso }: VerAlumnosModalProps) 
               {curso.materia}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Comisión {curso.comision} · Semestre {curso.semestre} · Año {curso.anio}
+              Año {curso.anio} · Semestre {curso.semestre} · Comisión {curso.comision}
             </p>
           </div>
           <button

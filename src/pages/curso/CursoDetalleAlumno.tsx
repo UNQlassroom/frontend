@@ -1,6 +1,14 @@
+import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Mail } from "lucide-react";
 import { useCursoDetalle, useAsignacionesAlumno } from "@/hooks";
-import { AsignacionesAlumnoList, PanelHeader, ErrorBanner } from "@/components";
+import {
+  AsignacionesAlumnoList,
+  PanelHeader,
+  ErrorBanner,
+  UserDetail,
+  compararUsuarios,
+} from "@/components";
 
 export const CursoDetalleAlumno = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +28,12 @@ export const CursoDetalleAlumno = () => {
     error: errorAsignaciones,
     cargarAsignaciones,
   } = useAsignacionesAlumno(cursoId);
+
+  const docentes = curso?.docentes;
+  const docentesOrdenados = useMemo(() => {
+    if (!docentes?.length) return [];
+    return [...docentes].sort(compararUsuarios);
+  }, [docentes]);
 
   if (isLoadingCurso) {
     return (
@@ -67,26 +81,27 @@ export const CursoDetalleAlumno = () => {
               <span className="text-xs uppercase tracking-[0.2em] font-semibold text-muted-foreground">
                 Espacio del Alumno
               </span>
-              <span className="text-muted-foreground/40">•</span>
-              <span className="rounded-lg border border-line bg-panel2 px-2.5 py-1 text-xs font-semibold text-foreground">
-                Año {curso.anio}
-              </span>
             </div>
 
             <h1 className="font-suez text-3xl sm:text-4xl tracking-tight text-foreground">
               {curso.materia}
             </h1>
 
-            {/* Metadatos Académicos: Comisión y Semestre */}
+            {/* Metadatos Académicos: Año, Semestre, Comisión */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
-                <span className="text-muted-foreground font-normal">Comisión:</span>
-                <span>{curso.comision}</span>
+                <span className="text-muted-foreground font-normal">Año:</span>
+                <span>{curso.anio}</span>
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
                 <span className="text-muted-foreground font-normal">Semestre:</span>
                 <span>{curso.semestre}° Semestre</span>
+              </span>
+
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-panel2 px-3.5 py-1.5 text-sm font-semibold text-foreground">
+                <span className="text-muted-foreground font-normal">Comisión:</span>
+                <span>{curso.comision}</span>
               </span>
 
               {curso.descripcion && (
@@ -97,6 +112,49 @@ export const CursoDetalleAlumno = () => {
             </div>
           </div>
         </div>
+
+        {/* Equipo docente del curso */}
+        {docentesOrdenados.length > 0 && (
+          <div className="mt-6 pt-5 border-t border-line/70 space-y-3">
+            <p className="text-xs uppercase tracking-[0.18em] font-semibold text-muted-foreground">
+              {docentesOrdenados.length === 1 ? "Docente" : "Equipo docente"}
+            </p>
+            <div className="flex flex-wrap gap-2.5">
+              {docentesOrdenados.map((docente) => (
+                <div
+                  key={docente.username}
+                  className="inline-flex items-center gap-3 rounded-xl border border-line bg-panel2 px-3.5 py-2.5 max-w-full"
+                >
+                  <img
+                    src={`https://github.com/${docente.username}.png?size=64`}
+                    alt={docente.username}
+                    className="w-8 h-8 rounded-full border border-line bg-line/30 object-cover shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                  <div className="min-w-0 flex flex-col">
+                    <UserDetail
+                      username={docente.username}
+                      nombreCompleto={docente.nombreCompleto}
+                      layout="stacked"
+                    />
+                    {docente.email && (
+                      <a
+                        href={`mailto:${docente.email}`}
+                        className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors truncate"
+                        title={`Enviar correo a ${docente.email}`}
+                      >
+                        <Mail className="w-3 h-3 shrink-0 opacity-75" />
+                        <span className="truncate">{docente.email}</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Panel Principal de Asignaciones y Trabajos Prácticos */}

@@ -26,7 +26,7 @@ import githubIcon from "@/assets/github_favicon.svg";
 import type { SeccionDetalle } from "@/types";
 
 const subItemsTecnicos: { id: SubSeccionTecnica; label: string }[] = [
-  { id: "ci", label: "Integración Continua (CI/CD)" },
+  { id: "ci", label: "Integración Continua (CI)" },
   { id: "cobertura", label: "Cobertura y Tests" },
   { id: "git", label: "Buenas Prácticas" },
 ];
@@ -208,12 +208,7 @@ export const AsignacionDetalleAlumno = () => {
                 {asignacion.tipo === "GRUPAL" ? "Grupal" : "Individual"}
               </span>
 
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 font-semibold ${badge.classes}`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${badge.dotColor}`} />
-                <span>{badge.label}</span>
-              </span>
+              <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 font-semibold ${badge.classes}`}>{badge.label}</span>
 
               {asignacion.fechaLimite && (
                 <>
@@ -272,10 +267,10 @@ export const AsignacionDetalleAlumno = () => {
                   <img
                     src={githubIcon}
                     alt="GitHub"
-                    className="w-4 h-4 opacity-80"
+                    className="w-4 h-4 opacity-80 dark:invert"
                   />
                   <span>Ver en GitHub</span>
-                  <span className="text-muted-foreground text-xs">↗</span>
+                  <span className="text-muted-foreground dark:text-neutral-300 text-xs">↗</span>
                 </a>
 
                 {/* Botón integrado: un solo recuadro continuo donde '?' es solo un circulito adentro */}
@@ -393,7 +388,7 @@ export const AsignacionDetalleAlumno = () => {
                 </div>
               </>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-100 px-3.5 py-2 text-xs font-semibold text-amber-700 dark:text-amber-300">
+              <span className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2 text-xs font-semibold text-amber-700 dark:text-amber-300">
                 <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
                 <span>Creando repositorio en GitHub...</span>
               </span>

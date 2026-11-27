@@ -6,7 +6,8 @@ export type KpiVariant =
   | "amber"
   | "emerald"
   | "rose"
-  | "sky";
+  | "sky"
+  | "indigo";
 
 interface KpiCardProps {
   label: string;
@@ -33,27 +34,37 @@ const variantStyles: Record<
   }
 > = {
   default: {
-    selected: "border-primary ring-2 ring-primary/30 bg-panel shadow-sm",
-    unselected: "border-line bg-panel hover:border-foreground/30",
-    labelColor: "text-muted-foreground",
-    valueColor: "text-foreground",
-    subtextColor: "text-muted-foreground",
-    dotColor: "bg-primary",
+    selected:
+      "border-primary ring-2 ring-primary/30 bg-panel shadow-sm dark:border-indigo-500 dark:ring-indigo-500/40 dark:bg-indigo-500/10",
+    unselected:
+      "border-line bg-panel hover:border-foreground/30 dark:border-indigo-500/20 dark:bg-indigo-500/5 dark:hover:border-indigo-500/40",
+    labelColor: "text-muted-foreground dark:text-indigo-300",
+    valueColor: "text-foreground dark:text-indigo-400",
+    subtextColor: "text-muted-foreground dark:text-indigo-300/80",
+    dotColor: "bg-primary dark:bg-indigo-500",
+  },
+  indigo: {
+    selected: "border-indigo-500 ring-2 ring-indigo-500/40 bg-indigo-500/10 shadow-sm",
+    unselected: "border-indigo-500/20 bg-indigo-500/5 hover:border-indigo-500/40",
+    labelColor: "text-indigo-700 dark:text-indigo-300",
+    valueColor: "text-indigo-600 dark:text-indigo-400",
+    subtextColor: "text-indigo-700/80 dark:text-indigo-300/80",
+    dotColor: "bg-indigo-500",
   },
   neutral: {
-    selected: "border-neutral-500 ring-2 ring-neutral-500/30 bg-neutral-200 shadow-sm",
-    unselected: "border-line bg-neutral-200 hover:border-neutral-400",
-    labelColor: "text-muted-foreground",
-    valueColor: "text-foreground",
-    subtextColor: "text-muted-foreground",
-    dotColor: "bg-neutral-400",
+    selected: "border-neutral-500 ring-2 ring-neutral-500/40 bg-neutral-500/10 shadow-sm",
+    unselected: "border-neutral-500/20 bg-neutral-500/5 hover:border-neutral-500/40",
+    labelColor: "text-neutral-700 dark:text-neutral-300",
+    valueColor: "text-neutral-800 dark:text-neutral-200",
+    subtextColor: "text-neutral-600 dark:text-neutral-400",
+    dotColor: "bg-neutral-400 dark:bg-neutral-500",
   },
   amber: {
-    selected: "border-amber-500 ring-2 ring-amber-500/40 bg-amber-100 shadow-sm",
-    unselected: "border-line bg-amber-100 hover:border-amber-400",
-    labelColor: "text-muted-foreground",
-    valueColor: "text-foreground",
-    subtextColor: "text-muted-foreground",
+    selected: "border-amber-500 ring-2 ring-amber-500/40 bg-amber-500/10 shadow-sm",
+    unselected: "border-amber-500/20 bg-amber-500/5 hover:border-amber-500/40",
+    labelColor: "text-amber-700 dark:text-amber-300",
+    valueColor: "text-amber-600 dark:text-amber-400",
+    subtextColor: "text-amber-700/80 dark:text-amber-300/80",
     dotColor: "bg-amber-500",
   },
   emerald: {

@@ -243,7 +243,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
               <img
                 src={circleAddIcon}
                 alt="Crear"
-                className="w-4 h-4 brightness-0 invert"
+                className="w-4 h-4 brightness-0 invert dark:invert-0"
               />
               <span>Crear asignación</span>
             </button>
@@ -286,7 +286,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                 <img
                   src={circleAddIcon}
                   alt="Crear"
-                  className="w-3.5 h-3.5 brightness-0 invert"
+                  className="w-3.5 h-3.5 brightness-0 invert dark:invert-0"
                 />
                 <span>Crear primera asignación</span>
               </button>
@@ -384,7 +384,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                             <img
                               src={githubIcon}
                               alt="Repo"
-                              className="w-3.5 h-3.5 opacity-75"
+                              className="w-3.5 h-3.5 opacity-75 dark:invert"
                             />
                             <span>Plantilla:</span>
                             <span className="font-semibold text-foreground underline decoration-muted-foreground/40 group-hover:decoration-foreground">
@@ -633,7 +633,7 @@ export function AsignacionesTab({ curso, alumnos }: AsignacionesTabProps) {
                                             <img
                                               src={githubIcon}
                                               alt="GitHub"
-                                              className="w-4 h-4 opacity-80"
+                                              className="w-4 h-4 opacity-80 dark:invert"
                                             />
                                             <span className="truncate max-w-[220px]">
                                               {grupo.repositorio.nombre}

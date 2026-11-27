@@ -75,6 +75,7 @@ export function mapAsignacionesDTO(
       advertenciasGit: miGrupo?.advertenciasGit ?? [],
       ultimoCommit: repo?.ultimoCommit,
       fechaUltimoCommit: repo?.fechaUltimoCommit,
+      rama: repo?.rama,
       entregada: estaEntregada,
       fechaEntregada: fechaEntregada,
       fechaEntregadaFormatted: fechaEntregada ? formatFechaLegible(fechaEntregada) ?? undefined : undefined,

@@ -55,7 +55,7 @@ export const useCursos = (archivados: boolean = false) => {
 
   // Refresco silencioso de cursos ante activación de membresía o actualización de asignación
   useSseListener(["MIEMBRO_ACTIVADO", "ASIGNACION_ACTUALIZADA"], () => {
-    obtenerCursos(archivados ? true : undefined)
+    obtenerCursos(archivados ? true : undefined, { skipErrorToast: true })
       .then((response) => {
         setCursos(response.data);
       })

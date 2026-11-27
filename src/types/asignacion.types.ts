@@ -202,6 +202,7 @@ export interface AsignacionAlumnoDTO {
   advertenciasGit?: AdvertenciaGitResponseDTO[];
   ultimoCommit?: string | null;
   fechaUltimoCommit?: string | null;
+  rama?: string | null;
   fechaUltimaEntrega?: string | null;
   entregada?: boolean;
   fechaEntregada?: string | null;

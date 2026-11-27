@@ -176,7 +176,7 @@ export function MetricasTab({
             ultimoCommit: repo.ultimoCommit || "Sin commits registrados",
             commitHash: repo.ultimoCommit ? repo.ultimoCommit.slice(0, 7) : "-",
             fechaUltimoCommit: repo.fechaUltimoCommit || null,
-            branch: "main",
+            branch: repo.rama?.trim() || "main",
           });
         }
       });
@@ -217,7 +217,8 @@ export function MetricasTab({
           ) ||
           (item.grupoNombre &&
             item.grupoNombre.toLowerCase().includes(searchLower)) ||
-          item.ultimoCommit.toLowerCase().includes(searchLower);
+          item.ultimoCommit.toLowerCase().includes(searchLower) ||
+          item.branch.toLowerCase().includes(searchLower);
 
         if (!matchBusqueda) return false;
         if (filtroEstado === "todos") return true;
@@ -359,7 +360,7 @@ export function MetricasTab({
                     <img
                       src={githubIcon}
                       alt="GitHub"
-                      className="w-4 h-4 opacity-60"
+                      className="w-4 h-4 opacity-60 dark:invert"
                     />
                   }
                 />
@@ -447,7 +448,7 @@ export function MetricasTab({
                           : "Alumno / Grupo"}
                       </th>
                       <th className="py-3.5 px-4.5">Repositorio</th>
-                      <th className="py-3.5 px-4.5">Pipeline CI/CD</th>
+                      <th className="py-3.5 px-4.5">Pipeline CI</th>
                       <th className="py-3.5 px-4.5">Último Commit</th>
                       <th className="py-3.5 px-4.5">Rama</th>
                       <th className="py-3.5 px-4.5">Fecha Commit</th>
@@ -502,7 +503,7 @@ export function MetricasTab({
                             <img
                               src={githubIcon}
                               alt="GitHub"
-                              className="w-4 h-4 opacity-80 shrink-0"
+                              className="w-4 h-4 opacity-80 shrink-0 dark:invert"
                             />
                             <span className="truncate">{item.repoNombre}</span>
                             <span className="text-xs text-muted-foreground shrink-0">
@@ -511,29 +512,52 @@ export function MetricasTab({
                           </a>
                         </td>
 
-                        {/* Pipeline CI/CD */}
+                        {/* Pipeline CI */}
                         <td className="py-4 px-4.5 whitespace-nowrap">
                           <CIStatusBadge estado={item.estadoCI} />
                         </td>
 
                         {/* Último commit */}
                         <td className="py-4 px-4.5">
-                          <div className="flex items-center gap-2 min-w-[200px] max-w-[320px]">
-                            <span className="rounded bg-panel2 border border-line px-2 py-0.5 text-xs text-muted-foreground shrink-0">
-                              {item.commitHash}
+                          {item.ultimoCommit && item.ultimoCommit !== "Sin commits registrados" ? (
+                            <div className="flex items-center min-w-0 max-w-[200px] sm:max-w-[260px]">
+                              {item.repoUrl ? (
+                                <a
+                                  href={`${item.repoUrl}/commits/${encodeURIComponent(item.branch)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="rounded border border-line bg-panel2 px-2 py-0.5 text-xs font-semibold text-foreground hover:text-primary hover:border-primary/40 transition-colors inline-flex items-center gap-1.5 group max-w-full min-w-0 truncate"
+                                  title={`Ver commit: ${item.ultimoCommit}`}
+                                >
+                                  <span className="truncate">
+                                    {obtenerPrimerLineaCommit(item.ultimoCommit)}
+                                  </span>
+                                  <span className="text-muted-foreground group-hover:text-primary text-[10px] transition-colors shrink-0">
+                                    ↗
+                                  </span>
+                                </a>
+                              ) : (
+                                <span
+                                  className="rounded border border-line bg-panel2 px-2 py-0.5 text-xs font-semibold text-foreground truncate max-w-full"
+                                  title={item.ultimoCommit}
+                                >
+                                  {obtenerPrimerLineaCommit(item.ultimoCommit)}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">
+                              Sin commits registrados
                             </span>
-                            <span
-                              className="truncate text-foreground text-xs sm:text-sm"
-                              title={item.ultimoCommit}
-                            >
-                              {obtenerPrimerLineaCommit(item.ultimoCommit)}
-                            </span>
-                          </div>
+                          )}
                         </td>
 
                         {/* Rama */}
                         <td className="py-4 px-4.5 whitespace-nowrap">
-                          <span className="rounded-md border border-line bg-panel2 px-2.5 py-0.5 text-xs text-muted-foreground">
+                          <span
+                            className="inline-block max-w-[120px] sm:max-w-[160px] truncate rounded-md border border-line bg-panel2 px-2.5 py-0.5 text-xs text-muted-foreground font-mono align-middle"
+                            title={item.branch}
+                          >
                             {item.branch}
                           </span>
                         </td>
